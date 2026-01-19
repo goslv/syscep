@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}Gestión de Carreras{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/carreras.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% if carreras %}
+<div class="row g-4">
+    {% for carrera in carreras %}
+    <div class="col-lg-6 col-xl-4">
+        <div class="carrera-card {% if carrera.naturalidad == 'TS' %}tecnico-superior{% else %}formacion-profesional{% endif %}">
+            <div class="carrera-icon {% if carrera.naturalidad == 'TS' %}ts{% else %}fp{% endif %}">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+
+            <div class="carrera-header">
+                <div>
+                    <h4 class="carrera-title">{{ carrera.nombre }}</h4>
+                    <span class="carrera-type {% if carrera.naturalidad == 'TS' %}ts{% else %}fp{% endif %}">
+                        {{ carrera.get_naturalidad_display }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="carrera-stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{ carrera.materias.count }}</div>
+                    <div class="stat-label">Materias</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ carrera.duracion_meses }}</div>
+                    <div class="stat-label">Meses</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ carrera.alumnos.count }}</div>
+                    <div class="stat-label">Alumnos</div>
+                </div>
+            </div>
+
+            {% if carrera.descripcion %}
+            <p style="color: #64748b; font-size: 0.9rem; margin: 1rem 0;">
+                {{ carrera.descripcion|truncatewords:15 }}
+            </p>
+            {% endif %}
+
+            <div class="materias-preview">
+                <h6>Materias</h6>
+                <div>
+                    {% for materia in carrera.materias.all|slice:":3" %}
+                    <span class="materia-chip">
+                        <i class="bi bi-book"></i>
+                        {{ materia.nombre }}
+                    </span>
+                    {% endfor %}
+                    {% if carrera.materias.count > 3 %}
+                    <span class="materia-chip">
+                        <i class="bi bi-three-dots"></i>
+                        +{{ carrera.materias.count|add:"-3" }} más
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="carrera-actions">
+                <a href="{% url 'detalle_carrera' carrera.id %}" class="btn-view-detail">
+                    <i class="bi bi-eye-fill"></i>
+                    Ver Detalle
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-mortarboard"></i>
+    <h5>No hay carreras registradas</h5>
+    <p>Comienza creando tu primera carrera para organizar las materias</p>
+    <a href="{% url 'crear_carrera' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Crear Primera Carrera
+    </a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,415 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle del Pago - ITS CEP{% endblock %}
+{% block page_title %}Detalle del Pago{% endblock %}
+
+{% block content %}
+
+<style>
+    .detail-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .detail-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .detail-row {
+        display: flex;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #6b7280;
+        width: 200px;
+        flex-shrink: 0;
+    }
+
+    .detail-value {
+        color: #1f2937;
+        flex: 1;
+    }
+
+    .detail-value strong {
+        color: #059669;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-back {
+        background-color: rgba(107, 114, 128, 0);
+        color: #000000;
+        font-size: 1.2rem;
+    }
+
+    @keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .btn-back:hover {
+        background-color: rgba(255, 255, 255, 0);
+        color: #00040b;
+        animation: fadeInRight 0.3s forwards;
+        border: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .btn-edit {
+        background-color: #f59e0b;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .btn-edit:hover {
+        background-color: #d97706;
+    }
+
+    .btn-delete {
+        background-color: #ef4444;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .btn-delete:hover {
+        background-color: #dc2626;
+    }
+
+    .recibo-badge {
+        background: linear-gradient(135deg, rgba(18, 67, 2, 0.22) 0%, rgba(92, 251, 8, 0.25) 100%);
+        color: rgba(17, 32, 0, 0.65);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .foto-container {
+        max-width: 500px;
+        margin-top: 1rem;
+    }
+
+    .foto-container img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .detail-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .detail-row {
+            flex-direction: column;
+        }
+
+        .detail-label {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="detail-card">
+            <a href="{% url 'lista_pagos' %}" class="btn-action btn-back">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+            <div class="detail-header">
+                <div>
+                    <div class="recibo-badge">
+                        <i class="bi bi-receipt"></i> Recibo N° {{ pago.numero_recibo }}
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <a href="{% url 'editar_pago' pago.id %}" class="btn-action btn-edit">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <button type="button"
+                            class="btn-action btn-delete"
+                            onclick="confirmarEliminacion()">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="bi bi-calendar"></i> Fecha de Pago:
+                </div>
+                <div class="detail-value">
+                    {{ pago.fecha|date:"d/m/Y" }}
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="bi bi-person"></i> {% if pago.es_cliente_diferenciado %}Cliente{% else %}Alumno{% endif %}:
+                </div>
+                <div class="detail-value">
+                    {% if pago.es_cliente_diferenciado %}
+                        {{ pago.nombre_cliente }}
+                        <span class="badge bg-info text-dark ms-2">
+                            <i class="bi bi-person-badge"></i> Cliente Diferenciado
+                        </span>
+                    {% else %}
+                        <a href="{% url 'detalle_alumno' pago.alumno.id %}">
+                            {{ pago.alumno.nombre_completo }}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="bi bi-building"></i> Sede:
+                </div>
+                <div class="detail-value">
+                    {{ pago.sede.nombre }}
+                </div>
+            </div>
+
+            {% if pago.es_cliente_diferenciado %}
+                {% if pago.curso %}
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="bi bi-book"></i> Curso:
+                    </div>
+                    <div class="detail-value">
+                        {{ pago.curso }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if pago.validez_pago %}
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="bi bi-calendar-check"></i> Validez del Pago:
+                    </div>
+                    <div class="detail-value">
+                        {{ pago.validez_pago|date:"d/m/Y" }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if pago.fecha_vencimiento %}
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="bi bi-calendar-x"></i> Fecha de Vencimiento:
+                    </div>
+                    <div class="detail-value">
+                        {{ pago.fecha_vencimiento|date:"d/m/Y" }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if pago.cantidad_cuotas %}
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="bi bi-123"></i> Cantidad de Cuotas:
+                    </div>
+                    <div class="detail-value">
+                        {{ pago.cantidad_cuotas }} cuota{{ pago.cantidad_cuotas|pluralize }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if pago.monto_unitario %}
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="bi bi-currency-exchange"></i> Monto Unitario:
+                    </div>
+                    <div class="detail-value">
+                        <strong class="text-success">Gs. {{ pago.monto_unitario|floatformat:0 }}</strong>
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="bi bi-hash"></i> Número de Cuota:
+                    </div>
+                    <div class="detail-value">
+                        {{ pago.numero_cuota }}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="bi bi-card-text"></i> Concepto:
+                </div>
+                <div class="detail-value">
+                    {{ pago.concepto }}
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="bi bi-cash-coin"></i> Importe Total:
+                </div>
+                <div class="detail-value">
+                    <strong style="font-size: 1.25rem;">Gs. {{ pago.importe_total|floatformat:0 }}</strong>
+                </div>
+            </div>
+
+            {% if pago.foto_comprobante %}
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="bi bi-image"></i> Comprobante:
+                </div>
+                <div class="detail-value">
+                    <div class="foto-preview">
+                        <img src="{{ pago.foto_comprobante.url }}"
+                             alt="Comprobante de pago"
+                             class="img-thumbnail"
+                             onclick="abrirModalImagen('{{ pago.foto_comprobante.url }}')"
+                             style="cursor: pointer; max-width: 200px; border-radius: 8px;">
+                        <br>
+                        <small class="text-muted">
+                            <i class="bi bi-zoom-in"></i> Haz clic para ampliar
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if pago.observaciones %}
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="bi bi-chat-left-text"></i> Observaciones:
+                </div>
+                <div class="detail-value">
+                    {{ pago.observaciones }}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if pago.usuario_registro %}
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="bi bi-person-check"></i> Registrado por:
+                </div>
+                <div class="detail-value">
+                    {{ pago.usuario_registro.get_full_name|default:pago.usuario_registro.username }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalEliminarLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro que desea eliminar el pago con recibo <strong>{{ pago.numero_recibo }}</strong>?</p>
+                <p class="text-danger"><i class="bi bi-info-circle"></i> Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <form action="{% url 'eliminar_pago' pago.id %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para visualizar imagen -->
+<div class="modal fade" id="modalImagen" tabindex="-1" aria-labelledby="modalImagenLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content" style="background: transparent; border: none;">
+            <div class="modal-header" style="border: none; background: rgba(0, 0, 0, 0.8); color: white;">
+                <h5 class="modal-title" id="modalImagenLabel">
+                    <i class="bi bi-image"></i> Comprobante de Pago - Recibo N° {{ pago.numero_recibo }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center" style="background: rgba(0, 0, 0, 0.8); padding: 2rem;">
+                <img src="" id="imagenModal" alt="Comprobante" style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmarEliminacion() {
+        const modal = new bootstrap.Modal(document.getElementById('modalEliminar'));
+        modal.show();
+    }
+
+    function abrirModalImagen(urlImagen) {
+        document.getElementById('imagenModal').src = urlImagen;
+        const modal = new bootstrap.Modal(document.getElementById('modalImagen'));
+        modal.show();
+    }
+</script>
+
+{% endblock %}

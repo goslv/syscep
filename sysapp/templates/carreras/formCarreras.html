@@ -1,0 +1,504 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .form-header h3 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.75rem;
+    }
+
+    .form-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+    }
+
+    .form-body {
+        padding: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .section-title i {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+        color: #6d28d9;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 0.938rem;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .help-text {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.813rem;
+        color: #64748b;
+    }
+
+    /* Materias dinámicas */
+    .materias-container {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .materia-item {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+        transition: all 0.2s;
+    }
+
+    .materia-item:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .materia-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .materia-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #2563eb;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+
+    .btn-remove-materia {
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-remove-materia:hover {
+        background: #fecaca;
+        transform: scale(1.05);
+    }
+
+    .btn-add-materia {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-add-materia:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .empty-materias {
+        text-align: center;
+        padding: 2rem;
+        color: #64748b;
+    }
+
+    .empty-materias i {
+        font-size: 3rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+
+    /* Switch personalizado */
+    .form-switch .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+        cursor: pointer;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+
+    .form-switch .form-check-label {
+        margin-left: 0.5rem;
+        font-weight: 500;
+        color: #334155;
+    }
+
+    /* Botones de acción */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f1f5f9;
+    }
+
+    .btn {
+        padding: 0.875rem 1.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.938rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .btn-secondary {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .btn-secondary:hover {
+        background: #cbd5e1;
+        color: #1e293b;
+        transform: translateY(-1px);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%);
+        color: white;
+        flex: 1;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
+    }
+
+    .text-danger {
+        color: #dc2626;
+        font-size: 0.813rem;
+        margin-top: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-header {
+            padding: 1.5rem;
+        }
+
+        .form-body {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-success {
+            order: -1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h3>
+                <i class="bi bi-mortarboard-fill"></i>
+                {{ titulo }}
+            </h3>
+            <p>Complete la información de la carrera y sus materias</p>
+        </div>
+
+        <div class="form-body">
+            <form method="post" id="carreraForm">
+                {% csrf_token %}
+
+                <!-- Información Básica -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="bi bi-info-circle-fill"></i>
+                        Información Básica
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Nombre de la Carrera *</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="text-danger">{{ form.nombre.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de Carrera *</label>
+                            {{ form.naturalidad }}
+                            {% if form.naturalidad.errors %}
+                                <div class="text-danger">{{ form.naturalidad.errors }}</div>
+                            {% endif %}
+                            <small class="help-text">
+                                <i class="bi bi-info-circle"></i>
+                                Técnico Superior utiliza sistema de bimestres
+                            </small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Duración (meses) *</label>
+                            {{ form.duracion_meses }}
+                            {% if form.duracion_meses.errors %}
+                                <div class="text-danger">{{ form.duracion_meses.errors }}</div>
+                            {% endif %}
+                            <small class="help-text">
+                                <i class="bi bi-calendar-check"></i>
+                                Tiempo total de la carrera
+                            </small>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Descripción</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="text-danger">{{ form.descripcion.errors }}</div>
+                            {% endif %}
+                            <small class="help-text">
+                                Breve descripción de la carrera y sus objetivos
+                            </small>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-check form-switch">
+                                {{ form.activa }}
+                                <label class="form-check-label" for="{{ form.activa.id_for_label }}">
+                                    <i class="bi bi-toggle-on"></i>
+                                    Carrera activa y disponible para inscripciones
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Materias -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="bi bi-book-fill"></i>
+                        Materias del Plan de Estudio
+                    </div>
+
+                    <div class="materias-container">
+                        <div id="materiasLista">
+                            <div class="empty-materias">
+                                <i class="bi bi-journal-x"></i>
+                                <p>No hay materias agregadas aún</p>
+                                <small>Utilice el botón inferior para agregar materias</small>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn-add-materia" onclick="agregarMateria()">
+                            <i class="bi bi-plus-circle-fill"></i>
+                            Agregar Materia
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="form-actions">
+                    <a href="{% url 'lista_carreras' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                        {{ boton }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let contadorMaterias = 0;
+
+function agregarMateria() {
+    contadorMaterias++;
+
+    // Remover mensaje de vacío si existe
+    const emptyMsg = document.querySelector('.empty-materias');
+    if (emptyMsg) {
+        emptyMsg.remove();
+    }
+
+    const materiasLista = document.getElementById('materiasLista');
+    const nuevaMateria = document.createElement('div');
+    nuevaMateria.className = 'materia-item';
+    nuevaMateria.innerHTML = `
+        <div class="materia-header">
+            <span class="materia-number">${contadorMaterias}</span>
+            <button type="button" class="btn-remove-materia" onclick="eliminarMateria(this)">
+                <i class="bi bi-trash-fill"></i>
+            </button>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label">Nombre de la Materia *</label>
+                <input type="text" class="form-control" name="materias[${contadorMaterias}][nombre]" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Código</label>
+                <input type="text" class="form-control" name="materias[${contadorMaterias}][codigo]" placeholder="Ej: MAT-101">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Horas Semanales</label>
+                <input type="number" class="form-control" name="materias[${contadorMaterias}][horas]" min="1" placeholder="Ej: 4">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Créditos</label>
+                <input type="number" class="form-control" name="materias[${contadorMaterias}][creditos]" min="1" placeholder="Ej: 3">
+            </div>
+        </div>
+    `;
+
+    materiasLista.appendChild(nuevaMateria);
+}
+
+function eliminarMateria(btn) {
+    const materiaItem = btn.closest('.materia-item');
+    materiaItem.remove();
+
+    // Renumerar las materias restantes
+    const materias = document.querySelectorAll('.materia-item');
+    materias.forEach((materia, index) => {
+        const numero = materia.querySelector('.materia-number');
+        numero.textContent = index + 1;
+    });
+
+    contadorMaterias = materias.length;
+
+    // Si no quedan materias, mostrar mensaje vacío
+    if (contadorMaterias === 0) {
+        const materiasLista = document.getElementById('materiasLista');
+        materiasLista.innerHTML = `
+            <div class="empty-materias">
+                <i class="bi bi-journal-x"></i>
+                <p>No hay materias agregadas aún</p>
+                <small>Utilice el botón inferior para agregar materias</small>
+            </div>
+        `;
+    }
+}
+
+// Validación del formulario
+document.getElementById('carreraForm').addEventListener('submit', function(e) {
+    const materias = document.querySelectorAll('.materia-item');
+
+    if (materias.length === 0) {
+        e.preventDefault();
+        alert('Debe agregar al menos una materia a la carrera');
+        return false;
+    }
+});
+
+// Cargar materias existentes si estamos editando
+{% if form.instance.pk %}
+document.addEventListener('DOMContentLoaded', function() {
+    // Aquí puedes cargar las materias existentes si estás editando
+    {% for materia in form.instance.materias.all %}
+    agregarMateria();
+    const ultimaMateria = document.querySelector('.materia-item:last-child');
+    ultimaMateria.querySelector('input[name*="[nombre]"]').value = "{{ materia.nombre }}";
+    ultimaMateria.querySelector('input[name*="[codigo]"]').value = "{{ materia.codigo|default:'' }}";
+    ultimaMateria.querySelector('input[name*="[horas]"]').value = "{{ materia.horas_semanales|default:'' }}";
+    ultimaMateria.querySelector('input[name*="[creditos]"]').value = "{{ materia.creditos|default:'' }}";
+    {% endfor %}
+});
+{% endif %}
+</script>
+{% endblock %}

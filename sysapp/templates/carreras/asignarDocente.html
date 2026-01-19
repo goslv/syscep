@@ -1,0 +1,459 @@
+{% extends 'base.html' %}
+
+{% block title %}Asignar Docente - SysCEP{% endblock %}
+{% block page_title %}Asignar Docente a Materia{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="stat-card">
+            <div class="alert alert-info">
+                <h6><i class="bi bi-book"></i> Materia: <strong>{{ materia.nombre }}</strong></h6>
+                <p class="mb-0">
+                    <i class="bi bi-mortarboard"></i> Carrera: {{ carrera.nombre }}
+                </p>
+            </div>
+
+            {% if materia.docente %}
+            <div class="alert alert-warning">
+                <h6><i class="bi bi-exclamation-triangle"></i> Docente Actual</h6>
+                <p class="mb-2">
+                    <strong>{{ materia.docente.nombre_completo }}</strong><br>
+                    <i class="bi bi-telephone"></i> {{ materia.docente.telefono_principal }}
+                </p>
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        <i class="bi bi-x-circle"></i> Remover Docente
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+            <h5 class="mb-3">
+                <i class="bi bi-person-plus"></i> Seleccionar Docente
+            </h5>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    {% for docente in docentes %}
+                    <div class="col-md-6">
+                        <label class="docente-card" style="cursor: pointer;">
+                            <input type="radio" name="docente_id" value="{{ docente.id }}"
+                                   {% if materia.docente.id == docente.id %}checked{% endif %}
+                                   style="display: none;">
+                            <div class="card h-100" style="border: 2px solid #e2e8f0; transition: all 0.3s;">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1.2rem;">
+                                            {{ docente.nombre|first }}{{ docente.apellido|first }}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">{{ docente.nombre_completo }}</h6>
+                                            <small class="text-muted">
+                                                <i class="bi bi-telephone"></i> {{ docente.telefono_principal }}
+                                            </small><br>
+                                            <small class="text-muted">
+                                                <i class="bi bi-building"></i> {{ docente.sede.nombre }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    {% if docente.materias_asignadas.count > 0 %}
+                                    <div class="mt-2">
+                                        <small class="badge bg-light text-dark">
+                                            <i class="bi bi-book"></i> {{ docente.materias_asignadas.count }} materia{{ docente.materias_asignadas.count|pluralize }}
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            No hay docentes disponibles.
+                            <a href="{% url 'crear_funcionario' %}">Registra un docente primero</a>.
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if docentes %}
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'detalle_carrera' carrera.id %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Asignar Docente
+                    </button>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.docente-card input:checked + .card {
+    border-color: #6366f1 !important;
+    background: #f0f9ff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+</style>
+{% endblock %}
+{% block page_title %}Gestión de Carreras{% endblock %}
+
+{% block extra_css %}
+<style>
+    .carrera-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        border: 2px solid #f1f5f9;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .carrera-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+    }
+
+    .carrera-card.tecnico-superior::before {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    }
+
+    .carrera-card.formacion-profesional::before {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .carrera-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        border-color: #e0e7ff;
+    }
+
+    .carrera-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+    }
+
+    .carrera-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .carrera-icon.ts {
+        background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+        color: #6d28d9;
+    }
+
+    .carrera-icon.fp {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #059669;
+    }
+
+    .carrera-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .carrera-type {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .carrera-type.ts {
+        background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+        color: #4f46e5;
+    }
+
+    .carrera-type.fp {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #059669;
+    }
+
+    .carrera-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 1.5rem 0;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 12px;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 0.25rem;
+    }
+
+    .materias-preview {
+        margin-top: 1.5rem;
+    }
+
+    .materias-preview h6 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .materia-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        margin: 0.25rem;
+        font-size: 0.85rem;
+        color: #334155;
+        transition: all 0.2s ease;
+    }
+
+    .materia-chip:hover {
+        border-color: #6366f1;
+        background: #f0f9ff;
+        transform: translateY(-2px);
+    }
+
+    .materia-chip i {
+        color: #6366f1;
+    }
+
+    .carrera-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn-view-detail {
+        flex: 1;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-view-detail:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 16px;
+        border: 2px dashed #e2e8f0;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h5 {
+        color: #64748b;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #94a3b8;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-1" style="font-weight: 700; color: #1e293b;">Catálogo de Carreras</h5>
+                <p class="text-muted mb-0">Gestiona carreras, materias y docentes asignados</p>
+            </div>
+            <a href="{% url 'crear_carrera' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nueva Carrera
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card" style="background: white;">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); color: #6d28d9;">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div class="ms-3">
+                    <h6 class="text-muted mb-1">Total Carreras</h6>
+                    <h3 class="mb-0">{{ carreras|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card" style="background: white;">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #2563eb;">
+                    <i class="bi bi-book-fill"></i>
+                </div>
+                <div class="ms-3">
+                    <h6 class="text-muted mb-1">Total Materias</h6>
+                    <h3 class="mb-0">{{ total_materias }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card" style="background: white;">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #059669;">
+                    <i class="bi bi-person-video3"></i>
+                </div>
+                <div class="ms-3">
+                    <h6 class="text-muted mb-1">Docentes Activos</h6>
+                    <h3 class="mb-0">{{ total_docentes }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Carreras -->
+{% if carreras %}
+<div class="row g-4">
+    {% for carrera in carreras %}
+    <div class="col-lg-6 col-xl-4">
+        <div class="carrera-card {% if carrera.naturalidad == 'TS' %}tecnico-superior{% else %}formacion-profesional{% endif %}">
+            <div class="carrera-icon {% if carrera.naturalidad == 'TS' %}ts{% else %}fp{% endif %}">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+
+            <div class="carrera-header">
+                <div>
+                    <h4 class="carrera-title">{{ carrera.nombre }}</h4>
+                    <span class="carrera-type {% if carrera.naturalidad == 'TS' %}ts{% else %}fp{% endif %}">
+                        {{ carrera.get_naturalidad_display }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="carrera-stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{ carrera.materias.count }}</div>
+                    <div class="stat-label">Materias</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ carrera.duracion_meses }}</div>
+                    <div class="stat-label">Meses</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ carrera.alumnos.count }}</div>
+                    <div class="stat-label">Alumnos</div>
+                </div>
+            </div>
+
+            {% if carrera.descripcion %}
+            <p style="color: #64748b; font-size: 0.9rem; margin: 1rem 0;">
+                {{ carrera.descripcion|truncatewords:15 }}
+            </p>
+            {% endif %}
+
+            <div class="materias-preview">
+                <h6>Materias</h6>
+                <div>
+                    {% for materia in carrera.materias.all|slice:":3" %}
+                    <span class="materia-chip">
+                        <i class="bi bi-book"></i>
+                        {{ materia.nombre }}
+                    </span>
+                    {% endfor %}
+                    {% if carrera.materias.count > 3 %}
+                    <span class="materia-chip">
+                        <i class="bi bi-three-dots"></i>
+                        +{{ carrera.materias.count|add:"-3" }} más
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="carrera-actions">
+                <a href="{% url 'detalle_carrera' carrera.id %}" class="btn-view-detail">
+                    <i class="bi bi-eye-fill"></i>
+                    Ver Detalle
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-mortarboard"></i>
+    <h5>No hay carreras registradas</h5>
+    <p>Comienza creando tu primera carrera para organizar las materias</p>
+    <a href="{% url 'crear_carrera' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Crear Primera Carrera
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+<style>
+.docente-card input:checked + .card {
+    border-color: #6366f1 !important;
+    background: #f0f9ff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+</style>
+{% endblock %}

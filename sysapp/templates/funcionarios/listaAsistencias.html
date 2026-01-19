@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Asistencias - SysCEP{% endblock %}
+{% block page_title %}Registro de Asistencias{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Historial de Asistencias</h5>
+            <div>
+                <a href="{% url 'registrar_asistencia' %}" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Registrar Asistencia
+                </a>
+                <a href="{% url 'lista_funcionarios' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="stat-card">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Funcionario</label>
+                    <select name="funcionario" class="form-select">
+                        <option value="">Todos los funcionarios</option>
+                        {% for funcionario in funcionarios %}
+                            <option value="{{ funcionario.id }}">{{ funcionario.nombre_completo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Fecha</label>
+                    <input type="date" name="fecha" class="form-control">
+                </div>
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    <a href="{% url 'lista_asistencias' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Asistencias -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="stat-card">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Funcionario</th>
+                            <th>Cargo</th>
+                            <th>Estado</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for asistencia in asistencias %}
+                        <tr>
+                            <td><strong>{{ asistencia.fecha|date:"d/m/Y" }}</strong></td>
+                            <td>{{ asistencia.funcionario.nombre_completo }}</td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    {{ asistencia.funcionario.get_cargo_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if asistencia.presente %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Presente
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle"></i> Ausente
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if asistencia.observaciones %}
+                                    {{ asistencia.observaciones }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox" style="font-size: 3rem;"></i><br>
+                                No se encontraron asistencias registradas
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if asistencias|length == 50 %}
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle"></i> Mostrando las últimas 50 asistencias. Usa los filtros para buscar registros específicos.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

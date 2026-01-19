@@ -1,0 +1,264 @@
+<!-- ARCHIVO 1: sysapp/templates/sedes/listaCarreras.html -->
+<!-- ============================================ -->
+{% extends 'base.html' %}
+
+{% block title %}Sedes - SysCEP{% endblock %}
+{% block page_title %}Rendiciones por Sede{% endblock %}
+{% block breadcrumb_current %}Sedes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sede-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-100);
+        transition: all var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sede-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-500), var(--primary-700));
+    }
+
+    .sede-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .sede-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        gap: 1rem;
+    }
+
+    .sede-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--border-radius-md);
+        background: linear-gradient(135deg, var(--primary-100), var(--primary-200));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: var(--primary-600);
+        flex-shrink: 0;
+    }
+
+    .sede-info h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 0.25rem;
+    }
+
+    .sede-info p {
+        color: var(--gray-500);
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .sede-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--gray-100);
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--gray-500);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .stat-item.ingresos .stat-value {
+        color: var(--success);
+    }
+
+    .stat-item.pagos .stat-value {
+        color: var(--info);
+    }
+
+    .stat-item.alumnos .stat-value {
+        color: var(--primary-600);
+    }
+
+    .stat-item.funcionarios .stat-value {
+        color: var(--warning);
+    }
+
+    .btn-ver-rendicion {
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+        color: white;
+        padding: 0.65rem 1.5rem;
+        border-radius: var(--border-radius-sm);
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        border: none;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    }
+
+    .btn-ver-rendicion:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+        color: white;
+    }
+
+    .fecha-actual {
+        background: var(--gray-100);
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--border-radius-md);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 2rem;
+    }
+
+    .fecha-actual i {
+        color: var(--primary-600);
+        font-size: 1.25rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--gray-400);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .sede-card {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .sede-card:nth-child(1) { animation-delay: 0.1s; }
+    .sede-card:nth-child(2) { animation-delay: 0.2s; }
+    .sede-card:nth-child(3) { animation-delay: 0.3s; }
+    .sede-card:nth-child(4) { animation-delay: 0.4s; }
+
+    @media (max-width: 768px) {
+        .sede-header {
+            flex-direction: column;
+        }
+
+        .sede-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <div class="fecha-actual">
+        <i class="bi bi-calendar-check"></i>
+        <span>Rendiciones del día: {{ fecha|date:"d/m/Y" }}</span>
+    </div>
+</div>
+
+{% if sedes_data %}
+    <div class="row g-4">
+        {% for item in sedes_data %}
+        <div class="col-lg-6 col-xl-4">
+            <div class="sede-card">
+                <div class="sede-header">
+                    <div class="d-flex align-items-start gap-3 flex-1">
+                        <div class="sede-icon">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div class="sede-info">
+                            <h4>{{ item.sede.nombre }}</h4>
+                            <p><i class="bi bi-telephone me-1"></i>{{ item.sede.telefono }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sede-stats">
+                    <div class="stat-item ingresos">
+                        <span class="stat-value">Gs. {{ item.ingresos_hoy|floatformat:0 }}</span>
+                        <span class="stat-label">Ingresos Hoy</span>
+                    </div>
+                    <div class="stat-item pagos">
+                        <span class="stat-value">{{ item.pagos_hoy }}</span>
+                        <span class="stat-label">Pagos</span>
+                    </div>
+                    <div class="stat-item alumnos">
+                        <span class="stat-value">{{ item.alumnos_activos }}</span>
+                        <span class="stat-label">Alumnos</span>
+                    </div>
+                    <div class="stat-item funcionarios">
+                        <span class="stat-value">{{ item.funcionarios_activos }}</span>
+                        <span class="stat-label">Personal</span>
+                    </div>
+                </div>
+
+                <div class="mt-3 pt-3 border-top">
+                    <a href="{% url 'rendicion_sede' item.sede.id %}" class="btn-ver-rendicion w-100 justify-content-center">
+                        <i class="bi bi-bar-chart-fill"></i>
+                        Ver Rendición Completa
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="stat-card">
+        <div class="empty-state">
+            <i class="bi bi-building"></i>
+            <h5>No hay sedes registradas</h5>
+            <p>Las sedes se gestionan desde el panel de administración</p>
+            <a href="admin/sysapp/sede/" class="btn btn-primary mt-3">
+                <i class="bi bi-plus-circle"></i> Ir al Admin
+            </a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

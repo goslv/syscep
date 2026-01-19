@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Usuarios - SysCEP{% endblock %}
+{% block page_title %}Gestión de Usuarios{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Lista de Usuarios del Sistema</h5>
+            <a href="{% url 'crear_usuario' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Crear Usuario
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: #e3f2fd; color: #1976d2;">
+                    <i class="bi bi-person-check"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Usuarios Activos</h6>
+                    <h4 class="mb-0">{{ usuarios_activos }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: #f3e5f5; color: #7b1fa2;">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Administradores</h6>
+                    <h4 class="mb-0">{{ total_admin }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: #e8f5e9; color: #388e3c;">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Usuarios Estándar</h6>
+                    <h4 class="mb-0">{{ total_estandar }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Usuarios -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="stat-card">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre Completo</th>
+                            <th>Email</th>
+                            <th>Tipo de Usuario</th>
+                            <th>Último Acceso</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>
+                                <strong>{{ usuario.username }}</strong>
+                                {% if usuario.is_superuser %}
+                                    <br><span class="badge bg-danger">Superusuario</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ usuario.first_name }} {{ usuario.last_name }}
+                                {% if not usuario.first_name and not usuario.last_name %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if usuario.email %}
+                                    {{ usuario.email }}
+                                {% else %}
+                                    <span class="text-muted">Sin email</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if usuario.is_superuser %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-star-fill"></i> Superusuario
+                                    </span>
+                                {% elif usuario.is_staff %}
+                                    <span class="badge bg-primary">
+                                        <i class="bi bi-shield-check"></i> Administrador
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-person"></i> Usuario Estándar
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if usuario.last_login %}
+                                    {{ usuario.last_login|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    <span class="text-muted">Nunca</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if usuario.is_active %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'editar_usuario' usuario.id %}"
+                                   class="btn btn-sm btn-warning"
+                                   title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% if not usuario.is_superuser %}
+                                    <a href="{% url 'cambiar_estado_usuario' usuario.id %}"
+                                       class="btn btn-sm {% if usuario.is_active %}btn-danger{% else %}btn-success{% endif %}"
+                                       title="{% if usuario.is_active %}Desactivar{% else %}Activar{% endif %}"
+                                       onclick="return confirm('¿Estás seguro de cambiar el estado de este usuario?')">
+                                        <i class="bi bi-{% if usuario.is_active %}x-circle{% else %}check-circle{% endif %}"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No hay usuarios registrados
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Información sobre permisos -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="alert alert-info">
+            <h6><i class="bi bi-info-circle"></i> Tipos de Usuario</h6>
+            <ul class="mb-0">
+                <li><strong>Superusuario:</strong> Acceso completo al sistema y panel de administración.</li>
+                <li><strong>Administrador (Staff):</strong> Acceso a todos los módulos del sistema (Alumnos, Pagos, Funcionarios, Carreras, Usuarios).</li>
+                <li><strong>Usuario Estándar:</strong> Solo puede acceder a los módulos de Alumnos y Pagos.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

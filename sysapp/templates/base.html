@@ -1,0 +1,252 @@
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de Gestión CEP - Instituto Técnico Superior">
+    <meta name="keywords" content="educación, gestión, alumnos, pagos, carreras">
+    <meta name="author" content="ITS CEP">
+    <meta name="theme-color" content="#6366f1">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="ITS CEP - Sistema de Gestión">
+    <meta property="og:description" content="Sistema integral de gestión educativa">
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+
+    <title>{% block title %}ITS CEP - Sistema de Gestión{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Estilos base -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<!-- Skip to main content for accessibility -->
+<a href="#main-content" class="skip-to-main">Saltar al contenido principal</a>
+
+<!-- Overlay para móvil -->
+<div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar" aria-label="Menú principal de navegación">
+    <div class="sidebar-brand" role="banner">
+        <div class="brand-logo" aria-hidden="true">
+            🎓
+        </div>
+        <div class="brand-info">
+            <h1 class="brand-name">ITS CEP</h1>
+            <div class="brand-tagline">Sistema de Gestión</div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Menú lateral">
+        <!-- Sección Principal -->
+        <div class="nav-section">
+            <div class="nav-section-title">Principal</div>
+            <div class="nav-item">
+                <a href="{% url 'dashboard' %}"
+                   class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                   {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>
+                <i class="bi bi-grid-1x2-fill" aria-hidden="true"></i>
+                <span>Inicio</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Sección Gestión -->
+        <div class="nav-section">
+            <div class="nav-section-title">Gestión</div>
+            <div class="nav-item">
+                <a href="{% url 'lista_alumnos' %}"
+                   class="nav-link {% if 'alumno' in request.resolver_match.url_name %}active{% endif %}"
+                   {% if alumno in request.resolver_match.url_name %}aria-current="page"{% endif %}>
+                <i class="bi bi-people-fill" aria-hidden="true"></i>
+                <span>Alumnos</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'lista_pagos' %}"
+                   class="nav-link {% if 'pago' in request.resolver_match.url_name %}active{% endif %}"
+                   {% if pago in request.resolver_match.url_name %}aria-current="page"{% endif %}>
+                <i class="bi bi-wallet2" aria-hidden="true"></i>
+                <span>Pagos</span>
+                {% if pagos_pendientes %}
+                <span class="nav-badge">{{ pagos_pendientes }}</span>
+                {% endif %}
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'lista_funcionarios' %}"
+                   class="nav-link {% if 'funcionario' in request.resolver_match.url_name %}active{% endif %}"
+                   {% if funcionario in request.resolver_match.url_name %}aria-current="page"{% endif %}>
+                <i class="bi bi-person-badge-fill" aria-hidden="true"></i>
+                <span>Funcionarios</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Sección Académico -->
+        <div class="nav-section">
+            <div class="nav-section-title">Académico</div>
+            <div class="nav-item">
+                <a href="{% url 'lista_sedes' %}"
+                   class="nav-link {% if 'sede' in request.resolver_match.url_name %}active{% endif %}"
+                   {% if sede in request.resolver_match.url_name %}aria-current="page"{% endif %}>
+                <i class="bi bi-building" aria-hidden="true"></i>
+                <span>Sedes</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'lista_carreras' %}"
+                   class="nav-link {% if 'carrera' in request.resolver_match.url_name %}active{% endif %}"
+                   {% if carrera in request.resolver_match.url_name %}aria-current="page"{% endif %}>
+                <i class="bi bi-mortarboard-fill" aria-hidden="true"></i>
+                <span>Carreras</span>
+                </a>
+            </div>
+        </div>
+        <div class="sidebar-divider"></div>
+
+        <!-- Sección Sistema -->
+        <div class="nav-section">
+            <div class="nav-section-title">Sistema</div>
+            <div class="nav-item">
+                <a href="/admin" class="nav-link" target="_blank">
+                    <i class="bi bi-gear-fill" aria-hidden="true"></i>
+                    <span>Administración</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content" id="main-content" role="main">
+    <!-- Top Bar -->
+    <header class="top-bar" role="banner">
+        <div class="search-box">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="text" placeholder="Buscar alumnos, pagos, carreras..." id="globalSearch" aria-label="Buscar en el sistema">
+        </div>
+
+        <div class="top-bar-right">
+            <button class="top-bar-btn" id="themeToggle" aria-label="Cambiar tema">
+                <i class="bi bi-moon"></i>
+            </button>
+            <button class="top-bar-btn" title="Notificaciones" aria-label="Notificaciones">
+                <i class="bi bi-bell"></i>
+                <span class="notification"></span>
+            </button>
+            <button class="top-bar-btn" title="Ayuda" aria-label="Ayuda">
+                <i class="bi bi-question-circle"></i>
+            </button>
+
+            <div class="divider-vertical"></div>
+
+            <div class="user-dropdown">
+                <button class="user-dropdown-toggle" id="userDropdownToggle" aria-expanded="false" aria-haspopup="true">
+                    <div class="user-dropdown-avatar">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <div class="user-dropdown-info">
+                        <div class="user-dropdown-name">{{ user.username }}</div>
+                        <div class="user-dropdown-role">{% if user.is_superuser %}Admin{% else %}Usuario{% endif %}</div>
+                    </div>
+                    <i class="bi bi-chevron-down" style="color: var(--gray-400);" aria-hidden="true"></i>
+                </button>
+                <div class="dropdown-menu-custom" id="userDropdownMenu" aria-labelledby="userDropdownToggle">
+                    <a href="#" class="dropdown-item-custom">
+                        <i class="bi bi-person" aria-hidden="true"></i>
+                        Mi Perfil
+                    </a>
+                    <a href="#" class="dropdown-item-custom">
+                        <i class="bi bi-gear" aria-hidden="true"></i>
+                        Configuración
+                    </a>
+                    <div class="dropdown-divider-custom"></div>
+                    <a href="{% url 'logout' %}" class="dropdown-item-custom danger">
+                        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                        Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content-wrapper animate-fadeIn">
+        <!-- Sistema de notificaciones mejorado -->
+        <div id="notifications-container" class="notifications-container"></div>
+
+        <!-- Messages -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert-custom alert-{{ message.tags }} alert-dismissible fade show alert-auto-close"
+             role="alert"
+             data-alert-id="{{ forloop.counter }}">
+            <div class="alert-icon">
+                {% if message.tags == 'success' %}
+                <i class="bi bi-check-lg"></i>
+                {% elif message.tags == 'warning' %}
+                <i class="bi bi-exclamation-lg"></i>
+                {% elif message.tags == 'danger' or message.tags == 'error' %}
+                <i class="bi bi-x-lg"></i>
+                {% else %}
+                <i class="bi bi-info-lg"></i>
+                {% endif %}
+            </div>
+            <div class="alert-content">
+                <div class="alert-title">
+                    {% if message.tags == 'success' %}¡Éxito!
+                    {% elif message.tags == 'warning' %}Advertencia
+                    {% elif message.tags == 'danger' or message.tags == 'error' %}Error
+                    {% else %}Información{% endif %}
+                </div>
+                {{ message }}
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Loading overlay -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="spinner-container">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-3">Cargando...</p>
+            </div>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Scripts base -->
+<script src="{% static 'js/base.js'%}"></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,220 @@
+.rendicion-header {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+    color: white;
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.rendicion-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.rendicion-header p {
+    opacity: 0.9;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.filtro-fecha {
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
+}
+
+.resumen-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.resumen-card {
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition-normal);
+}
+
+.resumen-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+}
+
+.resumen-card.total::before {
+    background: linear-gradient(90deg, var(--success), var(--success-dark));
+}
+
+.resumen-card.cantidad::before {
+    background: linear-gradient(90deg, var(--info), var(--info-dark));
+}
+
+.resumen-card.promedio::before {
+    background: linear-gradient(90deg, var(--warning), var(--warning-dark));
+}
+
+.resumen-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+}
+
+.resumen-card h6 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+}
+
+.resumen-card .value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 0.5rem;
+}
+
+.resumen-card .subtext {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+
+.pagos-table-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.table-header h5 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin: 0;
+}
+
+.btn-exportar {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    padding: 0.65rem 1.25rem;
+    border-radius: var(--border-radius-sm);
+    border: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.btn-exportar:hover {
+    background: var(--gray-200);
+    transform: translateY(-2px);
+}
+
+.pago-row {
+    border-bottom: 1px solid var(--gray-100);
+    padding: 1rem 0;
+    transition: background var(--transition-fast);
+}
+
+.pago-row:hover {
+    background: var(--primary-50);
+}
+
+.pago-row:last-child {
+    border-bottom: none;
+}
+
+.recibo-badge {
+    background: var(--primary-100);
+    color: var(--primary-700);
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.alumno-name {
+    font-weight: 600;
+    color: var(--gray-800);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.cuota-info {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+
+.importe-badge {
+    background: linear-gradient(135deg, var(--success-light), var(--success));
+    color: var(--success-dark);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.estrellas-display {
+    font-size: 1.2rem;
+}
+
+.empty-state-table {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--gray-400);
+}
+
+.empty-state-table i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+@media print {
+    .filtro-fecha, .btn-exportar, .top-bar, .sidebar {
+        display: none !important;
+    }
+
+    .rendicion-header {
+        background: white !important;
+        color: black !important;
+        border: 2px solid black;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .resumen-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .pago-row {
+        padding: 1.5rem 0;
+    }
+}

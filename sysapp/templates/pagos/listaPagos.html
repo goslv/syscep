@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block title %}Pagos - ITS CEP{% endblock %}
+{% block page_title %}Historial de Pagos{% endblock %}
+
+{% block content %}
+
+<style>
+    .btn-primary-custom.fab-register {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 1100;
+        border-radius: 100px;
+        padding: 0.75rem 1rem;
+        font-size: 1.1rem;
+        box-shadow: 0 12px 30px rgba(102, 126, 234, 0);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(209, 213, 219, 0.05) !important;
+        transition: transform 0.35s ease, box-shadow 0.35s ease;
+        transform-origin: center center;
+    }
+
+    .btn-primary-custom.fab-register i {
+        font-size: 5rem;
+        color: rgba(118, 75, 162, 0.91) !important;
+        display: inline-block;
+        transform-origin: center center;
+        will-change: transform;
+    }
+
+    /* Animación de rotación mientras el cursor está sobre el botón */
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(90deg); }
+    }
+
+    .btn-primary-custom.fab-register:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+    }
+
+    .btn-primary-custom.fab-register:hover i {
+        animation: spin 0.5s linear;
+    }
+
+    .btn-primary-custom.fab-register:hover:after i {
+        animation: spin-reverse 0.5s linear;
+    }
+
+    @keyframes spin-reverse {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(-90deg); }
+    }
+
+    @media (max-width: 720px) {
+        .card-header-custom .btn-primary-custom {
+            display: none;
+        }
+    }
+
+    /* Estilos para los botones de acción */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .btn-action {
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.375rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-view {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .btn-view:hover {
+        background-color: #2563eb;
+    }
+
+    .btn-edit {
+        background-color: #f59e0b;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background-color: #d97706;
+    }
+
+    .btn-delete {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background-color: #dc2626;
+    }
+</style>
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="stat-card">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Sede</label>
+                    <select name="sede" class="form-select">
+                        <option value="">Todas las sedes</option>
+                        {% for sede in sedes %}
+                        <option value="{{ sede.id }}" {% if request.GET.sede == sede.id|stringformat:"s" %}selected{% endif %}>
+                            {{ sede.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Fecha Desde</label>
+                    <input type="date" name="fecha_desde" class="form-control" value="{{ request.GET.fecha_desde }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Fecha Hasta</label>
+                    <input type="date" name="fecha_hasta" class="form-control" value="{{ request.GET.fecha_hasta }}">
+                </div>
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    <a href="{% url 'lista_pagos' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Pagos -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="stat-card">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>N° Recibo</th>
+                        <th>Fecha</th>
+                        <th>Alumno</th>
+                        <th>Sede</th>
+                        <th>Cuota</th>
+                        <th>Concepto</th>
+                        <th>Importe</th>
+                        <th class="text-center">Detalles</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for pago in pagos %}
+                    <tr>
+                        <td><strong>{{ pago.numero_recibo }}</strong></td>
+                        <td>{{ pago.fecha|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if pago.es_cliente_diferenciado %}
+                                {{ pago.nombre_cliente }}
+                                <span class="badge bg-info text-dark ms-1" style="font-size: 0.7rem;">
+                                    <i class="bi bi-person-badge"></i> Cliente
+                                </span>
+                            {% else %}
+                                <a href="{% url 'detalle_alumno' pago.alumno.id %}">
+                                    {{ pago.alumno.nombre_completo }}
+                                </a>
+                            {% endif %}
+                        </td>
+                        <td>{{ pago.sede.nombre }}</td>
+                        <td>{{ pago.numero_cuota }}</td>
+                        <td>{{ pago.concepto|truncatewords:5 }}</td>
+                        <td><strong class="text-success">Gs. {{ pago.importe_total|floatformat:0 }}</strong></td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'detalle_pago' pago.id %}"
+                                   class="btn-action btn-view"
+                                   title="Ver detalle">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 3rem;"></i><br>
+                            No se encontraron pagos
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if pagos|length == 100 %}
+            <div class="alert alert-info mt-3">
+                <i class="bi bi-info-circle"></i> Mostrando los últimos 100 pagos. Usa los filtros para buscar pagos específicos.
+            </div>
+            {% endif %}
+        </div>
+        <a href="{% url 'registrar_pago' %}" class="btn-primary-custom fab-register" aria-label="Registrar pago">
+            <i class="bi bi-plus-circle-fill"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalEliminarLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro que desea eliminar el pago con recibo <strong id="numeroRecibo"></strong>?</p>
+                <p class="text-danger"><i class="bi bi-info-circle"></i> Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <form id="formEliminar" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmarEliminacion(pagoId, numeroRecibo) {
+        document.getElementById('numeroRecibo').textContent = numeroRecibo;
+        const form = document.getElementById('formEliminar');
+        form.action = `/pagos/eliminar/${pagoId}/`;
+
+        const modal = new bootstrap.Modal(document.getElementById('modalEliminar'));
+        modal.show();
+    }
+</script>
+
+{% endblock %}

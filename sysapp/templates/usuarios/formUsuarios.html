@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - SysCEP{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="stat-card">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Información de Acceso -->
+                <h5 class="mb-3">
+                    <i class="bi bi-person-badge"></i> Información de Acceso
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre de Usuario *</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="text-danger">{{ form.username.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">Único, sin espacios ni caracteres especiales</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% if not usuario %}
+                    <div class="col-md-6">
+                        <label class="form-label">Contraseña *</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}
+                            <div class="text-danger">{{ form.password.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">Mínimo 8 caracteres</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Confirmar Contraseña *</label>
+                        {{ form.password_confirm }}
+                        {% if form.password_confirm.errors %}
+                            <div class="text-danger">{{ form.password_confirm.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Información Personal -->
+                <h5 class="mb-3">
+                    <i class="bi bi-person"></i> Información Personal
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <div class="text-danger">{{ form.first_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Apellido</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <div class="text-danger">{{ form.last_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Permisos y Estado -->
+                <h5 class="mb-3">
+                    <i class="bi bi-shield-check"></i> Permisos y Estado
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <div class="alert alert-warning">
+                            <strong>Importante:</strong> Los usuarios <strong>staff (administradores)</strong> tienen acceso a todos los módulos. 
+                            Los usuarios <strong>no-staff</strong> solo pueden acceder a Alumnos y Pagos.
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            {{ form.is_staff }}
+                            <label class="form-check-label" for="{{ form.is_staff.id_for_label }}">
+                                <strong>Administrador (Staff)</strong>
+                            </label>
+                            {% if form.is_staff.errors %}
+                                <div class="text-danger">{{ form.is_staff.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">Permite acceso a todos los módulos</small>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                <strong>Usuario Activo</strong>
+                            </label>
+                            {% if form.is_active.errors %}
+                                <div class="text-danger">{{ form.is_active.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">Usuario puede iniciar sesión</small>
+                    </div>
+                </div>
+
+                {% if usuario %}
+                <!-- Cambio de contraseña (solo en edición) -->
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> 
+                    Para cambiar la contraseña de este usuario, ve al 
+                    <a href="/admin/auth/user/{{ usuario.id }}/password/" target="_blank">panel de administración</a>.
+                </div>
+                {% endif %}
+
+                <!-- Errores generales -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> {{ boton }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

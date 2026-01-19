@@ -1,0 +1,841 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Inicio - ITS CEP{% endblock %}
+{% block extra_css %}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #12276c 0%, #6366f1 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --warning-gradient: linear-gradient(135deg, #F2994A 0%, #F2C94C 100%);
+        --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+        --card-hover-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+        --border-radius: 20px;
+        --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .dashboard-container {
+        padding: 2.5rem;
+        background: linear-gradient(180deg, #f8fafc 0%, #e8eef5 100%);
+        min-height: 100vh;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .dashboard-header p {
+        color: #64748b;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    /* Statistics Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--card-hover-shadow);
+    }
+
+    .stat-card.alumnos::before { background: var(--primary-gradient); }
+    .stat-card.funcionarios::before { background: var(--secondary-gradient); }
+    .stat-card.ingresos::before { background: var(--success-gradient); }
+    .stat-card.carreras::before { background: var(--warning-gradient); }
+
+    .stat-icon {
+        width: 80px;
+        height: 80px;
+        min-width: 80px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.15) rotate(-5deg);
+    }
+
+    .stat-icon.alumnos {
+        background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+        color: #7c3aed;
+    }
+
+    .stat-icon.funcionarios {
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        color: #4f46e5;
+    }
+
+    .stat-icon.ingresos {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #059669;
+    }
+
+    .stat-icon.carreras {
+        background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+        color: #ea580c;
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-content h6 {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-content h2 {
+        font-size: 2.75rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .stat-content small {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-top: 0.5rem;
+    }
+
+    .stat-trend {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .stat-trend.up {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .stat-trend.down {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    /* Payment Status Section */
+    .payment-status-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2.5rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        margin-bottom: 2.5rem;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #6366f1;
+    }
+
+    .section-header h5 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .status-grid {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: space-between;
+        align-items: stretch;
+        flex-wrap: wrap;
+        margin-bottom: 2.5rem;
+    }
+
+    .status-item {
+        background: linear-gradient(135deg, rgba(248, 250, 252, 0.29) 0%, rgba(241, 245, 249, 0.21) 100%);
+        border-radius: 16px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        transition: var(--transition);
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+        flex: 1 1 calc(33.333% - 1rem);
+        min-width: 220px;
+        box-sizing: border-box;
+    }
+
+    .status-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .status-item:hover {
+        border-color: #e2e8f0;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .status-item:hover::before {
+        opacity: 1;
+    }
+
+    .status-badge {
+        min-width: 75px;
+        height: 75px;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: white;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        position: relative;
+        z-index: 1;
+    }
+
+    .status-badge.al-dia {
+        background: var(--success-gradient);
+    }
+
+    .status-badge.por-vencer {
+        background: var(--warning-gradient);
+    }
+
+    .status-badge.atrasado {
+        background: var(--danger-gradient);
+    }
+
+    .status-info {
+        flex: 1;
+        position: relative;
+        z-index: 1;
+    }
+
+    .status-info h6 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .status-info p {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .recent-payments-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2.5rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+    }
+
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .card-header-custom .section-header {
+        margin: 0;
+    }
+
+    .btn-primary-custom {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.625rem;
+        transition: var(--transition);
+        text-decoration: none;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary-custom:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        color: white;
+    }
+
+    .btn-primary-custom:active {
+        transform: translateY(-1px);
+    }
+
+    .table-modern {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    /* Asegura que el contenedor no añada padding que rompa los bordes */
+    .table-container {
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+
+
+    /* Botón flotante en esquina inferior derecha */
+
+    .btn-primary-custom.fab-register {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 1100;
+        border-radius: 100px;
+        padding: 0.75rem 1rem;
+        font-size: 1.1rem;
+        box-shadow: 0 12px 30px rgba(102, 126, 234, 0);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(209, 213, 219, 0.05) !important;
+        transition: transform 0.35s ease, box-shadow 0.35s ease;
+        transform-origin: center center;
+    }
+
+    .btn-primary-custom.fab-register i {
+        font-size: 5rem;
+        color: rgba(118, 75, 162, 0.8) !important;
+        display: inline-block;
+        transform-origin: center center;
+        will-change: transform;
+    }
+
+    /* Animación de rotación mientras el cursor está sobre el botón */
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(90deg); }
+    }
+
+    .btn-primary-custom.fab-register:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+    }
+
+    .btn-primary-custom.fab-register:hover i {
+        animation: spin 0.5s linear;
+    }
+
+    .btn-primary-custom.fab-register hover:after i {
+        animation: spin-reverse 0.5s linear;
+    }
+
+    @keyframes spin-reverse {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(-90deg); }
+    }
+
+    @media (max-width: 720px) {
+        .card-header-custom .btn-primary-custom {
+            display: none;
+        }
+    }
+
+    .table-modern thead {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    }
+
+    .table-modern thead th {
+        padding: 1.25rem 1.5rem;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        text-align: left;
+        border: none;
+    }
+
+    .table-modern thead th i {
+        opacity: 0.8;
+        margin-right: 0.5rem;
+    }
+
+    .table-modern tbody tr {
+        transition: var(--transition);
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .table-modern tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .table-modern tbody tr:hover {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    }
+
+    .table-modern tbody td {
+        padding: 1.25rem 1.5rem;
+        color: #334155;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .recibo-number {
+        font-weight: 800;
+        color: #6366f1;
+        background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        display: inline-block;
+    }
+
+    .alumno-link {
+        color: #1e293b;
+        text-decoration: none;
+        font-weight: 700;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .alumno-link:hover {
+        color: #6366f1;
+        transform: translateX(3px);
+    }
+
+    .alumno-link i {
+        font-size: 0.9rem;
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .alumno-link:hover i {
+        opacity: 1;
+    }
+
+    .sede-badge {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        color: #475569;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .fecha-cell {
+        color: #64748b;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .cuota-badge {
+        background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+        color: #6d28d9;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .importe-cell {
+        font-weight: 800;
+        color: #059669;
+        font-size: 1.1rem;
+    }
+
+    .estrellas-cell {
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .estrellas-count {
+        font-weight: 700;
+        color: #f59e0b;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #94a3b8;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.3;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .animate-slide-in {
+        animation: slideInRight 0.6s ease forwards;
+    }
+
+    .animate-scale-in {
+        animation: scaleIn 0.6s ease forwards;
+    }
+
+    .delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .stat-card:hover .stat-content h2 {
+        animation: pulse 1s ease infinite;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1.5rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+        }
+
+        .payment-status-card,
+        .recent-payments-card {
+            padding: 1.5rem;
+        }
+
+        .section-header h5 {
+            font-size: 1.25rem;
+        }
+
+        .card-header-custom {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table-modern {
+            min-width: 800px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Payment Status -->
+    <div class="payment-status-card animate-fade-in">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="bi bi-pie-chart-fill"></i>
+            </div>
+            <h5>Estado de Pagos de Alumnos</h5>
+        </div>
+
+        <div class="status-grid">
+            <div class="status-item">
+                <div class="status-badge al-dia">
+                    {{ alumnos_al_dia|default:"0" }}
+                </div>
+                <div class="status-info">
+                    <h6>Al día</h6>
+                </div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-badge por-vencer">
+                    {{ alumnos_por_vencer|default:"0" }}
+                </div>
+                <div class="status-info">
+                    <h6>Por vencer</h6>
+                </div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-badge atrasado">
+                    {{ alumnos_atrasados|default:"0" }}
+                </div>
+                <div class="status-info">
+                    <h6>Atrasados</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Payments -->
+    <div class="recent-payments-card animate-fade-in">
+        <div class="card-header-custom">
+            <div class="section-header">
+                <div class="section-icon" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #059669;">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <h5>Pagos Recientes</h5>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="table-modern">
+                <thead>
+                <tr>
+                    <th>N° Recibo</th>
+                    <th>Alumno</th>
+                    <th>Sede</th>
+                    <th>Fecha</th>
+                    <th>Cuota</th>
+                    <th>Importe</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for pago in pagos_recientes %}
+                <tr>
+                    <td>
+                        <span class="recibo-number">{{ pago.numero_recibo }}</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'detalle_alumno' pago.alumno.id %}" class="alumno-link">
+                            {{ pago.alumno.nombre_completo }}
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </td>
+                    <td>
+                        <span class="sede-badge">
+                            {{ pago.sede.nombre }}
+                        </span>
+                    </td>
+                    <td class="fecha-cell">
+                        {{ pago.fecha|date:"d/m/Y" }}
+                    </td>
+                    <td>
+                        <span class="cuota-badge">{{ pago.numero_cuota|default:"0" }}</span>
+                    </td>
+                    <td class="importe-cell">
+                        Gs. {{ pago.importe_total_formatted|default:"0" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <p>No hay pagos registrados hoy</p>
+                            <a href="{% url 'registrar_pago' %}" class="btn-primary-custom">
+                                <i class="bi bi-plus-circle-fill"></i>
+                                Registrar primer pago
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <a href="{% url 'registrar_pago' %}" class="btn-primary-custom fab-register" aria-label="Registrar pago">
+        <i class="bi bi-plus-circle-fill"></i></a>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animación de números al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animar números de estadísticas
+        const statNumbers = document.querySelectorAll('.stat-content h2');
+
+        statNumbers.forEach(function(el) {
+            const finalValue = parseInt(el.textContent) || 0;
+            let currentValue = 0;
+            const increment = Math.ceil(finalValue / 50);
+            const duration = 1000;
+            const stepTime = duration / (finalValue / increment);
+
+            el.textContent = '0';
+
+            const timer = setInterval(function() {
+                currentValue += increment;
+                if (currentValue >= finalValue) {
+                    el.textContent = finalValue.toLocaleString('es-PY');
+                    clearInterval(timer);
+                } else {
+                    el.textContent = currentValue.toLocaleString('es-PY');
+                }
+            }, stepTime);
+        });
+
+        // Animar barras de porcentaje
+        setTimeout(function() {
+            const percentageFills = document.querySelectorAll('.percentage-fill');
+            percentageFills.forEach(function(fill) {
+                const width = fill.style.width;
+                fill.style.width = '0%';
+                setTimeout(function() {
+                    fill.style.width = width;
+                }, 100);
+            });
+        }, 500);
+
+        // Tooltips para estrellas
+        const estrellas = document.querySelectorAll('.estrellas-cell');
+        estrellas.forEach(function(el) {
+            const count = el.querySelector('.estrellas-count')?.textContent || '0';
+            el.setAttribute('title', count + ' punto' + (count !== '1' ? 's' : '') + ' ganado' + (count !== '1' ? 's' : ''));
+        });
+
+        // Efecto de hover en filas de tabla
+        const tableRows = document.querySelectorAll('.table-modern tbody tr');
+        tableRows.forEach(function(row) {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.01)';
+            });
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    });
+</script>
+{% endblock %}

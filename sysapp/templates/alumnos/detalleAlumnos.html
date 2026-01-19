@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ alumno.nombre_completo }} - SysCEP{% endblock %}
+{% block page_title %}Detalle del Alumno{% endblock %}
+
+{% block content %}
+<!-- Información del Alumno -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">{{ alumno.nombre_completo }}</h4>
+                <div>
+                    <a href="{% url 'editar_alumno' alumno.id %}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <a href="{% url 'registrar_pago' %}?alumno={{ alumno.id }}" class="btn btn-success btn-sm">
+                        <i class="bi bi-cash"></i> Registrar Pago
+                    </a>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Cédula:</strong> {{ alumno.cedula }}</p>
+                    <p><strong>Fecha de Nacimiento:</strong> {{ alumno.fecha_nacimiento|date:"d/m/Y" }}</p>
+                    <p><strong>Teléfono:</strong> {{ alumno.telefono }}</p>
+                    <p><strong>Sede:</strong> {{ alumno.sede.nombre }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Carrera:</strong> {{ alumno.carrera.nombre }}</p>
+                    <p><strong>Curso Actual:</strong> {{ alumno.curso_actual }}º</p>
+                    <p><strong>Fecha de Inicio:</strong> {{ alumno.fecha_inicio|date:"d/m/Y" }}</p>
+                    <p><strong>Estado:</strong>
+                        {% if alumno.activo %}
+                            <span class="badge bg-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactivo</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <hr>
+            <h6>Contacto de Emergencia</h6>
+            <p><strong>Nombre:</strong> {{ alumno.contacto_emergencia_nombre }}</p>
+            <p><strong>Teléfono:</strong> {{ alumno.contacto_emergencia_telefono }}</p>
+            <p><strong>Relación:</strong> {{ alumno.contacto_emergencia_relacion }}</p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Estado de Pagos -->
+        <div class="stat-card mb-3">
+            <h6 class="mb-3">Estado de Pagos</h6>
+            {% if alumno.estado_pagos == 'AL_DIA' %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i> Al día con los pagos
+                </div>
+            {% elif alumno.estado_pagos == 'CERCANO_VENCIMIENTO' %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Pago próximo a vencer
+                </div>
+            {% elif alumno.estado_pagos == 'ATRASADO' %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-x-circle"></i> Pagos atrasados
+                </div>
+            {% else %}
+                <div class="alert alert-secondary">
+                    <i class="bi bi-info-circle"></i> Sin pagos registrados
+                </div>
+            {% endif %}
+
+            <p class="mb-1"><strong>Total Estrellas:</strong></p>
+            <h2 style="color: gold;">⭐ {{ alumno.total_estrellas }}</h2>
+
+            <hr>
+
+            <p class="mb-1"><strong>Total Pagado:</strong></p>
+            <h5>Gs. {{ total_pagado|floatformat:0 }}</h5>
+
+            {% if alumno.carrera.naturalidad == 'TS' %}
+                <hr>
+                <p class="mb-1"><strong>Puede rendir examen:</strong></p>
+                {% if alumno.puede_rendir_examen %}
+                    <span class="badge bg-success">✓ Sí</span>
+                {% else %}
+                    <span class="badge bg-danger">✗ No (debe estar al día)</span>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Historial de Pagos -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="stat-card">
+            <h5 class="mb-3">Historial de Pagos</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Recibo</th>
+                            <th>Fecha</th>
+                            <th>Cuota</th>
+                            <th>Concepto</th>
+                            <th>Importe</th>
+                            <th>Vencimiento</th>
+                            <th>Estrellas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pago in pagos %}
+                        <tr>
+                            <td><strong>{{ pago.numero_recibo }}</strong></td>
+                            <td>{{ pago.fecha|date:"d/m/Y" }}</td>
+                            <td>{{ pago.numero_cuota }}</td>
+                            <td>{{ pago.concepto|truncatewords:5 }}</td>
+                            <td><strong>Gs. {{ pago.importe_total|floatformat:0 }}</strong></td>
+                            <td>{{ pago.fecha_vencimiento|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if pago.estrellas > 0 %}
+                                    <span style="color: gold;">{% for i in "x"|ljust:pago.estrellas %}⭐{% endfor %}</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No hay pagos registrados
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'lista_alumnos' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a la lista
+    </a>
+</div>
+{% endblock %}

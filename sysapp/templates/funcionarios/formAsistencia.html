@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - SysCEP{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="stat-card">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> <strong>Registrar Asistencia Diaria</strong><br>
+                Marca la asistencia de los funcionarios para el día seleccionado. Esta información se usará para la liquidación de salarios de los docentes.
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Funcionario *</label>
+                        {{ form.funcionario }}
+                        {% if form.funcionario.errors %}
+                            <div class="text-danger">{{ form.funcionario.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha *</label>
+                        {{ form.fecha }}
+                        {% if form.fecha.errors %}
+                            <div class="text-danger">{{ form.fecha.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-check form-switch">
+                            {{ form.presente }}
+                            <label class="form-check-label" for="{{ form.presente.id_for_label }}">
+                                <strong>¿Estuvo presente?</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Observaciones</label>
+                        {{ form.observaciones }}
+                        {% if form.observaciones.errors %}
+                            <div class="text-danger">{{ form.observaciones.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">Opcional - Ej: Llegó tarde, salió temprano, permiso médico, etc.</small>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'lista_asistencias' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> {{ boton }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

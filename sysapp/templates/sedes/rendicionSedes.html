@@ -1,0 +1,146 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Rendición {{ sede.nombre }} - SysCEP{% endblock %}
+{% block page_title %}Rendición de Caja{% endblock %}
+{% block breadcrumb_current %}{{ sede.nombre }}{% endblock %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/rendicion.css' %}">
+<style>
+
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="rendicion-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2>{{ sede.nombre }}</h2>
+            <p>Fecha: {{ fecha|date:'Y-m-d' }}</p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-light">
+                <i class="bi bi-printer"></i> Imprimir
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Filtro de Fecha -->
+<div class="filtro-fecha">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">
+                <i class="bi bi-calendar-date me-1"></i>
+                Seleccionar Fecha
+            </label>
+            <input type="date"
+                   name="fecha"
+                   class="form-control"
+                   value="{{ fecha|date:'Y-m-d' }}"
+                   max="{{ fecha|date:'Y-m-d' }}">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'lista_sedes' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a Sedes
+            </a>
+        </div>
+    </form>
+</div>
+
+<div class="resumen-cards">
+    <div class="resumen-card total">
+        <h6><i class="bi bi-cash-stack me-1"></i>Total Recaudado</h6>
+        <div class="value">Gs. {{ rendicion.total|floatformat:0 }}</div>
+        <div class="subtext">Suma de todos los pagos</div>
+    </div>
+
+    <div class="resumen-card cantidad">
+        <h6><i class="bi bi-receipt me-1"></i>Cantidad de Pagos</h6>
+        <div class="value">{{ rendicion.cantidad_pagos }}</div>
+        <div class="subtext">Transacciones realizadas</div>
+    </div>
+</div>
+
+<!-- Tabla de Pagos -->
+<div class="pagos-table-card">
+    <div class="table-header">
+        <h5>
+            <i class="bi bi-list-ul me-2"></i>
+            Detalle de Pagos ({{ pagos|length }})
+        </h5>
+        <button onclick="exportarExcel()" class="btn-exportar">
+            <i class="bi bi-file-earmark-excel"></i>
+            Exportar a Excel
+        </button>
+    </div>
+
+    {% if pagos %}
+        <div class="table-responsive">
+            {% for pago in pagos %}
+            <div class="pago-row">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-2">
+                        <span class="recibo-badge">{{ pago.numero_recibo }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="alumno-name">{{ pago.alumno.nombre_completo }}</span>
+                        <span class="cuota-info">
+                            <i class="bi bi-layers me-1"></i>Cuota {{ pago.numero_cuota }}
+                        </span>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>
+                            {{ pago.fecha|date }}
+                        </small>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="importe-badge">
+                            Gs. {{ pago.importe_total|floatformat:0 }}
+                        </span>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <div class="estrellas-display">
+                            {% if pago.estrellas > 0 %}
+                                <span style="color: #fbbf24;">
+                                    {% for i in "x"|ljust:pago.estrellas %}⭐{% endfor %}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-1 text-end">
+                        <a href="{% url 'detalle_alumno' pago.alumno.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state-table">
+            <i class="bi bi-inbox"></i>
+            <h5>No hay pagos registrados</h5>
+            <p>No se realizaron transacciones en esta fecha para esta sede</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function exportarExcel() {
+        alert('Función de exportación a Excel. Próximamente disponible.');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - SysCEP{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="stat-card">
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Información Personal -->
+                <h5 class="mb-3">
+                    <i class="bi bi-person-badge"></i> Información Personal
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre *</label>
+                        {{ form.nombre }}
+                        {% if form.nombre.errors %}
+                            <div class="text-danger">{{ form.nombre.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Apellido *</label>
+                        {{ form.apellido }}
+                        {% if form.apellido.errors %}
+                            <div class="text-danger">{{ form.apellido.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Cédula *</label>
+                        {{ form.cedula }}
+                        {% if form.cedula.errors %}
+                            <div class="text-danger">{{ form.cedula.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Información Laboral -->
+                <h5 class="mb-3">
+                    <i class="bi bi-briefcase"></i> Información Laboral
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Sede *</label>
+                        {{ form.sede }}
+                        {% if form.sede.errors %}
+                            <div class="text-danger">{{ form.sede.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Cargo *</label>
+                        {{ form.cargo }}
+                        {% if form.cargo.errors %}
+                            <div class="text-danger">{{ form.cargo.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha de Ingreso *</label>
+                        {{ form.fecha_ingreso }}
+                        {% if form.fecha_ingreso.errors %}
+                            <div class="text-danger">{{ form.fecha_ingreso.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Contacto -->
+                <h5 class="mb-3">
+                    <i class="bi bi-telephone"></i> Contacto
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Teléfono Principal *</label>
+                        {{ form.telefono_principal }}
+                        {% if form.telefono_principal.errors %}
+                            <div class="text-danger">{{ form.telefono_principal.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Teléfono Secundario</label>
+                        {{ form.telefono_secundario }}
+                        {% if form.telefono_secundario.errors %}
+                            <div class="text-danger">{{ form.telefono_secundario.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">Opcional</small>
+                    </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <div class="form-check">
+                            {{ form.activo }}
+                            <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                Funcionario activo
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'lista_funcionarios' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> {{ boton }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

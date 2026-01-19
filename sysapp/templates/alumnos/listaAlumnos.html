@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Alumnos - ITS CEP{% endblock %}
+{% block page_title %}Gestión de Alumnos{% endblock %}
+
+{% block content %}
+<style>
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.4em 0.6em;
+        border-radius: 0.25rem;
+    }
+    .btn:hover {
+        animation: fadeIn 1s;
+        background-color: rgba(11, 94, 215, 0.76);
+        border-color: #0a58ca;
+        color: #ffffff;
+    }
+    .btn-primary-custom.fab-register {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 1100;
+        border-radius: 100px;
+        padding: 0.75rem 1rem;
+        font-size: 1.1rem;
+        box-shadow: 0 12px 30px rgba(102, 126, 234, 0);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(209, 213, 219, 0.05) !important;
+        transition: transform 0.35s ease, box-shadow 0.35s ease;
+        transform-origin: center center;
+    }
+
+    .btn-primary-custom.fab-register i {
+        font-size: 5rem;
+        color: rgba(118, 75, 162, 0.8) !important;
+        display: inline-block;
+        transform-origin: center center;
+        will-change: transform;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(90deg); }
+    }
+
+    .btn-primary-custom.fab-register:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+    }
+
+    .btn-primary-custom.fab-register:hover i {
+        animation: spin 0.5s linear;
+    }
+
+    .btn-primary-custom.fab-register hover:after i {
+        animation: spin-reverse 0.5s linear;
+    }
+
+    @keyframes spin-reverse {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(-90deg); }
+    }
+
+    @media (max-width: 720px) {
+        .card-header-custom .btn-primary-custom {
+            display: none;
+        }
+    }
+
+</style>
+<!-- Filtros -->
+<div class="row mb-3 mt-1">
+    <div class="col-md-12">
+        <div class="stat-card">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" name="busqueda" class="form-control"
+                           placeholder="Nombre, apellido o cédula">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Sede</label>
+                    <select name="sede" class="form-select">
+                        <option value="">Todas las sedes</option>
+                        {% for sede in sedes %}
+                        <option value="{{ sede.id }}" {% if filtros.sede == sede.id|stringformat:"s" %}selected{% endif %}>
+                        {{ sede.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Carrera</label>
+                    <select name="carrera" class="form-select">
+                        <option value="">Todas las carreras</option>
+                        {% for carrera in carreras %}
+                        <option value="{{ carrera.id }}" {% if filtros.carrera == carrera.id|stringformat:"s" %}selected{% endif %}>
+                        {{ carrera.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Estado de Pago</label>
+                    <select name="estado" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="AL_DIA" {% if filtros.estado == "AL_DIA" %}selected{% endif %}>Al día</option>
+                        <option value="CERCANO_VENCIMIENTO" {% if filtros.estado == "CERCANO_VENCIMIENTO" %}selected{% endif %}>Por vencer</option>
+                        <option value="ATRASADO" {% if filtros.estado == "ATRASADO" %}selected{% endif %}>Atrasado</option>
+                    </select>
+                </div>
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    <a href="{% url 'lista_alumnos' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Alumnos -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="stat-card">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Carrera</th>
+                        <th>Sede</th>
+                        <th>Curso</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for alumno in alumnos %}
+                    <tr>
+                        <td>
+                            <strong>{{ alumno.nombre_completo }}</strong><br>
+                            <small class="text-muted">{{ alumno.telefono }}</small>
+                        </td>
+                        <td>{{ alumno.carrera.nombre }}</td>
+                        <td>{{ alumno.sede.nombre }}</td>
+                        <td>{{ alumno.curso_actual }}º</td>
+                        <td>
+                            {% if alumno.estado_pagos == 'AL_DIA' %}
+                            <span class="badge bg-success">Al día</span>
+                            {% elif alumno.estado_pagos == 'CERCANO_VENCIMIENTO' %}
+                            <span class="badge bg-warning text-dark">Por vencer</span>
+                            {% elif alumno.estado_pagos == 'ATRASADO' %}
+                            <span class="badge bg-danger">Atrasado</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Sin pagos</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'detalle_alumno' alumno.id %}" class="btn" title="Ver detalle">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 3rem;"></i><br>
+                            No se encontraron alumnos
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-3">
+                <p class="text-muted mb-0">Total: {{ alumnos|length }} alumno{{ alumnos|length|pluralize }}</p>
+            </div>
+        </div>
+        <a href="{% url 'registrar_pago' %}" class="btn-primary-custom fab-register" aria-label="Registrar pago">
+            <i class="bi bi-plus-circle-fill"></i></a>
+    </div>
+
+</div>
+
+
+
+<script>
+    const fabButton = document.getElementById('fabButton');
+    const fabContainer = document.getElementById('fabContainer');
+    const fabIcon = document.getElementById('fabIcon');
+    const fabOverlay = document.getElementById('fabOverlay');
+
+    function toggleFab() {
+        fabContainer.classList.toggle('active');
+        if (fabContainer.classList.contains('active')) {
+            fabIcon.className = 'bi bi-x-lg';
+        } else {
+            fabIcon.className = 'bi bi-plus-lg';
+        }
+    }
+
+    fabButton.addEventListener('click', toggleFab);
+    fabOverlay.addEventListener('click', toggleFab);
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && fabContainer.classList.contains('active')) {
+            toggleFab();
+        }
+    });
+</script>
+{% endblock %}
