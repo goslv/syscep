@@ -1,8 +1,27 @@
+import os
 from typing import Any
 
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
+
+
+def path_comprobante_pago(instance, filename):
+    # Extension del archivo
+    ext = filename.split('.')[-1]
+    # Nombre del archivo basado en la fecha o id si no hay fecha
+    fecha_str = instance.fecha.strftime('%d-%m-%Y') if instance.fecha else timezone.now().strftime('%d-%m-%Y')
+    # Carpeta: comprobantes/recibos/DD-MM-YYYY/
+    return os.path.join('comprobantes', 'recibos', fecha_str, filename)
+
+
+def path_comprobante_egreso(instance, filename):
+    # Extension del archivo
+    ext = filename.split('.')[-1]
+    # Nombre del archivo basado en la fecha o id si no hay fecha
+    fecha_str = instance.fecha.strftime('%d-%m-%Y') if instance.fecha else timezone.now().strftime('%d-%m-%Y')
+    # Carpeta: comprobantes/egresos/DD-MM-YYYY/
+    return os.path.join('comprobantes', 'egresos', fecha_str, filename)
 
 
 class Sede(models.Model):
@@ -245,7 +264,7 @@ class Pago(models.Model):
 
     numero_recibo = models.CharField(max_length=50, unique=True, null=True, blank=True,
                                      verbose_name="N? de Recibo")
-    foto_recibo = models.ImageField(upload_to='recibos/%Y/%m/', blank=True, null=True, verbose_name="Foto del Recibo")
+    foto_recibo = models.ImageField(upload_to=path_comprobante_pago, blank=True, null=True, verbose_name="Foto del Recibo")
 
     fecha = models.DateField(default=timezone.now, verbose_name="Fecha")
     recibido_de = models.CharField(max_length=200, verbose_name="Recibido de", blank=True, null=True)
@@ -269,7 +288,7 @@ class Pago(models.Model):
 
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
 
-    foto_comprobante = models.ImageField(upload_to='comprobantes/', blank=True, null=True)
+    foto_comprobante = models.ImageField(upload_to=path_comprobante_pago, blank=True, null=True)
 
     observaciones = models.TextField(blank=True, null=True)
 
@@ -390,7 +409,7 @@ class Egreso(models.Model):
         validators=[MinValueValidator(0)]
     )
     comprobante = models.ImageField(
-        upload_to='egresos/%Y/%m/',
+        upload_to=path_comprobante_egreso,
         blank=True,
         null=True,
         verbose_name="Comprobante"
