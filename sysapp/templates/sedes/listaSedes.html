@@ -2,204 +2,240 @@
 <!-- ============================================ -->
 {% extends 'base.html' %}
 
-{% block title %}Sedes - SysCEP{% endblock %}
+{% block title %}Sedes - ITS CEP{% endblock %}
 {% block page_title %}Rendiciones por Sede{% endblock %}
 {% block breadcrumb_current %}Sedes{% endblock %}
 
 {% block extra_css %}
 <style>
-    .sede-card {
-        background: white;
-        border-radius: var(--border-radius-lg);
-        padding: 2rem;
-        box-shadow: var(--shadow-md);
-        border: 1px solid var(--gray-100);
-        transition: all var(--transition-normal);
-        position: relative;
-        overflow: hidden;
+    :root {
+        --card-bg: #ffffff;
+        --card-border: rgba(0, 0, 0, 0.05);
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --stat-bg: #f8fafc;
+        --accent-color: #0ea5e9;
+        --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
     }
 
-    .sede-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear-gradient(90deg, var(--primary-500), var(--primary-700));
+    [data-theme="dark"] {
+        --card-bg: #1e293b;
+        --card-border: rgba(255, 255, 255, 0.05);
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+        --stat-bg: #0f172a;
+    }
+
+    .sede-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid var(--card-border);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 250px;
     }
 
     .sede-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-xl);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border-color: var(--accent-color);
+    }
+
+    .card-accent-bar {
+        height: 6px;
+        background: var(--accent-gradient);
+        width: 100%;
+    }
+
+    .sede-card-content {
+        padding: 1.75rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
     }
 
     .sede-header {
         display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
+        align-items: center;
+        gap: 1.25rem;
         margin-bottom: 1.5rem;
-        gap: 1rem;
     }
 
-    .sede-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: var(--border-radius-md);
-        background: linear-gradient(135deg, var(--primary-100), var(--primary-200));
+    .sede-icon-wrapper {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: var(--stat-bg);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.75rem;
-        color: var(--primary-600);
-        flex-shrink: 0;
+        font-size: 1.5rem;
+        color: var(--accent-color);
+        transition: all 0.3s;
+        border: 1px solid var(--card-border);
+    }
+
+    .sede-card:hover .sede-icon-wrapper {
+        background: var(--accent-gradient);
+        color: white;
+        transform: scale(1.1) rotate(5deg);
     }
 
     .sede-info h4 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin-bottom: 0.25rem;
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--text-main);
+        margin: 0;
+        letter-spacing: -0.025em;
     }
 
     .sede-info p {
-        color: var(--gray-500);
-        margin: 0;
-        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin: 0.25rem 0 0 0;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
     }
 
-    .sede-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid var(--gray-100);
+    .ingresos-container {
+        background: var(--stat-bg);
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-top: auto;
+        border: 1px solid var(--card-border);
+        position: relative;
+        overflow: hidden;
     }
 
-    .stat-item {
-        text-align: center;
+    .ingresos-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 64px;
+        height: 64px;
+        background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent);
     }
 
-    .stat-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        display: block;
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-        font-size: 0.8rem;
-        color: var(--gray-500);
+    .ingresos-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 600;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 0.5rem;
     }
 
-    .stat-item.ingresos .stat-value {
-        color: var(--success);
-    }
-
-    .stat-item.pagos .stat-value {
-        color: var(--info);
-    }
-
-    .stat-item.alumnos .stat-value {
-        color: var(--primary-600);
-    }
-
-    .stat-item.funcionarios .stat-value {
-        color: var(--warning);
-    }
-
-    .btn-ver-rendicion {
-        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
-        color: white;
-        padding: 0.65rem 1.5rem;
-        border-radius: var(--border-radius-sm);
-        text-decoration: none;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
+    .ingresos-value-wrapper {
+        display: flex;
+        align-items: baseline;
         gap: 0.5rem;
-        transition: all var(--transition-fast);
-        border: none;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
     }
 
-    .btn-ver-rendicion:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
-        color: white;
-    }
-
-    .fecha-actual {
-        background: var(--gray-100);
-        padding: 0.75rem 1.25rem;
-        border-radius: var(--border-radius-md);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
+    .ingresos-currency {
+        font-size: 1rem;
         font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: 2rem;
+        color: #10b981;
     }
 
-    .fecha-actual i {
-        color: var(--primary-600);
-        font-size: 1.25rem;
+    .ingresos-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #10b981;
+        line-height: 1;
     }
 
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        color: var(--gray-400);
+    .sede-footer {
+        padding: 1rem 1.75rem 1.75rem;
     }
 
-    .empty-state i {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        opacity: 0.5;
+    .btn-action {
+        background: var(--accent-gradient);
+        color: white !important;
+        padding: 0.8rem 1.5rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all 0.3s;
+        border: none;
+        width: 100%;
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
     }
 
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .btn-action:hover {
+        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
+        transform: translateY(-2px);
     }
 
-    .sede-card {
-        animation: fadeInUp 0.5s ease forwards;
+    .header-section {
+        background: var(--card-bg);
+        padding: 1.5rem 2rem;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2.5rem;
+        border: 1px solid var(--card-border);
+        box-shadow: var(--shadow-sm);
     }
 
-    .sede-card:nth-child(1) { animation-delay: 0.1s; }
-    .sede-card:nth-child(2) { animation-delay: 0.2s; }
-    .sede-card:nth-child(3) { animation-delay: 0.3s; }
-    .sede-card:nth-child(4) { animation-delay: 0.4s; }
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .header-title i {
+        font-size: 2rem;
+        color: var(--accent-color);
+    }
+
+    .header-title h2 {
+        margin: 0;
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: var(--text-main);
+    }
+
+    .date-badge {
+        background: var(--stat-bg);
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        color: var(--text-main);
+        border: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
 
     @media (max-width: 768px) {
-        .sede-header {
+        .header-section {
             flex-direction: column;
-        }
-
-        .sede-stats {
-            grid-template-columns: repeat(2, 1fr);
+            align-items: flex-start;
+            gap: 1rem;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="mb-4">
-    <div class="fecha-actual">
-        <i class="bi bi-calendar-check"></i>
-        <span>Rendiciones del día: {{ fecha|date:"d/m/Y" }}</span>
+<div class="header-section mt-5">
+    <div class="date-badge">
+        <i class="bi bi-calendar3"></i>
+        <span>{{ fecha|date:"l, d \d\e F Y"|capfirst }}</span>
     </div>
 </div>
 
@@ -208,41 +244,31 @@
         {% for item in sedes_data %}
         <div class="col-lg-6 col-xl-4">
             <div class="sede-card">
-                <div class="sede-header">
-                    <div class="d-flex align-items-start gap-3 flex-1">
-                        <div class="sede-icon">
-                            <i class="bi bi-building"></i>
+                <div class="card-accent-bar"></div>
+                <div class="sede-card-content">
+                    <div class="sede-header">
+                        <div class="sede-icon-wrapper">
+                            <i class="bi bi-building-fill"></i>
                         </div>
                         <div class="sede-info">
                             <h4>{{ item.sede.nombre }}</h4>
-                            <p><i class="bi bi-telephone me-1"></i>{{ item.sede.telefono }}</p>
+                            <p><i class="bi bi-telephone-fill"></i>{{ item.sede.telefono }}</p>
+                        </div>
+                    </div>
+
+                    <div class="ingresos-container">
+                        <span class="ingresos-label">Recaudación del Día</span>
+                        <div class="ingresos-value-wrapper">
+                            <span class="ingresos-currency">Gs.</span>
+                            <span class="ingresos-value">{{ item.ingresos_hoy|floatformat:0 }}</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="sede-stats">
-                    <div class="stat-item ingresos">
-                        <span class="stat-value">Gs. {{ item.ingresos_hoy|floatformat:0 }}</span>
-                        <span class="stat-label">Ingresos Hoy</span>
-                    </div>
-                    <div class="stat-item pagos">
-                        <span class="stat-value">{{ item.pagos_hoy }}</span>
-                        <span class="stat-label">Pagos</span>
-                    </div>
-                    <div class="stat-item alumnos">
-                        <span class="stat-value">{{ item.alumnos_activos }}</span>
-                        <span class="stat-label">Alumnos</span>
-                    </div>
-                    <div class="stat-item funcionarios">
-                        <span class="stat-value">{{ item.funcionarios_activos }}</span>
-                        <span class="stat-label">Personal</span>
-                    </div>
-                </div>
-
-                <div class="mt-3 pt-3 border-top">
-                    <a href="{% url 'rendicion_sede' item.sede.id %}" class="btn-ver-rendicion w-100 justify-content-center">
-                        <i class="bi bi-bar-chart-fill"></i>
-                        Ver Rendición Completa
+                <div class="sede-footer">
+                    <a href="{% url 'rendicion_sede' item.sede.id %}" class="btn-action">
+                        <span>Ver Detalle de Rendición</span>
+                        <i class="bi bi-arrow-right-short fs-4"></i>
                     </a>
                 </div>
             </div>

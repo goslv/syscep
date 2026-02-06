@@ -1,28 +1,49 @@
 {% extends 'base.html' %}
 
-{% block title %}Funcionarios - SysCEP{% endblock %}
+{% block title %}Funcionarios - ITS CEP{% endblock %}
 {% block page_title %}Gestión de Funcionarios{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Lista de Funcionarios</h5>
-            <div>
-                <a href="{% url 'registrar_asistencia' %}" class="btn btn-info me-2">
-                    <i class="bi bi-calendar-check"></i> Registrar Asistencia
-                </a>
-                <a href="{% url 'crear_funcionario' %}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Registrar Funcionario
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+    .stat-card {
+        border-radius: 18px;
+        border: 1px solid var(--border-color);
+        background: var(--card-bg);
+        box-shadow: var(--shadow-md);
+    }
+    .table thead th {
+        background: rgba(239, 239, 239, 0.05);
+        border-bottom: 2px solid var(--border-color);
+    }
+    .table tbody td {
+        border-bottom: 1px solid var(--border-color);
+    }
+    .table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+    .form-control, .form-select {
+        background-color: var(--body-bg) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-main) !important;
+    }
+    .form-label {
+        color: var(--text-main);
+    }
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+    .btn-info{
+        color: #0a58ca;
+    }
+    [data-theme="dark"] .badge.bg-warning.text-dark,
+    [data-theme="dark"] .badge.bg-info.text-dark {
+        color: #0f172a !important;
+    }
+</style>
 
 <!-- Filtros -->
 <div class="row mb-4">
-    <div class="col-md-12">
+    <div class="col-md-12 mt-5">
         <div class="stat-card">
             <form method="get" class="row g-3">
                 <div class="col-md-6">
@@ -55,6 +76,21 @@
                     </a>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12 mt-1">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <a href="{% url 'registrar_asistencia' %}" class="btn btn-outline-info me-2">
+                    <i class="bi bi-calendar-check"></i> Registrar Asistencia
+                </a>
+                <a href="{% url 'crear_funcionario' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Registrar Funcionario
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -103,11 +139,6 @@
                             <td>{{ funcionario.sede.nombre }}</td>
                             <td>
                                 <i class="bi bi-telephone"></i> {{ funcionario.telefono_principal }}<br>
-                                {% if funcionario.telefono_secundario %}
-                                    <small class="text-muted">
-                                        <i class="bi bi-telephone"></i> {{ funcionario.telefono_secundario }}
-                                    </small>
-                                {% endif %}
                             </td>
                             <td>{{ funcionario.fecha_ingreso|date:"d/m/Y" }}</td>
                             <td>

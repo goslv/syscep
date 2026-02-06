@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_filters %}
+
 {% block title %}Inicio - ITS CEP{% endblock %}
 {% block extra_css %}{% endblock %}
 
@@ -26,7 +28,7 @@
 
     .dashboard-container {
         padding: 2.5rem;
-        background: linear-gradient(180deg, #f8fafc 0%, #e8eef5 100%);
+        background: transparent;
         min-height: 100vh;
     }
 
@@ -37,16 +39,12 @@
     .dashboard-header h1 {
         font-size: 2.5rem;
         font-weight: 800;
-        color: #1e293b;
+        color: var(--text-main);
         margin-bottom: 0.5rem;
-        background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
     }
 
     .dashboard-header p {
-        color: #64748b;
+        color: var(--text-muted);
         font-size: 1.1rem;
         margin: 0;
     }
@@ -60,11 +58,11 @@
     }
 
     .stat-card {
-        background: white;
+        background: var(--card-bg);
         border-radius: var(--border-radius);
         padding: 2rem;
         box-shadow: var(--card-shadow);
-        border: 1px solid rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--border-color);
         transition: var(--transition);
         position: relative;
         overflow: hidden;
@@ -111,23 +109,23 @@
     }
 
     .stat-icon.alumnos {
-        background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
-        color: #7c3aed;
+        background: linear-gradient(135deg, rgba(221, 214, 254, 0.2) 0%, rgba(196, 181, 253, 0.2) 100%);
+        color: #a78bfa;
     }
 
     .stat-icon.funcionarios {
-        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-        color: #4f46e5;
+        background: linear-gradient(135deg, rgba(224, 231, 255, 0.2) 0%, rgba(199, 210, 254, 0.2) 100%);
+        color: #818cf8;
     }
 
     .stat-icon.ingresos {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-        color: #059669;
+        background: linear-gradient(135deg, rgba(209, 250, 229, 0.2) 0%, rgba(167, 243, 208, 0.2) 100%);
+        color: #34d399;
     }
 
     .stat-icon.carreras {
-        background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
-        color: #ea580c;
+        background: linear-gradient(135deg, rgba(254, 215, 170, 0.2) 0%, rgba(253, 186, 116, 0.2) 100%);
+        color: #fb923c;
     }
 
     .stat-content {
@@ -137,7 +135,7 @@
     .stat-content h6 {
         font-size: 0.875rem;
         font-weight: 700;
-        color: #64748b;
+        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.8px;
         margin-bottom: 0.5rem;
@@ -146,14 +144,14 @@
     .stat-content h2 {
         font-size: 2.75rem;
         font-weight: 800;
-        color: #1e293b;
+        color: var(--text-main);
         margin: 0;
         line-height: 1;
     }
 
     .stat-content small {
         font-size: 0.8rem;
-        color: #94a3b8;
+        color: var(--text-muted);
         display: flex;
         align-items: center;
         gap: 0.25rem;
@@ -171,22 +169,21 @@
     }
 
     .stat-trend.up {
-        background: #d1fae5;
-        color: #059669;
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
     }
 
     .stat-trend.down {
-        background: #fee2e2;
-        color: #dc2626;
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
     }
 
-    /* Payment Status Section */
     .payment-status-card {
-        background: white;
+        background: var(--card-bg);
         border-radius: var(--border-radius);
         padding: 2.5rem;
         box-shadow: var(--card-shadow);
-        border: 1px solid rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--border-color);
         margin-bottom: 2.5rem;
     }
 
@@ -201,18 +198,18 @@
         width: 50px;
         height: 50px;
         border-radius: 14px;
-        background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+        background: var(--body-bg);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
-        color: #6366f1;
+        color: var(--primary-500);
     }
 
     .section-header h5 {
         font-size: 1.5rem;
         font-weight: 800;
-        color: #1e293b;
+        color: var(--text-main);
         margin: 0;
     }
 
@@ -226,7 +223,7 @@
     }
 
     .status-item {
-        background: linear-gradient(135deg, rgba(248, 250, 252, 0.29) 0%, rgba(241, 245, 249, 0.21) 100%);
+        background: transparent;
         border-radius: 16px;
         padding: 1rem;
         display: flex;
@@ -248,15 +245,15 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: white;
+        background: var(--body-bg);
         opacity: 0;
         transition: var(--transition);
     }
 
     .status-item:hover {
-        border-color: #e2e8f0;
+        border-color: var(--border-color);
         transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        box-shadow: var(--shadow-md);
     }
 
     .status-item:hover::before {
@@ -274,7 +271,7 @@
         font-size: 1.75rem;
         font-weight: 800;
         color: white;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
         position: relative;
         z-index: 1;
     }
@@ -300,23 +297,23 @@
     .status-info h6 {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #1e293b;
+        color: var(--text-main);
         margin: 0 0 0.25rem 0;
     }
 
     .status-info p {
         font-size: 0.9rem;
-        color: #64748b;
+        color: var(--text-muted);
         margin: 0;
         line-height: 1.4;
     }
 
     .recent-payments-card {
-        background: white;
+        background: var(--card-bg);
         border-radius: var(--border-radius);
         padding: 2.5rem;
         box-shadow: var(--card-shadow);
-        border: 1px solid rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--border-color);
     }
 
     .card-header-custom {
@@ -344,13 +341,12 @@
         transition: var(--transition);
         text-decoration: none;
         font-size: 0.95rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
     .btn-primary-custom:hover {
         transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
         color: white;
+        opacity: 0.9;
     }
 
     .btn-primary-custom:active {
@@ -363,18 +359,13 @@
         margin: 0;
     }
 
-    /* Asegura que el contenedor no añada padding que rompa los bordes */
     .table-container {
         border-radius: 14px;
         overflow: hidden;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border-color);
         padding: 0;
         box-sizing: border-box;
     }
-
-
-
-    /* Botón flotante en esquina inferior derecha */
 
     .btn-primary-custom.fab-register {
         position: fixed;
@@ -384,24 +375,23 @@
         border-radius: 100px;
         padding: 0.75rem 1rem;
         font-size: 1.1rem;
-        box-shadow: 0 12px 30px rgba(102, 126, 234, 0);
+        box-shadow: 0 0 0 rgba(255, 255, 255, 0);
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background: rgba(209, 213, 219, 0.05) !important;
+        background: rgba(209, 213, 219, 0) !important;
         transition: transform 0.35s ease, box-shadow 0.35s ease;
         transform-origin: center center;
     }
 
     .btn-primary-custom.fab-register i {
         font-size: 5rem;
-        color: rgba(118, 75, 162, 0.8) !important;
+        color: rgba(53, 133, 182, 0.85);
         display: inline-block;
         transform-origin: center center;
         will-change: transform;
     }
 
-    /* Animación de rotación mientras el cursor está sobre el botón */
     @keyframes spin {
         from { transform: rotate(0deg); }
         to   { transform: rotate(90deg); }
@@ -409,7 +399,7 @@
 
     .btn-primary-custom.fab-register:hover {
         transform: translateY(-6px);
-        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0);
     }
 
     .btn-primary-custom.fab-register:hover i {
@@ -432,18 +422,18 @@
     }
 
     .table-modern thead {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        background: var(--sidebar-bg);
     }
 
     .table-modern thead th {
         padding: 1.25rem 1.5rem;
         font-size: 0.8rem;
         font-weight: 800;
-        color: white;
         text-transform: uppercase;
         letter-spacing: 0.8px;
         text-align: left;
         border: none;
+        color: white;
     }
 
     .table-modern thead th i {
@@ -453,7 +443,8 @@
 
     .table-modern tbody tr {
         transition: var(--transition);
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--border-color);
+        background: transparent;
     }
 
     .table-modern tbody tr:last-child {
@@ -461,38 +452,39 @@
     }
 
     .table-modern tbody tr:hover {
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        background: rgba(102, 126, 234, 0.05);
     }
 
     .table-modern tbody td {
         padding: 1.25rem 1.5rem;
-        color: #334155;
         vertical-align: middle;
         border: none;
+        color: var(--text-main);
     }
 
     .recibo-number {
         font-weight: 800;
-        color: #6366f1;
-        background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+        color: var(--primary-500);
+        background: var(--body-bg);
         padding: 0.5rem 1rem;
         border-radius: 8px;
         font-size: 0.9rem;
         display: inline-block;
+        border: 1px solid var(--border-color);
     }
 
     .alumno-link {
-        color: #1e293b;
         text-decoration: none;
         font-weight: 700;
         transition: var(--transition);
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
+        color: var(--primary-500);
     }
 
     .alumno-link:hover {
-        color: #6366f1;
+        color: var(--primary-400);
         transform: translateX(3px);
     }
 
@@ -507,24 +499,25 @@
     }
 
     .sede-badge {
-        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-        color: #475569;
+        background: var(--body-bg);
+        color: var(--text-muted);
         padding: 0.5rem 1rem;
         border-radius: 10px;
         font-size: 0.85rem;
         font-weight: 600;
         display: inline-block;
+        border: 1px solid var(--border-color);
     }
 
     .fecha-cell {
-        color: #64748b;
+        color: var(--text-muted);
         font-size: 0.95rem;
         font-weight: 500;
     }
 
     .cuota-badge {
-        background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
-        color: #6d28d9;
+        background: linear-gradient(135deg, rgba(221, 214, 254, 0.2) 0%, rgba(196, 181, 253, 0.2) 100%);
+        color: #a78bfa;
         padding: 0.5rem 1rem;
         border-radius: 8px;
         font-weight: 700;
@@ -534,8 +527,12 @@
 
     .importe-cell {
         font-weight: 800;
-        color: #059669;
+        color: #10b981;
         font-size: 1.1rem;
+    }
+
+    [data-theme="dark"] .importe-cell {
+        color: #34d399;
     }
 
     .estrellas-cell {
@@ -664,11 +661,35 @@
         }
 
     }
+    [data-theme="dark"] .stat-card,
+    [data-theme="dark"] .table-modern,
+    [data-theme="dark"] .table-container {
+        border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .status-item:hover::before {
+        background: #334155;
+    }
+
+    [data-theme="dark"] .recibo-number,
+    [data-theme="dark"] .sede-badge {
+        background: #0f172a;
+        border-color: #334155;
+        color: var(--gray-400);
+    }
+
+    [data-theme="dark"] .table-modern thead {
+        background: #0f172a;
+    }
+
+    [data-theme="dark"] .table-modern tbody tr:hover {
+        background: rgba(102, 126, 234, 0.1);
+    }
 </style>
 
 <div class="dashboard-container">
     <!-- Payment Status -->
-    <div class="payment-status-card animate-fade-in">
+    <div class="payment-status-card animate-fade-in mt-5">
         <div class="section-header">
             <div class="section-icon">
                 <i class="bi bi-pie-chart-fill"></i>
@@ -725,7 +746,6 @@
                     <th>Alumno</th>
                     <th>Sede</th>
                     <th>Fecha</th>
-                    <th>Cuota</th>
                     <th>Importe</th>
                 </tr>
                 </thead>
@@ -749,16 +769,13 @@
                     <td class="fecha-cell">
                         {{ pago.fecha|date:"d/m/Y" }}
                     </td>
-                    <td>
-                        <span class="cuota-badge">{{ pago.numero_cuota|default:"0" }}</span>
-                    </td>
                     <td class="importe-cell">
-                        Gs. {{ pago.importe_total_formatted|default:"0" }}
+                        Gs. {{ pago.importe_total|formato_guaranies }}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7">
+                    <td colspan="8">
                         <div class="empty-state">
                             <i class="bi bi-inbox"></i>
                             <p>No hay pagos registrados hoy</p>

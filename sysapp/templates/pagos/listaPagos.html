@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block title %}Pagos - ITS CEP{% endblock %}
 {% block page_title %}Historial de Pagos{% endblock %}
@@ -6,113 +7,129 @@
 {% block content %}
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+    :root {
+        --ink: #0f172a;
+        --muted: #64748b;
+        --line: rgba(148, 163, 184, 0.25);
+        --sand: #f8f5f0;
+        --coral: #f97316;
+        --ember: #ea580c;
+        --sky: #0ea5e9;
+    }
+
+    [data-theme="dark"] {
+        --ink: #f8fafc;
+        --muted: #94a3b8;
+        --line: rgba(255, 255, 255, 0.1);
+        --sand: #0f172a;
+    }
+
+    .stat-card {
+        border-radius: 18px;
+        border: 1px solid var(--border-color);
+        background: var(--card-bg);
+        box-shadow: var(--shadow-md);
+        font-family: 'IBM Plex Sans', sans-serif;
+    }
+
+    .stat-card h2,
+    .stat-card h3,
+    .stat-card th {
+        font-family: 'Space Grotesk', sans-serif;
+    }
+
     .btn-primary-custom.fab-register {
         position: fixed;
         right: 24px;
         bottom: 24px;
         z-index: 1100;
         border-radius: 100px;
-        padding: 0.75rem 1rem;
+        padding: 0.65rem 1.1rem;
         font-size: 1.1rem;
-        box-shadow: 0 12px 30px rgba(102, 126, 234, 0);
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background: rgba(209, 213, 219, 0.05) !important;
         transition: transform 0.35s ease, box-shadow 0.35s ease;
         transform-origin: center center;
     }
 
-    .btn-primary-custom.fab-register i {
-        font-size: 5rem;
-        color: rgba(118, 75, 162, 0.91) !important;
-        display: inline-block;
-        transform-origin: center center;
-        will-change: transform;
-    }
-
-    /* Animación de rotación mientras el cursor está sobre el botón */
     @keyframes spin {
         from { transform: rotate(0deg); }
         to   { transform: rotate(90deg); }
     }
 
-    .btn-primary-custom.fab-register:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+    .btn-primary-custom.fab-register i {
+        font-size: 5rem;
+        color: rgba(53, 133, 182, 0.85);
+        display: inline-block;
+        transform-origin: center center;
+        will-change: transform;
     }
 
-    .btn-primary-custom.fab-register:hover i {
+    .btn-primary-custom.fab-register:hover {
         animation: spin 0.5s linear;
     }
 
-    .btn-primary-custom.fab-register:hover:after i {
-        animation: spin-reverse 0.5s linear;
+    .table thead th {
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.78rem;
     }
 
-    @keyframes spin-reverse {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(-90deg); }
-    }
-
-    @media (max-width: 720px) {
-        .card-header-custom .btn-primary-custom {
-            display: none;
-        }
-    }
-
-    /* Estilos para los botones de acción */
-    .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: center;
+    .table tbody tr:hover {
+        background: rgba(14, 165, 233, 0.05);
     }
 
     .btn-action {
-        padding: 0.375rem 0.75rem;
-        border-radius: 0.375rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 1rem;
-    }
-
-    .btn-action:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        text-decoration: none;
     }
 
     .btn-view {
-        background-color: #3b82f6;
-        color: white;
+        background-color: rgba(14, 165, 233, 0.1);
+        color: var(--sky);
+        border: 1px solid rgba(14, 165, 233, 0.2);
     }
 
     .btn-view:hover {
-        background-color: #2563eb;
-    }
-
-    .btn-edit {
-        background-color: #f59e0b;
+        background-color: var(--sky);
         color: white;
+        transform: translateY(-2px);
+    }
+    [data-theme="dark"] .stat-card {
+        border-color: #334155 !important;
     }
 
-    .btn-edit:hover {
-        background-color: #d97706;
+    [data-theme="dark"] .table-modern thead th {
+        color: var(--gray-400) !important;
     }
 
-    .btn-delete {
-        background-color: #ef4444;
-        color: white;
+    [data-theme="dark"] .table-modern tbody tr:hover {
+        background-color: rgba(148, 163, 184, 0.1) !important;
     }
 
-    .btn-delete:hover {
-        background-color: #dc2626;
+    [data-theme="dark"] .recibo-number,
+    [data-theme="dark"] .sede-badge {
+        background-color: #0f172a !important;
+        border-color: #334155 !important;
+        color: var(--gray-400) !important;
+    }
+    [data-theme="dark"] .badge.bg-info.text-dark {
+        color: #0f172a !important;
     }
 </style>
 
 <!-- Filtros -->
 <div class="row mb-4">
-    <div class="col-md-12">
+    <div class="col-md-12 mt-5">
         <div class="stat-card">
             <form method="get" class="row g-3">
                 <div class="col-md-4">
@@ -120,7 +137,8 @@
                     <select name="sede" class="form-select">
                         <option value="">Todas las sedes</option>
                         {% for sede in sedes %}
-                        <option value="{{ sede.id }}" {% if request.GET.sede == sede.id|stringformat:"s" %}selected{% endif %}>
+                        <option value="{{ sede.id }}" 
+                                {% if request.GET.sede == sede.id|stringformat:"s" %}selected{% endif %}>
                             {{ sede.nombre }}
                         </option>
                         {% endfor %}
@@ -159,7 +177,7 @@
                         <th>Fecha</th>
                         <th>Alumno</th>
                         <th>Sede</th>
-                        <th>Cuota</th>
+                        <th>Cuotas</th>
                         <th>Concepto</th>
                         <th>Importe</th>
                         <th class="text-center">Detalles</th>
@@ -168,30 +186,30 @@
                     <tbody>
                     {% for pago in pagos %}
                     <tr>
-                        <td><strong>{{ pago.numero_recibo }}</strong></td>
+                        <td><strong>{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</strong></td>
                         <td>{{ pago.fecha|date:"d/m/Y" }}</td>
                         <td>
                             {% if pago.es_cliente_diferenciado %}
-                                {{ pago.nombre_cliente }}
-                                <span class="badge bg-info text-dark ms-1" style="font-size: 0.7rem;">
+                            <span class="badge bg-info text-dark ms-1" style="font-size: 0.7rem;">
                                     <i class="bi bi-person-badge"></i> Cliente
                                 </span>
                             {% else %}
-                                <a href="{% url 'detalle_alumno' pago.alumno.id %}">
-                                    {{ pago.alumno.nombre_completo }}
-                                </a>
+                            <a href="{% url 'detalle_alumno' pago.alumno.id %}" class="text-decoration-none">
+                                {{ pago.alumno.nombre_completo }}
+                            </a>
                             {% endif %}
                         </td>
                         <td>{{ pago.sede.nombre }}</td>
-                        <td>{{ pago.numero_cuota }}</td>
+                        <td>{{ pago.numero_cuota|default:"-" }}</td>
                         <td>{{ pago.concepto|truncatewords:5 }}</td>
-                        <td><strong class="text-success">Gs. {{ pago.importe_total|floatformat:0 }}</strong></td>
+                        <td><strong class="text-success">Gs. {{ pago.importe_total|formato_guaranies }}</strong></td>
                         <td>
-                            <div class="action-buttons">
+                            <div class="d-flex justify-content-center">
                                 <a href="{% url 'detalle_pago' pago.id %}"
                                    class="btn-action btn-view"
+                                   data-bs-toggle="tooltip"
                                    title="Ver detalle">
-                                    <i class="bi bi-eye"></i>
+                                    <i class="bi bi-eye-fill"></i>
                                 </a>
                             </div>
                         </td>

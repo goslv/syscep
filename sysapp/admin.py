@@ -2,7 +2,20 @@
 
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Sede, Carrera, Materia, Funcionario, AsistenciaFuncionario, Alumno, Pago
+from .models import Sede, Carrera, Materia, Funcionario, AsistenciaFuncionario, Alumno, Pago, CanjeEstrellas
+
+
+@admin.register(CanjeEstrellas)
+class CanjeEstrellasAdmin(admin.ModelAdmin):
+    list_display = ['alumno', 'cantidad', 'concepto', 'fecha', 'usuario_registro']
+    list_filter = ['fecha', 'usuario_registro']
+    search_fields = ['alumno__nombre', 'alumno__apellido', 'concepto']
+    readonly_fields = ['fecha', 'usuario_registro']
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.usuario_registro = request.user
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Sede)
@@ -167,14 +180,14 @@ class PagoAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Información del Recibo', {
-            'fields': ('numero_recibo', 'foto_recibo', 'preview_foto', 'sede', 'alumno')
+            'fields': ('numero_recibo', 'foto_recibo', 'preview_foto', 'sede', 'alumno', 'carrera')
         }),
         ('Datos del Pago', {
             'fields': (('fecha', 'recibido_de'), 'suma_de', 'concepto', 'curso')
         }),
         ('Detalles de la Cuota', {
             'fields': (('numero_cuota', 'fecha_vencimiento'),
-                       'valido_hasta', ('importe_parcial', 'importe_total'))
+                       'valido_hasta', 'importe_total')
         }),
         ('Información Adicional', {
             'fields': ('recibido_por', ('estrellas', 'fecha_creacion'))
@@ -182,7 +195,11 @@ class PagoAdmin(admin.ModelAdmin):
     )
 
     def alumno_display(self, obj):
-        return obj.alumno.nombre_completo
+        if obj.alumno:
+            return obj.alumno.nombre_completo
+        if obj.nombre_cliente:
+            return obj.nombre_cliente
+        return "Sin especificar"
 
     alumno_display.short_description = 'Alumno'
     alumno_display.admin_order_field = 'alumno__apellido'

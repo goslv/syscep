@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - ITS CEP{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="user-dropdown-avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            {{ user.username|first|upper }}
+                        </div>
+                        <h4 class="mb-0">{{ user.username }}</h4>
+                        <p class="text-muted small">Miembro desde {{ user.date_joined|date:"d/m/Y" }}</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nombre de Usuario</label>
+                            <input type="text" class="form-control bg-light" value="{{ user.username }}" readonly disabled>
+                            <small class="text-muted">El nombre de usuario no se puede cambiar.</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label small fw-bold">Nombre</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label small fw-bold">Apellido</label>
+                                {{ form.last_name }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label small fw-bold">Email</label>
+                            {{ form.email }}
+                        </div>
+
+                        <div class="row justify-content-center gap-5">
+                            <button type="submit" class="btn btn-primary btn-lg col-md-4 mb-3">
+                                Guardar
+                            </button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary col-md-4 mb-3">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <div class="small">
+                        <a href="{% url 'configuracion' %}" class="text-decoration-none">
+                            <i class="bi bi-shield-lock me-1"></i> ¿Deseas cambiar tu contraseña?
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-dropdown-avatar {
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        border-radius: 50%;
+    }
+    [data-theme="dark"] .card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+    }
+    [data-theme="dark"] .bg-light {
+        background-color: var(--body-bg) !important;
+        border-color: var(--border-color);
+        color: var(--text-main);
+    }
+</style>
+{% endblock %}

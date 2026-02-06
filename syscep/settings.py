@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-clave-temporal-desarrollo-cambiar-en-produccion-12
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '192.168.100.102']
 
 # Application definition
 
@@ -57,6 +57,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'sysapp.views.notifications_processor',
             ],
         },
     },

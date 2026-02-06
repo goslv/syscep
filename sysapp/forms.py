@@ -1,6 +1,17 @@
 from django import forms
-from .models import Pago, Alumno, Funcionario, AsistenciaFuncionario, Sede, Carrera, Materia
 from django.contrib.auth.models import User
+
+from .models import (
+    Pago,
+    Alumno,
+    Funcionario,
+    AsistenciaFuncionario,
+    Sede,
+    Carrera,
+    Materia,
+    Egreso,
+)
+
 
 class UsuarioForm(forms.ModelForm):
     password = forms.CharField(
@@ -49,12 +60,23 @@ class UsuarioForm(forms.ModelForm):
         return cleaned_data
 
 
+class PerfilForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
+
+
 class PagoForm(forms.ModelForm):
     # Campo adicional para cliente diferenciado
     es_cliente_diferenciado = forms.BooleanField(
         required=False,
-        label='Cliente Diferenciado',
-        help_text='Marcar si el pago no es de un alumno regular',
+        label='Cliente no regular',
+        help_text='Marcar si el pago no corresponde a un alumno regular',
         widget=forms.CheckboxInput(attrs={
             'class': 'form-check-input',
             'onchange': 'toggleClienteDiferenciado()'
@@ -120,7 +142,7 @@ class PagoForm(forms.ModelForm):
             'class': 'form-control',
             'min': '1',
             'value': '1',
-            'placeholder': 'Número de cuotas a pagar'
+            'placeholder': 'N?mero de cuotas a pagar'
         })
     )
 
@@ -131,6 +153,7 @@ class PagoForm(forms.ModelForm):
             'fecha',
             'alumno',
             'sede',
+            'carrera',
             'numero_cuota',
             'concepto',
             'importe_total',
@@ -140,25 +163,25 @@ class PagoForm(forms.ModelForm):
         widgets = {
             'numero_recibo': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Se generará automáticamente',
-                'readonly': 'readonly'
+                'placeholder': 'Opcional'
             }),
             'fecha': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
             }),
             'alumno': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
+                'class': 'form-select'
             }),
             'sede': forms.Select(attrs={
                 'class': 'form-select',
                 'required': True
             }),
-            'numero_cuota': forms.NumberInput(attrs={
+            'carrera': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'numero_cuota': forms.TextInput(attrs={
                 'class': 'form-control',
-                'min': '1',
-                'placeholder': 'Ej: 1, 2, 3...'
+                'placeholder': 'Ej: 3,4,5'
             }),
             'concepto': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -169,8 +192,7 @@ class PagoForm(forms.ModelForm):
                 'class': 'form-control',
                 'min': '0',
                 'step': '1',
-                'placeholder': 'Monto en Guaraníes',
-                'readonly': 'readonly'
+                'placeholder': 'Monto en Guaraníes'
             }),
             'foto_comprobante': forms.FileInput(attrs={
                 'class': 'form-control',
@@ -187,9 +209,10 @@ class PagoForm(forms.ModelForm):
             'fecha': 'Fecha de Pago',
             'alumno': 'Alumno',
             'sede': 'Sede',
-            'numero_cuota': 'Número de Cuota',
+            'carrera': 'Carrera',
+            'numero_cuota': 'Cuotas',
             'concepto': 'Concepto',
-            'importe_total': 'Importe Total (Gs.)',
+            'importe_total': 'Importe (Gs.)',
             'foto_comprobante': 'Foto del Comprobante',
             'observaciones': 'Observaciones'
         }
@@ -197,20 +220,35 @@ class PagoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Ordenar alumnos alfabéticamente
+        # Ordenar alumnos alfabeticamente
         self.fields['alumno'].queryset = Alumno.objects.all().order_by('apellido', 'nombre')
 
-        # Ordenar sedes alfabéticamente
+        # Ordenar sedes alfabeticamente
         self.fields['sede'].queryset = Sede.objects.all().order_by('nombre')
 
-        # Hacer el número de recibo opcional (se generará automáticamente)
+        # Ordenar carreras alfabeticamente
+        self.fields['carrera'].queryset = Carrera.objects.all().order_by('nombre')
+
+        # Hacer el numero de recibo opcional
         self.fields['numero_recibo'].required = False
+        self.fields['alumno'].required = False
+        self.fields['carrera'].required = False
 
         # Hacer las observaciones y foto opcionales
         self.fields['observaciones'].required = False
         self.fields['foto_comprobante'].required = False
 
-        # Si estamos editando y hay datos previos de cliente diferenciado
+        if self.instance.pk:
+            if self.instance.carrera:
+                self.initial['carrera'] = self.instance.carrera
+            elif self.instance.alumno:
+                self.initial['carrera'] = self.instance.alumno.carrera
+            if self.instance.monto_unitario is not None:
+                self.initial['monto_unitario'] = self.instance.monto_unitario
+            if self.instance.cantidad_cuotas is not None:
+                self.initial['cantidad_cuotas'] = self.instance.cantidad_cuotas
+
+        # Si estamos editando y hay datos previos de cliente no regular
         if self.instance.pk and hasattr(self.instance, 'nombre_cliente'):
             if self.instance.nombre_cliente:
                 self.initial['es_cliente_diferenciado'] = True
@@ -221,31 +259,38 @@ class PagoForm(forms.ModelForm):
                     self.initial['fecha_vencimiento'] = self.instance.fecha_vencimiento
                 if hasattr(self.instance, 'curso'):
                     self.initial['curso'] = self.instance.curso
-                if hasattr(self.instance, 'monto_unitario'):
-                    self.initial['monto_unitario'] = self.instance.monto_unitario
-                if hasattr(self.instance, 'cantidad_cuotas'):
-                    self.initial['cantidad_cuotas'] = self.instance.cantidad_cuotas
 
     def clean(self):
         cleaned_data = super().clean()
         es_cliente_diferenciado = cleaned_data.get('es_cliente_diferenciado')
         alumno = cleaned_data.get('alumno')
+        carrera = cleaned_data.get('carrera')
         nombre_cliente = cleaned_data.get('nombre_cliente')
-        cantidad_cuotas = cleaned_data.get('cantidad_cuotas', 1)
-        monto_unitario = cleaned_data.get('monto_unitario', 0)
+        cantidad_cuotas = cleaned_data.get('cantidad_cuotas') or 1
+        monto_unitario = cleaned_data.get('monto_unitario')
+        importe_total = cleaned_data.get('importe_total')
 
         # Validar que si no es alumno regular, tenga nombre de cliente
         if es_cliente_diferenciado:
             if not nombre_cliente:
                 raise forms.ValidationError('Debe ingresar el nombre del cliente')
-            # Hacer alumno no obligatorio
             cleaned_data['alumno'] = None
         else:
             if not alumno:
                 raise forms.ValidationError('Debe seleccionar un alumno')
 
-        # Calcular importe total si hay monto unitario y cantidad de cuotas
-        if monto_unitario and cantidad_cuotas:
+        if alumno and not carrera:
+            cleaned_data['carrera'] = alumno.carrera
+            carrera = alumno.carrera
+
+        if not monto_unitario and carrera:
+            cleaned_data['monto_unitario'] = carrera.monto_mensualidad
+            monto_unitario = carrera.monto_mensualidad
+
+        cleaned_data['cantidad_cuotas'] = cantidad_cuotas
+
+        # Calcular importe total si no se ingreso y hay monto unitario y cuotas
+        if not importe_total and monto_unitario and cantidad_cuotas:
             cleaned_data['importe_total'] = monto_unitario * cantidad_cuotas
 
         return cleaned_data
@@ -258,9 +303,96 @@ class PagoForm(forms.ModelForm):
 
     def clean_numero_cuota(self):
         numero_cuota = self.cleaned_data.get('numero_cuota')
-        if numero_cuota and numero_cuota <= 0:
-            raise forms.ValidationError('El número de cuota debe ser mayor a 0')
-        return numero_cuota
+        if not numero_cuota:
+            return None
+
+        partes = [parte.strip() for parte in str(numero_cuota).split(',') if parte.strip()]
+        if not partes:
+            return None
+
+        numeros = []
+        for parte in partes:
+            if not parte.isdigit():
+                raise forms.ValidationError('Use solo numeros separados por comas')
+            numero = int(parte)
+            if numero <= 0:
+                raise forms.ValidationError('Los numeros de cuota deben ser mayores a 0')
+            numeros.append(str(numero))
+
+        return ','.join(numeros)
+
+
+# NUEVO FORMULARIO: EGRESO
+class EgresoForm(forms.ModelForm):
+    class Meta:
+        model = Egreso
+        fields = [
+            'numero_comprobante',
+            'fecha',
+            'sede',
+            'categoria',
+            'concepto',
+            'monto',
+            'comprobante',
+            'observaciones'
+        ]
+        widgets = {
+            'numero_comprobante': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Número de factura o comprobante'
+            }),
+            'fecha': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'sede': forms.Select(attrs={
+                'class': 'form-select',
+                'required': True
+            }),
+            'categoria': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'concepto': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Descripción detallada del gasto'
+            }),
+            'monto': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'step': '1',
+                'placeholder': 'Monto en Guaraníes'
+            }),
+            'comprobante': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'observaciones': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Observaciones adicionales (opcional)'
+            })
+        }
+        labels = {
+            'numero_comprobante': 'Número de Comprobante',
+            'fecha': 'Fecha del Gasto',
+            'sede': 'Sede',
+            'categoria': 'Categoría',
+            'concepto': 'Concepto',
+            'monto': 'Monto (Gs.)',
+            'comprobante': 'Comprobante/Factura',
+            'observaciones': 'Observaciones'
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ordenar sedes alfabéticamente
+        self.fields['sede'].queryset = Sede.objects.all().order_by('nombre')
+
+        # Hacer observaciones y comprobante opcionales
+        self.fields['observaciones'].required = False
+        self.fields['comprobante'].required = False
+
 
 class AlumnoForm(forms.ModelForm):
     class Meta:
@@ -337,14 +469,28 @@ class SedeForm(forms.ModelForm):
             'activa': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
+
 class CarreraForm(forms.ModelForm):
     class Meta:
         model = Carrera
-        fields = ['nombre', 'naturalidad', 'duracion_meses', 'descripcion', 'activa']
+        fields = ['nombre', 'naturalidad', 'duracion_meses', 'monto_matricula',
+                  'monto_mensualidad', 'descripcion', 'activa']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'naturalidad': forms.Select(attrs={'class': 'form-select'}),
             'duracion_meses': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+            'monto_matricula': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'step': '1000',
+                'placeholder': 'Ej: 150.000'
+            }),
+            'monto_mensualidad': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'step': '1000',
+                'placeholder': 'Ej: 200.000'
+            }),
             'descripcion': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'activa': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
@@ -353,14 +499,29 @@ class CarreraForm(forms.ModelForm):
 class MateriaForm(forms.ModelForm):
     class Meta:
         model = Materia
-        fields = ['nombre', 'bimestre', 'orden', 'link_classroom', 'docente']
+        fields = ['nombre', 'bimestre', 'orden', 'fecha_examen_parcial', 'fecha_examen_final',
+                  'link_classroom', 'docente']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'bimestre': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '6'}),
             'orden': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+            'fecha_examen_parcial': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+                'placeholder': 'Fecha del examen parcial'
+            }),
+            'fecha_examen_final': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+                'placeholder': 'Fecha del examen final'
+            }),
             'link_classroom': forms.URLInput(
                 attrs={'class': 'form-control', 'placeholder': 'https://classroom.google.com/...'}),
             'docente': forms.Select(attrs={'class': 'form-select'}),
+        }
+        labels = {
+            'fecha_examen_parcial': 'Examen Parcial',
+            'fecha_examen_final': 'Examen Final',
         }
 
     def __init__(self, *args, **kwargs):
@@ -368,3 +529,7 @@ class MateriaForm(forms.ModelForm):
         # Solo mostrar docentes activos
         self.fields['docente'].queryset = Funcionario.objects.filter(cargo='DOCENCIA', activo=True)
         self.fields['docente'].empty_label = "Sin asignar"
+
+        # Hacer fechas opcionales
+        self.fields['fecha_examen_parcial'].required = False
+        self.fields['fecha_examen_final'].required = False

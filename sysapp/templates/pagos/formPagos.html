@@ -6,107 +6,157 @@
 {% block content %}
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+    :root {
+        --ink: #111827;
+        --muted: #6b7280;
+        --line: rgba(148, 163, 184, 0.35);
+        --sand: #f8f5f0;
+        --coral: #f97316;
+        --ember: #ea580c;
+        --leaf: #0f766e;
+        --sky: #0ea5e9;
+    }
+
+    [data-theme="dark"] {
+        --ink: #f8fafc;
+        --muted: #94a3b8;
+        --line: rgba(255, 255, 255, 0.1);
+        --sand: #0f172a;
+    }
+
     .form-card {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: var(--card-bg);
+        border-radius: 18px;
+        padding: 2.25rem;
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--border-color);
+        font-family: 'IBM Plex Sans', sans-serif;
+        color: var(--text-main);
+    }
+
+    .form-card h3,
+    .form-card label,
+    .form-section-title {
+        font-family: 'Space Grotesk', sans-serif;
     }
 
     .form-section {
-        margin-bottom: 2rem;
+        margin-bottom: 2.25rem;
+        padding: 1.5rem;
+        border-radius: 16px;
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
     }
 
     .form-section-title {
-        font-size: 1.25rem;
+        font-size: 1.05rem;
         font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid #e5e7eb;
+        color: var(--text-main);
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.6rem;
+        border-bottom: 2px solid var(--primary-500);
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+    .form-label, label {
+        color: var(--text-main);
+    }
+
+    .form-control, .form-select {
+        background-color: var(--body-bg) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-main) !important;
+    }
+
+    .form-control:focus, .form-select:focus {
+        background-color: var(--card-bg) !important;
+        border-color: var(--primary-400) !important;
     }
 
     .required-field label::after {
         content: " *";
-        color: #ef4444;
+        color: var(--primary-500);
     }
 
     .btn-submit {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-500);
         color: white;
-        padding: 0.75rem 2rem;
+        padding: 0.75rem 2.2rem;
         border: none;
-        border-radius: 8px;
+        border-radius: 999px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        letter-spacing: 0.02em;
     }
 
     .btn-submit:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        box-shadow: var(--shadow-lg);
+        background: var(--primary-600);
+        color: white;
     }
 
     .btn-cancel {
-        background-color: #6b7280;
-        color: white;
+        background-color: var(--gray-800);
+        color: var(--gray-50);
         padding: 0.75rem 2rem;
         border: none;
-        border-radius: 8px;
+        border-radius: 999px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: transform 0.3s ease;
         text-decoration: none;
         display: inline-block;
     }
 
     .btn-cancel:hover {
-        background-color: #4b5563;
         transform: translateY(-2px);
+        background-color: var(--gray-900);
+        color: var(--gray-50);
     }
 
     .image-preview {
-        max-width: 300px;
+        max-width: 320px;
         margin-top: 1rem;
-        border-radius: 8px;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .image-preview img {
-        width: 100%;
-        height: auto;
-        display: block;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
     }
 
     .alert {
-        border-radius: 8px;
-        padding: 1rem;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
         margin-bottom: 1.5rem;
+    }
+
+    .list-group-item {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+    }
+
+    .list-group-item-action:hover {
+        background-color: var(--body-bg);
+        color: var(--text-main);
+    }
+    [data-theme="dark"] .text-muted {
+        color: var(--muted) !important;
     }
 </style>
 
 <div class="row">
-    <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
+    <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2 mt-5">
         <div class="form-card">
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
-            {% endif %}
-
             <form method="post" enctype="multipart/form-data" id="pagoForm">
                 {% csrf_token %}
 
                 <!-- Información General -->
                 <div class="form-section">
-                    <h3 class="form-section-title">
-                        <i class="bi bi-info-circle"></i> Información General
-                    </h3>
-
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <div class="{% if form.numero_recibo.field.required %}required-field{% endif %}">
@@ -115,7 +165,6 @@
                                 {% if form.numero_recibo.errors %}
                                 <div class="text-danger small mt-1">{{ form.numero_recibo.errors }}</div>
                                 {% endif %}
-                                <small class="text-muted">Se generará automáticamente si se deja en blanco</small>
                             </div>
                         </div>
 
@@ -129,13 +178,10 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Datos del Alumno -->
-                <div class="form-section">
-                    <h3 class="form-section-title">
-                        <i class="bi bi-person"></i> Datos del Pagador
-                    </h3>
+
+                    <!-- Datos del Alumno -->
+
 
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -144,26 +190,40 @@
                                 <label class="form-check-label" for="{{ form.es_cliente_diferenciado.id_for_label }}">
                                     {{ form.es_cliente_diferenciado.label }}
                                 </label>
-                                <small class="form-text text-muted d-block">
-                                    {{ form.es_cliente_diferenciado.help_text }}
-                                </small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Campos para Alumno Regular -->
-                    <div id="camposAlumno" class="row">
-                        <div class="col-md-8 mb-3">
+                    <div class="row" id="camposAlumno">
+                        <div class="col-md-12 mb-3">
                             <div class="required-field">
-                                {{ form.alumno.label_tag }}
-                                {{ form.alumno }}
+                                <label for="alumnoSearch">Alumno</label>
+                                <input type="text" id="alumnoSearch" class="form-control" autocomplete="off"
+                                       placeholder="Buscar alumno por nombre o cedula"
+                                       value="{% if pago and pago.alumno %}{{ pago.alumno.nombre_completo }}{% endif %}">
+                                <div id="alumnoResults" class="list-group mt-1" style="display: none;"></div>
+                                <div class="d-none">{{ form.alumno }}</div>
                                 {% if form.alumno.errors %}
                                 <div class="text-danger small mt-1">{{ form.alumno.errors }}</div>
                                 {% endif %}
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-md-4 mb-3">
+                    <div class="row" id="camposClienteNoRegular" style="display: none;">
+                        <div class="col-md-12 mb-3">
+                            <div class="required-field">
+                                {{ form.nombre_cliente.label_tag }}
+                                {{ form.nombre_cliente }}
+                                {% if form.nombre_cliente.errors %}
+                                <div class="text-danger small mt-1">{{ form.nombre_cliente.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
                             <div class="{% if form.sede.field.required %}required-field{% endif %}">
                                 {{ form.sede.label_tag }}
                                 {{ form.sede }}
@@ -172,72 +232,49 @@
                                 {% endif %}
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Campos para Cliente Diferenciado -->
-                    <div id="camposClienteDiferenciado" style="display: none;">
-                        <div class="row">
-                            <div class="col-md-8 mb-3">
-                                <div class="required-field">
-                                    {{ form.nombre_cliente.label_tag }}
-                                    {{ form.nombre_cliente }}
-                                    {% if form.nombre_cliente.errors %}
-                                    <div class="text-danger small mt-1">{{ form.nombre_cliente.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="col-md-4 mb-3">
-                                <div class="{% if form.sede.field.required %}required-field{% endif %}">
-                                    {{ form.sede.label_tag }}
-                                    {{ form.sede }}
-                                    {% if form.sede.errors %}
-                                    <div class="text-danger small mt-1">{{ form.sede.errors }}</div>
-                                    {% endif %}
-                                </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="{% if form.carrera.field.required %}required-field{% endif %}">
+                                {{ form.carrera.label_tag }}
+                                {{ form.carrera }}
+                                {% if form.carrera.errors %}
+                                <div class="text-danger small mt-1">{{ form.carrera.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
-
                     </div>
-                </div>
 
-                <!-- Detalles del Pago -->
-                <div class="form-section">
+
+                    <!-- Detalles del Pago -->
+
                     <h3 class="form-section-title">
                         <i class="bi bi-cash-coin"></i> Detalles del Pago
                     </h3>
 
                     <div class="row">
-                        <div class="col-md-4 mb-3" id="campoNumeroCuota">
+                        <div class="col-md-4 mb-3">
                             <div class="{% if form.numero_cuota.field.required %}required-field{% endif %}">
                                 {{ form.numero_cuota.label_tag }}
                                 {{ form.numero_cuota }}
                                 {% if form.numero_cuota.errors %}
                                 <div class="text-danger small mt-1">{{ form.numero_cuota.errors }}</div>
                                 {% endif %}
+                                <small class="text-muted">Opcional. Ej: 3,4,5</small>
                             </div>
-                            <div class="col">
-                                    {{ form.validez_pago.label_tag }}
-                                    {{ form.validez_pago }}
-                                </div>
-
-                                <div class="col">
-                                    {{ form.fecha_vencimiento.label_tag }}
-                                    {{ form.fecha_vencimiento }}
-                                </div>
                         </div>
 
-                        <!-- Campos para Cliente Diferenciado -->
-                        <div class="col-md-4 mb-3 campo-cliente-dif" style="display: none;">
+                        <div class="col-md-4 mb-3">
                             {{ form.cantidad_cuotas.label_tag }}
                             {{ form.cantidad_cuotas }}
                         </div>
 
-                        <div class="col-md-4 mb-3 campo-cliente-dif" style="display: none;">
+                        <div class="col-md-4 mb-3">
                             {{ form.monto_unitario.label_tag }}
                             {{ form.monto_unitario }}
                         </div>
+                    </div>
 
+                    <div class="row">
                         <div class="col-md-4 mb-3">
                             <div class="{% if form.importe_total.field.required %}required-field{% endif %}">
                                 {{ form.importe_total.label_tag }}
@@ -246,9 +283,19 @@
                                 <div class="text-danger small mt-1">{{ form.importe_total.errors }}</div>
                                 {% endif %}
                                 <small class="text-muted" id="textoCalculoAuto" style="display: none;">
-                                    Se calculará automáticamente
+                                    Se sugiere automaticamente en base a cuotas
                                 </small>
                             </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ form.fecha_vencimiento.label_tag }}
+                            {{ form.fecha_vencimiento }}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ form.validez_pago.label_tag }}
+                            {{ form.validez_pago }}
                         </div>
                     </div>
 
@@ -261,10 +308,9 @@
                             {% endif %}
                         </div>
                     </div>
-                </div>
 
-                <!-- Comprobante y Observaciones -->
-                <div class="form-section">
+                    <!-- Comprobante y Observaciones -->
+
                     <h3 class="form-section-title">
                         <i class="bi bi-paperclip"></i> Comprobante y Observaciones
                     </h3>
@@ -308,7 +354,7 @@
 
                 <!-- Botones -->
                 <div class="d-flex gap-3 justify-content-end mt-4">
-                    <a href="{% url 'lista_pagos' %}" class="btn-cancel">
+                    <a href="{% url 'lista_caja' %}" class="btn-cancel">
                         <i class="bi bi-x-circle"></i> Cancelar
                     </a>
                     <button type="submit" class="btn-submit">
@@ -347,57 +393,126 @@
     function toggleClienteDiferenciado() {
         const checkbox = document.getElementById('{{ form.es_cliente_diferenciado.id_for_label }}');
         const camposAlumno = document.getElementById('camposAlumno');
-        const camposClienteDif = document.getElementById('camposClienteDiferenciado');
-        const campoNumeroCuota = document.getElementById('campoNumeroCuota');
-        const camposClienteDifAdicionales = document.querySelectorAll('.campo-cliente-dif');
+        const camposClienteNoRegular = document.getElementById('camposClienteNoRegular');
         const textoCalculoAuto = document.getElementById('textoCalculoAuto');
-        const inputImporteTotal = document.getElementById('id_importe_total');
+        const alumnoSelect = document.getElementById('id_alumno');
+        const alumnoSearch = document.getElementById('alumnoSearch');
 
         if (checkbox.checked) {
-            // Mostrar campos de cliente diferenciado
             camposAlumno.style.display = 'none';
-            camposClienteDif.style.display = 'block';
-            campoNumeroCuota.style.display = 'none';
-            camposClienteDifAdicionales.forEach(campo => campo.style.display = 'block');
-            textoCalculoAuto.style.display = 'block';
-            inputImporteTotal.readOnly = true;
-
-            // Quitar required del alumno
-            document.getElementById('id_alumno').required = false;
-            document.getElementById('id_nombre_cliente').required = true;
+            camposClienteNoRegular.style.display = 'block';
+            alumnoSelect.required = false;
+            if (alumnoSearch) {
+                alumnoSearch.value = '';
+            }
+            alumnoSelect.value = '';
         } else {
-            // Mostrar campos de alumno regular
-            camposAlumno.style.display = 'flex';
-            camposClienteDif.style.display = 'none';
-            campoNumeroCuota.style.display = 'block';
-            camposClienteDifAdicionales.forEach(campo => campo.style.display = 'none');
-            textoCalculoAuto.style.display = 'none';
-            inputImporteTotal.readOnly = false;
+            camposAlumno.style.display = 'block';
+            camposClienteNoRegular.style.display = 'none';
+            alumnoSelect.required = true;
+        }
 
-            // Restaurar required del alumno
-            document.getElementById('id_alumno').required = true;
-            document.getElementById('id_nombre_cliente').required = false;
+        if (textoCalculoAuto) {
+            textoCalculoAuto.style.display = 'block';
         }
     }
 
-    // Calcular importe total automáticamente para cliente diferenciado
     function calcularImporteTotal() {
-        const checkbox = document.getElementById('{{ form.es_cliente_diferenciado.id_for_label }}');
-        if (checkbox.checked) {
-            const montoUnitario = parseFloat(document.getElementById('id_monto_unitario').value) || 0;
-            const cantidadCuotas = parseInt(document.getElementById('id_cantidad_cuotas').value) || 1;
-            const importeTotal = montoUnitario * cantidadCuotas;
-            document.getElementById('id_importe_total').value = importeTotal;
+        const montoUnitario = parseFloat(document.getElementById('id_monto_unitario').value) || 0;
+        const cantidadCuotas = parseInt(document.getElementById('id_cantidad_cuotas').value || '1', 10);
+        if (montoUnitario && cantidadCuotas) {
+            document.getElementById('id_importe_total').value = montoUnitario * cantidadCuotas;
         }
     }
 
-    // Event listeners
-    document.getElementById('id_monto_unitario').addEventListener('input', calcularImporteTotal);
-    document.getElementById('id_cantidad_cuotas').addEventListener('input', calcularImporteTotal);
+    const carrerasData = JSON.parse('{{ carreras_data|escapejs }}');
+    const carrerasMap = new Map(carrerasData.map(item => [String(item.id), item.monto_mensualidad]));
 
-    // Inicializar estado al cargar la página
+    function aplicarCarrera(carreraId) {
+        const monto = carrerasMap.get(String(carreraId));
+        if (monto !== undefined && monto !== null && monto !== '') {
+            document.getElementById('id_monto_unitario').value = monto;
+            calcularImporteTotal();
+        }
+    }
+
+    function renderResultados(resultados) {
+        const resultsContainer = document.getElementById('alumnoResults');
+        resultsContainer.innerHTML = '';
+        if (!resultados.length) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+
+        resultados.forEach(alumno => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'list-group-item list-group-item-action';
+            item.textContent = `${alumno.nombre_completo} (${alumno.cedula})`;
+            item.addEventListener('click', () => {
+                document.getElementById('id_alumno').value = alumno.id;
+                document.getElementById('alumnoSearch').value = item.textContent;
+                if (alumno.sede_id) {
+                    document.getElementById('id_sede').value = alumno.sede_id;
+                }
+                if (alumno.carrera_id) {
+                    document.getElementById('id_carrera').value = alumno.carrera_id;
+                    aplicarCarrera(alumno.carrera_id);
+                }
+                resultsContainer.style.display = 'none';
+            });
+            resultsContainer.appendChild(item);
+        });
+        resultsContainer.style.display = 'block';
+    }
+
+    async function buscarAlumnos(query) {
+        const response = await fetch(`/buscar-alumno/?q=${encodeURIComponent(query)}`);
+        if (!response.ok) return [];
+        const data = await response.json();
+        return data.resultados || [];
+    }
+
+    function debounce(fn, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn.apply(this, args), wait);
+        };
+    }
+
     window.addEventListener('DOMContentLoaded', function() {
         toggleClienteDiferenciado();
+
+        const alumnoSearch = document.getElementById('alumnoSearch');
+        const alumnoSelect = document.getElementById('id_alumno');
+        const carreraSelect = document.getElementById('id_carrera');
+
+        if (alumnoSearch) {
+            alumnoSearch.addEventListener('input', debounce(async () => {
+                const query = alumnoSearch.value.trim();
+                if (query.length < 2) {
+                    renderResultados([]);
+                    if (!query) {
+                        alumnoSelect.value = '';
+                    }
+                    return;
+                }
+                const resultados = await buscarAlumnos(query);
+                renderResultados(resultados);
+            }, 250));
+        }
+
+        if (carreraSelect) {
+            carreraSelect.addEventListener('change', () => {
+                if (carreraSelect.value) {
+                    aplicarCarrera(carreraSelect.value);
+                }
+            });
+        }
+
+        document.getElementById('id_monto_unitario').addEventListener('input', calcularImporteTotal);
+        document.getElementById('id_cantidad_cuotas').addEventListener('input', calcularImporteTotal);
     });
 
     // Vista previa de imagen
@@ -417,7 +532,7 @@
         }
     });
 
-    // Validación del formulario
+    // Validacion del formulario
     document.getElementById('pagoForm').addEventListener('submit', function(e) {
         const importe = document.getElementById('id_importe_total').value;
         if (parseFloat(importe) <= 0) {
@@ -427,5 +542,6 @@
         }
     });
 </script>
+
 
 {% endblock %}

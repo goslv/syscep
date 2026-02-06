@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Lista de Egresos - ITS CEP{% endblock %}
+{% block page_title %}Gestión de Egresos{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+    :root {
+        --ink: #0f172a;
+        --muted: #64748b;
+        --line: rgba(148, 163, 184, 0.25);
+        --danger: #ef4444;
+        --card-bg: #ffffff;
+        --border-color: rgba(148, 163, 184, 0.2);
+    }
+
+    [data-theme="dark"] {
+        --ink: #f8fafc;
+        --muted: #94a3b8;
+        --line: rgba(255, 255, 255, 0.1);
+        --card-bg: #0f172a;
+        --border-color: #1e293b;
+        --bg-light: #1e293b;
+    }
+
+    .stat-card {
+        border-radius: 18px;
+        border: 1px solid var(--border-color);
+        background: var(--card-bg);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        font-family: 'IBM Plex Sans', sans-serif;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .egreso-summary-card {
+        background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%) !important;
+        color: white !important;
+        border: none;
+    }
+
+    [data-theme="dark"] .egreso-summary-card {
+        background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%) !important;
+        color: white !important;
+    }
+
+    .table thead th {
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.75rem;
+        font-family: 'Space Grotesk', sans-serif;
+        color: var(--muted);
+        border-bottom: 2px solid var(--border-color);
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(244, 63, 94, 0.03);
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        margin: 0 4px;
+        border: 1px solid transparent;
+    }
+
+    .btn-view { 
+        background-color: rgba(59, 130, 246, 0.1); 
+        color: #3b82f6;
+        border-color: rgba(59, 130, 246, 0.2);
+    }
+    .btn-edit { 
+        background-color: rgba(245, 158, 11, 0.1); 
+        color: #f59e0b;
+        border-color: rgba(245, 158, 11, 0.2);
+    }
+    .btn-delete { 
+        background-color: rgba(239, 68, 68, 0.1); 
+        color: #ef4444;
+        border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .btn-view:hover { background-color: #3b82f6; color: white; }
+    .btn-edit:hover { background-color: #f59e0b; color: white; }
+    .btn-delete:hover { background-color: #ef4444; color: white; }
+
+    .fab-register {
+        position: fixed;
+        right: 32px;
+        bottom: 32px;
+        z-index: 1000;
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        background: #f43f5e;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.4);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .fab-register:hover {
+        transform: rotate(90deg);
+        background: #e11d48;
+        color: white;
+        box-shadow: 0 20px 25px -5px rgba(244, 63, 94, 0.15);
+    }
+
+    [data-theme="dark"] .table tbody tr:hover {
+        background: rgba(244, 63, 94, 0.02);
+    }
+
+    [data-theme="dark"] .bg-light {
+        background-color: #1e293b !important;
+    }
+
+    [data-theme="dark"] .text-dark {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .badge.bg-light {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+    }
+
+    .badge-categoria {
+        font-weight: 500;
+        padding: 0.5em 0.8em;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Resumen -->
+    <div class="row mb-4 mt-5">
+        <div class="col-md-6">
+            <div class="stat-card egreso-summary-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-1 opacity-75">Total Egresos</p>
+                        <h3 class="mb-0 fw-bold">Gs. {{ total_egresos|formato_guaranies }}</h3>
+                    </div>
+                    <div class="fs-1 opacity-50">
+                        <i class="bi bi-graph-down-arrow"></i>
+                    </div>
+                </div>
+                <div class="mt-3 small">
+                    <i class="bi bi-journal-text"></i> {{ egresos|length }} registros encontrados
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 d-flex align-items-center justify-content-end gap-2 no-print">
+            <a href="{% url 'lista_caja' %}" class="btn btn-outline-primary rounded-pill">
+                <i class="bi bi-cash-register"></i> Panel de Caja
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary rounded-pill">
+                <i class="bi bi-printer"></i> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <div class="stat-card no-print shadow-sm">
+        <h6 class="mb-3 fw-bold"><i class="bi bi-filter-right"></i> Filtros de Búsqueda</h6>
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Sede</label>
+                <select name="sede" class="form-select border-0 bg-light rounded-3">
+                    <option value="">Todas las sedes</option>
+                    {% for s in sedes %}
+                    <option value="{{ s.id }}" {% if filtros.sede == s.id|slugify %}selected{% endif %}>
+                        {{ s.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Categoría</label>
+                <select name="categoria" class="form-select border-0 bg-light rounded-3">
+                    <option value="">Todas</option>
+                    {% for codigo, nombre in categorias %}
+                    <option value="{{ codigo }}" {% if filtros.categoria == codigo %}selected{% endif %}>
+                        {{ nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Desde</label>
+                <input type="date" name="fecha_desde" class="form-control border-0 bg-light rounded-3" value="{{ filtros.fecha_desde }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Hasta</label>
+                <input type="date" name="fecha_hasta" class="form-control border-0 bg-light rounded-3" value="{{ filtros.fecha_hasta }}">
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1 rounded-3">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+                <a href="{% url 'lista_egresos' %}" class="btn btn-light rounded-3" title="Limpiar">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="stat-card p-0 overflow-hidden w-100">
+        <div class="table-responsive w-100">
+            <table class="table table-hover align-middle mb-0 w-100" style="table-layout: fixed;">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4" style="width: 120px;">Fecha</th>
+                        <th style="width: 200px;">Sede</th>
+                        <th>Concepto</th>
+                        <th class="text-end pe-4" style="width: 180px;">Monto</th>
+                        <th class="text-center" style="width: 150px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for egreso in egresos %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-medium">{{ egreso.fecha|date:"d/m/Y" }}</div>
+                        </td>
+                        <td class="text-truncate">
+                            <span class="text-muted small"><i class="bi bi-geo-alt"></i></span> {{ egreso.sede.nombre }}
+                        </td>
+                        <td>
+                            <div class="text-truncate" title="{{ egreso.concepto }}">
+                                {{ egreso.concepto }}
+                            </div>
+                        </td>
+                        <td class="text-end pe-4">
+                            <span class="text-danger fw-bold">Gs. {{ egreso.monto|formato_guaranies }}</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center">
+                                <a href="{% url 'detalle_egreso' egreso.id %}" class="btn-action btn-view" title="Ver Detalle">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                                <a href="{% url 'editar_egreso' egreso.id %}" class="btn-action btn-edit" title="Editar">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                                <button type="button" class="btn-action btn-delete" title="Eliminar"
+                                        onclick="confirmarEliminacion('{{ egreso.id }}', '{{ egreso.numero_comprobante }}')">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="opacity-25 mb-3">
+                                <i class="bi bi-inbox" style="font-size: 4rem;"></i>
+                            </div>
+                            <h5 class="text-muted">No se encontraron egresos</h5>
+                            <p class="text-muted small">Intenta ajustar los filtros de búsqueda.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% if egresos %}
+                <tfoot class="bg-light fw-bold border-top">
+                    <tr>
+                        <td colspan="3" class="text-end ps-4 py-3">TOTAL ACUMULADO</td>
+                        <td class="text-end pe-4 py-3">
+                            <span class="text-danger fs-5">Gs. {{ total_egresos|formato_guaranies }}</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Botón flotante -->
+<a href="{% url 'registrar_egreso' %}" class="fab-register no-print" title="Registrar nuevo egreso">
+    <i class="bi bi-plus-lg"></i>
+</a>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="modalEliminar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar el egreso con comprobante <strong id="comprobanteEliminar"></strong>?</p>
+                <div class="alert alert-warning small mb-0">
+                    <i class="bi bi-info-circle"></i> Esta acción no se puede deshacer y afectará el balance de caja.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formEliminar" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="bi bi-trash"></i> Eliminar Egreso
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmarEliminacion(egresoId, numeroComprobante) {
+    document.getElementById('comprobanteEliminar').textContent = numeroComprobante;
+    document.getElementById('formEliminar').action = `/egresos/${egresoId}/eliminar/`;
+    new bootstrap.Modal(document.getElementById('modalEliminar')).show();
+}
+</script>
+{% endblock %}

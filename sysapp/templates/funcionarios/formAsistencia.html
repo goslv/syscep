@@ -1,16 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ titulo }} - SysCEP{% endblock %}
+{% block title %}{{ titulo }} - ITS CEP{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row mt-5">
     <div class="col-md-8 mx-auto">
         <div class="stat-card">
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> <strong>Registrar Asistencia Diaria</strong><br>
-                Marca la asistencia de los funcionarios para el día seleccionado. Esta información se usará para la liquidación de salarios de los docentes.
-            </div>
 
             <form method="post">
                 {% csrf_token %}

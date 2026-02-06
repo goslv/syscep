@@ -4,14 +4,37 @@
 {% block page_title %}{{ titulo }}{% endblock %}
 
 {% block content %}
+<style>
+    .stat-card {
+        border-radius: 18px;
+        border: 1px solid var(--border-color);
+        background: var(--card-bg);
+        box-shadow: var(--shadow-md);
+        padding: 2.5rem;
+    }
+    .form-control, .form-select {
+        background-color: var(--body-bg) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-main) !important;
+    }
+    .form-control:focus, .form-select:focus {
+        background-color: var(--card-bg) !important;
+        border-color: var(--primary-400) !important;
+    }
+    .form-label, h5 {
+        color: var(--text-main);
+    }
+    .form-check-label {
+        color: var(--text-main);
+    }
+</style>
 <div class="row">
-    <div class="col-md-10 mx-auto">
+    <div class="col-md-10 mx-auto mt-5">
         <div class="stat-card">
             <form method="post">
                 {% csrf_token %}
 
                 <!-- Información Personal -->
-                <h5 class="mb-3">Información Personal</h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <label class="form-label">Nombre *</label>
@@ -27,21 +50,21 @@
                             <div class="text-danger">{{ form.apellido.errors }}</div>
                         {% endif %}
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Cédula *</label>
                         {{ form.cedula }}
                         {% if form.cedula.errors %}
                             <div class="text-danger">{{ form.cedula.errors }}</div>
                         {% endif %}
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Fecha de Nacimiento *</label>
                         {{ form.fecha_nacimiento }}
                         {% if form.fecha_nacimiento.errors %}
                             <div class="text-danger">{{ form.fecha_nacimiento.errors }}</div>
                         {% endif %}
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Teléfono *</label>
                         {{ form.telefono }}
                         {% if form.telefono.errors %}
@@ -49,9 +72,6 @@
                         {% endif %}
                     </div>
                 </div>
-
-                <!-- Información Académica -->
-                <h5 class="mb-3">Información Académica</h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <label class="form-label">Sede *</label>
@@ -86,21 +106,21 @@
                 <!-- Contacto de Emergencia -->
                 <h5 class="mb-3">Contacto de Emergencia</h5>
                 <div class="row g-3 mb-4">
-                    <div class="col-md-12">
+                    <div class="col-md-4">
                         <label class="form-label">Nombre del Contacto</label>
                         {{form.contacto_emergencia_nombre}}
                         {% if form.contacto_emergencia_nombre.errors %}
                             <div class="text-danger">{{ form.contacto_emergencia_nombre.errors }}</div>
                         {% endif %}
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Teléfono de Emergencia *</label>
                         {{form.contacto_emergencia_telefono}}
                         {% if form.contacto_emergencia_telefono.errors %}
                             <div class="text-danger">{{ form.contacto_emergencia_telefono.errors }}</div>
                         {% endif %}
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Relación</label>
                         {{form.contacto_emergencia_relacion}}
                         {% if form.contacto_emergencia_relacion.errors %}
@@ -124,10 +144,10 @@
                 <!-- Botones -->
                 <div class="d-flex justify-content-between">
                     <a href="{% url 'lista_alumnos' %}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Cancelar
+                        Cancelar
                     </a>
                     <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-circle"></i> {{ boton }}
+                        {{ boton }}
                     </button>
                 </div>
             </form>

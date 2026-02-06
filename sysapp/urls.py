@@ -17,7 +17,19 @@ urlpatterns = [
     path('alumnos/crear/', views.crear_alumno, name='crear_alumno'),
     path('alumnos/<int:alumno_id>/', views.detalle_alumno, name='detalle_alumno'),
     path('alumnos/<int:alumno_id>/editar/', views.editar_alumno, name='editar_alumno'),
+    path('alumnos/<int:alumno_id>/canjear-estrellas/', views.canjear_estrellas, name='canjear_estrellas'),
     path('buscar-alumno/', views.buscar_alumno, name='buscar_alumno'),
+
+    # Caja (Ingresos y Egresos)
+    path('caja/', views.lista_caja, name='lista_caja'),
+    path('caja/informe/', views.informe_caja, name='informe_caja'),
+
+    # Egresos
+    path('egresos/', views.lista_egresos, name='lista_egresos'),
+    path('egresos/registrar/', views.registrar_egreso, name='registrar_egreso'),
+    path('egresos/<int:egreso_id>/', views.detalle_egreso, name='detalle_egreso'),
+    path('egresos/<int:egreso_id>/editar/', views.editar_egreso, name='editar_egreso'),
+    path('egresos/<int:egreso_id>/eliminar/', views.eliminar_egreso, name='eliminar_egreso'),
 
     # Pagos
     path('pagos/', views.lista_pagos, name='lista_pagos'),
@@ -44,10 +56,15 @@ urlpatterns = [
     path('carreras/<int:carrera_id>/materias/crear/', views.crear_materia, name='crear_materia'),
     path('materias/<int:materia_id>/editar/', views.editar_materia, name='editar_materia'),
     path('materias/<int:materia_id>/asignar-docente/', views.asignar_docente, name='asignar_docente'),
+    path('materias/<int:materia_id>/asignar-fechas/', views.asignar_fechas, name='asignar_fechas'),
 
     # Usuarios
     path('usuarios/', views.lista_usuarios, name='lista_usuarios'),
+    path('usuarios/solicitudes-eliminacion/', views.lista_solicitudes_eliminacion, name='lista_solicitudes_eliminacion'),
+    path('usuarios/solicitudes-eliminacion/<int:solicitud_id>/procesar/', views.procesar_solicitud_eliminacion, name='procesar_solicitud_eliminacion'),
     path('usuarios/crear/', views.crear_usuario, name='crear_usuario'),
+    path('usuarios/perfil/', views.mi_perfil, name='mi_perfil'),
+    path('usuarios/configuracion/', views.configuracion, name='configuracion'),
     path('usuarios/<int:usuario_id>/editar/', views.editar_usuario, name='editar_usuario'),
     path('usuarios/<int:usuario_id>/cambiar-estado/', views.cambiar_estado_usuario, name='cambiar_estado_usuario'),
 ]

@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 
+
 class Sede(models.Model):
     nombre = models.CharField(max_length=200, verbose_name="Nombre")
     direccion = models.TextField(verbose_name="Dirección")
@@ -23,12 +24,28 @@ class Sede(models.Model):
         """Retorna la rendición del día para esta sede"""
         if fecha is None:
             fecha = timezone.now().date()
+
+        # Ingresos (Pagos)
         pagos = self.pagos.filter(fecha=fecha)
+        total_ingresos = pagos.aggregate(models.Sum('importe_total'))['importe_total__sum'] or 0
+
+        # Egresos
+        egresos = self.egresos.filter(fecha=fecha)
+        total_egresos = egresos.aggregate(models.Sum('monto'))['monto__sum'] or 0
+
+        # Balance
+        balance = total_ingresos - total_egresos
+
         return {
-            'total': pagos.aggregate(models.Sum('importe_total'))['importe_total__sum'] or 0,
+            'total_ingresos': total_ingresos,
+            'total_egresos': total_egresos,
+            'balance': balance,
             'cantidad_pagos': pagos.count(),
-            'pagos': pagos
+            'cantidad_egresos': egresos.count(),
+            'pagos': pagos,
+            'egresos': egresos
         }
+
 
 class Carrera(models.Model):
     NATURALIDAD_CHOICES = [
@@ -40,6 +57,20 @@ class Carrera(models.Model):
     naturalidad = models.CharField(max_length=2, choices=NATURALIDAD_CHOICES, verbose_name="Tipo")
     duracion_meses = models.IntegerField(help_text="Duración total en meses", verbose_name="Duración (meses)")
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
+    monto_matricula = models.DecimalField(
+        max_digits=10,
+        decimal_places=0,
+        default=0,
+        verbose_name="Monto Matrícula (Gs.)",
+        help_text="Costo de matrícula de la carrera"
+    )
+    monto_mensualidad = models.DecimalField(
+        max_digits=10,
+        decimal_places=0,
+        default=0,
+        verbose_name="Mensualidad (Gs.)",
+        help_text="Costo mensual de la carrera"
+    )
     activa = models.BooleanField(default=True, verbose_name="Activa")
 
     class Meta:
@@ -49,9 +80,6 @@ class Carrera(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.get_naturalidad_display()})"
-
-    def get_naturalidad_display(self):
-        pass
 
 
 class Materia(models.Model):
@@ -64,6 +92,20 @@ class Materia(models.Model):
     docente = models.ForeignKey('Funcionario', on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='materias_asignadas', verbose_name="Docente",
                                 limit_choices_to={'cargo': 'DOCENCIA', 'activo': True})
+
+    # EXÁMENES
+    fecha_examen_parcial = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha Examen Parcial",
+        help_text="Fecha del examen parcial de la materia"
+    )
+    fecha_examen_final = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha Examen Final",
+        help_text="Fecha del examen final de la materia"
+    )
 
     class Meta:
         verbose_name = "Materia"
@@ -98,10 +140,6 @@ class Funcionario(models.Model):
         verbose_name_plural = "Funcionarios"
         ordering = ['apellido', 'nombre']
 
-    def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(args, kwargs)
-        self.asistencias = None
-
     def __str__(self):
         return f"{self.nombre} {self.apellido} - {self.get_cargo_display()}"
 
@@ -116,9 +154,6 @@ class Funcionario(models.Model):
         if anio is None:
             anio = timezone.now().year
         return self.asistencias.filter(fecha__month=mes, fecha__year=anio)
-
-    def get_cargo_display(self):
-        pass
 
 
 class AsistenciaFuncionario(models.Model):
@@ -195,31 +230,39 @@ class Alumno(models.Model):
 
     @property
     def total_estrellas(self):
-        """Calcula el total de estrellas acumuladas"""
-        return self.pagos.aggregate(models.Sum('estrellas'))['estrellas__sum'] or 0
+        """Calcula el total de estrellas acumuladas (acumuladas - canjeadas)"""
+        acumuladas = self.pagos.aggregate(models.Sum('estrellas'))['estrellas__sum'] or 0
+        canjeadas = self.canjes.aggregate(models.Sum('cantidad'))['cantidad__sum'] or 0
+        return acumuladas - canjeadas
 
 
 class Pago(models.Model):
     sede = models.ForeignKey(Sede, on_delete=models.CASCADE, related_name='pagos', verbose_name="Sede")
-    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name='pagos', verbose_name="Alumno")
+    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name='pagos',
+                               verbose_name="Alumno", null=True, blank=True)
+    carrera = models.ForeignKey(Carrera, on_delete=models.SET_NULL, related_name='pagos',
+                                verbose_name="Carrera", null=True, blank=True)
 
-    numero_recibo = models.CharField(max_length=50, unique=True, verbose_name="Nº de Recibo")
+    numero_recibo = models.CharField(max_length=50, unique=True, null=True, blank=True,
+                                     verbose_name="N? de Recibo")
     foto_recibo = models.ImageField(upload_to='recibos/%Y/%m/', blank=True, null=True, verbose_name="Foto del Recibo")
 
     fecha = models.DateField(default=timezone.now, verbose_name="Fecha")
-    recibido_de = models.CharField(max_length=200, verbose_name="Recibido de")
-    suma_de = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="La suma de")
+    recibido_de = models.CharField(max_length=200, verbose_name="Recibido de", blank=True, null=True)
+    suma_de = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="La suma de",
+                                  blank=True, null=True)
     concepto = models.TextField(verbose_name="En concepto de")
-    curso = models.CharField(max_length=100, verbose_name="Curso")
+    curso = models.CharField(max_length=100, verbose_name="Curso", blank=True, null=True)
 
     valido_hasta = models.DateField(null=True, blank=True, verbose_name="Válido hasta")
-    fecha_vencimiento = models.DateField(verbose_name="Fecha de Vencimiento")
-    numero_cuota = models.IntegerField(validators=[MinValueValidator(1)], verbose_name="Nº de Cuota")
+    fecha_vencimiento = models.DateField(verbose_name="Fecha de Vencimiento", null=True, blank=True)
+    numero_cuota = models.CharField(max_length=50, verbose_name="N? de Cuota",
+                                    null=True, blank=True,
+                                    help_text="Ej: 1 o 3,4,5")
 
-    importe_parcial = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="Importe Parcial")
     importe_total = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="Importe Total")
 
-    recibido_por = models.CharField(max_length=200, verbose_name="Recibido por")
+    recibido_por = models.CharField(max_length=200, verbose_name="Recibido por", blank=True, null=True)
 
     # Sistema de estrellas (se calcula automáticamente)
     estrellas = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name="Estrellas")
@@ -241,13 +284,15 @@ class Pago(models.Model):
     usuario_registro = models.ForeignKey('auth.User', on_delete=models.SET_NULL,
                                          null=True, blank=True,
                                          help_text='Usuario que registró el pago')
+
     class Meta:
-        ordering = ['-fecha', '-numero_cuota']
+        ordering = ['-fecha', '-id']
         verbose_name = "Pago"
         verbose_name_plural = "Pagos"
 
     def __str__(self):
-        return f"Recibo {self.numero_recibo} - {self.alumno.nombre_completo} - Cuota {self.numero_cuota}"
+        numero = self.numero_recibo or "sin recibo"
+        return f"Pago {numero} - {self.nombre_pagador}"
 
     def calcular_estrellas(self):
         """Calcula las estrellas según la fecha de pago vs vencimiento"""
@@ -285,14 +330,128 @@ class Pago(models.Model):
             return self.alumno.nombre_completo
         return 'Sin especificar'
 
+
+# NUEVO MODELO: EGRESOS
+class CanjeEstrellas(models.Model):
+    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name='canjes', verbose_name="Alumno")
+    cantidad = models.IntegerField(validators=[MinValueValidator(1)], verbose_name="Cantidad de Estrellas")
+    concepto = models.CharField(max_length=200, verbose_name="Concepto/Premio")
+    fecha = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Canje")
+    usuario_registro = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Canje de Estrellas"
+        verbose_name_plural = "Canjes de Estrellas"
+        ordering = ['-fecha']
+
     def __str__(self):
-        return f"Pago {self.numero_recibo} - {self.nombre_pagador}"
+        return f"{self.alumno.nombre_completo} - {self.cantidad} ⭐ - {self.concepto}"
+
+
+class Egreso(models.Model):
+    CATEGORIA_CHOICES = [
+        ('SERVICIOS', 'Servicios (Luz, Agua, Internet)'),
+        ('SUELDOS', 'Sueldos y Salarios'),
+        ('MATERIALES', 'Materiales y Suministros'),
+        ('MANTENIMIENTO', 'Mantenimiento'),
+        ('ALQUILER', 'Alquiler'),
+        ('IMPUESTOS', 'Impuestos y Tasas'),
+        ('OTROS', 'Otros Gastos'),
+    ]
+
+    sede = models.ForeignKey(
+        Sede,
+        on_delete=models.CASCADE,
+        related_name='egresos',
+        verbose_name="Sede"
+    )
+    numero_comprobante = models.CharField(
+        max_length=50,
+        verbose_name="Nº de Comprobante",
+        help_text="Número de factura o comprobante"
+    )
+    fecha = models.DateField(
+        default=timezone.now,
+        verbose_name="Fecha"
+    )
+    categoria = models.CharField(
+        max_length=20,
+        choices=CATEGORIA_CHOICES,
+        verbose_name="Categoría"
+    )
+    concepto = models.TextField(
+        verbose_name="Concepto",
+        help_text="Descripción detallada del gasto"
+    )
+    monto = models.DecimalField(
+        max_digits=10,
+        decimal_places=0,
+        verbose_name="Monto (Gs.)",
+        validators=[MinValueValidator(0)]
+    )
+    comprobante = models.ImageField(
+        upload_to='egresos/%Y/%m/',
+        blank=True,
+        null=True,
+        verbose_name="Comprobante"
+    )
+    usuario_registro = models.ForeignKey(
+        'auth.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Registrado por"
+    )
+    observaciones = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Observaciones"
+    )
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha de Registro"
+    )
 
     class Meta:
         ordering = ['-fecha', '-id']
-        verbose_name = 'Pago'
-        verbose_name_plural = 'Pagos'
+        verbose_name = "Egreso"
+        verbose_name_plural = "Egresos"
 
+    def __str__(self):
+        return f"Egreso {self.numero_comprobante} - {self.concepto[:30]} - Gs. {self.monto:,.0f}"
 
-class Max:
-    pass
+class SolicitudEliminacion(models.Model):
+    MODELO_CHOICES = [
+        ('PAGO', 'Pago'),
+        ('EGRESO', 'Egreso'),
+        ('ALUMNO', 'Alumno'),
+        ('CARRERA', 'Carrera'),
+        ('MATERIA', 'Materia'),
+        ('FUNCIONARIO', 'Funcionario'),
+        ('SEDE', 'Sede'),
+    ]
+
+    ESTADO_CHOICES = [
+        ('PENDIENTE', 'Pendiente'),
+        ('APROBADO', 'Aprobado'),
+        ('RECHAZADO', 'Rechazado'),
+    ]
+
+    usuario_solicita = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='solicitudes_eliminacion')
+    modelo = models.CharField(max_length=20, choices=MODELO_CHOICES)
+    objeto_id = models.PositiveIntegerField()
+    motivo = models.TextField(verbose_name="Motivo de la eliminación")
+    fecha_solicitud = models.DateTimeField(auto_now_add=True)
+    estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='PENDIENTE')
+    usuario_decide = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='decisiones_eliminacion')
+    fecha_decision = models.DateTimeField(null=True, blank=True)
+    observaciones_decision = models.TextField(blank=True, null=True)
+    datos_objeto = models.JSONField(help_text="Copia de los datos del objeto para mostrar en la notificación", null=True, blank=True)
+
+    class Meta:
+        ordering = ['-fecha_solicitud']
+        verbose_name = "Solicitud de Eliminación"
+        verbose_name_plural = "Solicitudes de Eliminación"
+
+    def __str__(self):
+        return f"Solicitud de {self.usuario_solicita.username} - {self.get_modelo_display()} (ID: {self.objeto_id})"

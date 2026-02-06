@@ -34,12 +34,1386 @@
 
     <!-- Estilos base -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}" media="print">
 
     {% block extra_css %}{% endblock %}
 </head>
+
+<style>
+    :root {
+
+        /* Colores Primarios (Basados en el Logo) */
+        --primary-50: #e6f7ff;
+        --primary-100: #bae7ff;
+        --primary-200: #91d5ff;
+        --primary-300: #69c0ff;
+        --primary-400: #40a9ff;
+        --primary-500: #00bfff; /* Azul claro del logo */
+        --primary-600: #1b3a4b; /* Azul oscuro del logo */
+        --primary-700: #0050b3;
+        --primary-800: #003a8c;
+        --primary-900: #002766;
+
+        /* Colores de Estado */
+        --success-light: #d1fae5;
+        --success: #10b981;
+        --success-dark: #059669;
+        --warning-light: #fef3c7;
+        --warning: #f59e0b;
+        --warning-dark: #d97706;
+        --danger-light: #fee2e2;
+        --danger: #ef4444;
+        --danger-dark: #dc2626;
+        --info-light: #dbeafe;
+        --info: #3b82f6;
+        --info-dark: #2563eb;
+
+        /* Colores Neutros */
+        --gray-50: rgba(249, 250, 251, 0.22);
+        --gray-100: rgba(243, 244, 246, 0.22);
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+
+        /* Sidebar */
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 80px;
+        --sidebar-bg: linear-gradient(180deg, #1b3a4b 0%, #2e6481 50%, #1b2c4b 100%);
+        --sidebar-hover: rgba(255, 255, 255, 0.08);
+        --sidebar-active: rgba(255, 255, 255, 0.15);
+
+        --topbar-height: 70px;
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 16px;
+        --border-radius-xl: 24px;
+
+        /* Shadows */
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+        /* Transitions */
+        --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+        --card-bg: #ffffff;
+        --body-bg: #f3f4f6;
+        --text-main: var(--gray-800);
+        --text-muted: var(--gray-500);
+        --border-color: var(--gray-200);
+    }
+
+    [data-theme="dark"] .dropdown-menu {
+        background: var(--card-bg);
+        border-color: var(--border-color);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="dark"] .dropdown-item {
+        color: var(--text-main);
+    }
+
+    [data-theme="dark"] .dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    [data-theme="dark"] .form-control,
+    [data-theme="dark"] .form-select {
+        background: #1e293b;
+        color: #f1f5f9;
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .form-control:focus,
+    [data-theme="dark"] .form-select:focus {
+        background: #1e293b;
+        color: #f1f5f9;
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 0.25rem rgba(0, 191, 255, 0.25);
+    }
+
+    [data-theme="dark"] .form-control::placeholder {
+        color: #94a3b8;
+        opacity: 0.7;
+    }
+
+    [data-theme="dark"] label.form-label {
+        color: #e2e8f0;
+    }
+
+    /* Tablas */
+    [data-theme="dark"] .table {
+        --bs-table-bg: transparent;
+        --bs-table-color: var(--text-main);
+        --bs-table-border-color: var(--border-color);
+        --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+        --bs-table-hover-bg: rgba(255, 255, 255, 0.04);
+        color: var(--text-main);
+    }
+
+    [data-theme="dark"] .table td,
+    [data-theme="dark"] .table th {
+        background-color: transparent !important;
+        color: var(--text-main) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    [data-theme="dark"] .table thead th {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: var(--text-muted) !important;
+    }
+
+    [data-theme="dark"] .table-responsive {
+        background-color: transparent !important;
+    }
+
+    /* Modal */
+    [data-theme="dark"] .modal-content {
+        background: var(--card-bg);
+        color: var(--text-main);
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .modal-header,
+    [data-theme="dark"] .modal-footer {
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    [data-theme="dark"] {
+        --gray-50: rgba(15, 23, 42, 0.6);
+        --gray-100: #0f172a;
+        --gray-200: #1f2937;
+        --gray-300: #334155;
+        --gray-400: #94a3b8;
+        --gray-500: #cbd5f5;
+        --gray-600: #e2e8f0;
+        --gray-700: #e5e7eb;
+        --gray-800: #f1f5f9;
+        --gray-900: #f8fafc;
+
+        --sidebar-bg: linear-gradient(180deg, #0b1220 0%, #1f2937 50%, #0b1220 100%);
+        --card-bg: #1e293b;
+        --body-bg: #0f172a;
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+        --border-color: #334155;
+
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+    }
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--text-main);
+        background: var(--body-bg);
+        overflow-x: hidden;
+        transition: background-color var(--transition-normal), color var(--transition-normal);
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--gray-300);
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--gray-400);
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: var(--sidebar-width);
+        background: var(--sidebar-bg);
+        color: white;
+        overflow: hidden;
+        z-index: 1050;
+        transition: width var(--transition-normal), transform var(--transition-normal);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar-brand {
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        flex-shrink: 0;
+    }
+
+    .brand-logo {
+        width: 48px;
+        height: 48px;
+        background: transparent;
+        border-radius: var(--border-radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .brand-info {
+        overflow: hidden;
+        transition: opacity var(--transition-normal);
+    }
+
+    .brand-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        white-space: nowrap;
+    }
+
+    .brand-tagline {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .sidebar-nav {
+        flex: 1;
+        padding: 1rem 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .nav-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .nav-section-title {
+        padding: 0.5rem 1.5rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        white-space: nowrap;
+    }
+
+    .nav-item {
+        position: relative;
+        margin: 0.25rem 0.75rem;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 0.85rem 1rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        border-radius: var(--border-radius-md);
+        transition: all var(--transition-fast);
+        gap: 0.875rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 0;
+        background: var(--primary-400);
+        border-radius: 0 3px 3px 0;
+        transition: height var(--transition-fast);
+    }
+
+    .nav-link:hover {
+        background: var(--sidebar-hover);
+        color: white;
+    }
+
+    .nav-link.active {
+        background: var(--sidebar-active);
+        color: white;
+    }
+
+    .nav-link.active::before {
+        height: 60%;
+    }
+
+    .nav-link i {
+        font-size: 1.25rem;
+        width: 24px;
+        text-align: center;
+        flex-shrink: 0;
+        transition: transform var(--transition-fast);
+    }
+
+    .nav-link:hover i {
+        transform: scale(1.1);
+    }
+
+    .nav-link span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .nav-badge {
+        margin-left: auto;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        border-radius: 20px;
+        background: var(--danger);
+        color: white;
+    }
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: var(--border-radius-md);
+        transition: background var(--transition-fast);
+        cursor: pointer;
+    }
+
+    .user-profile:hover {
+        background: var(--sidebar-hover);
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-400), var(--primary-600));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .user-info {
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .user-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-role {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .sidebar-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+        margin: 0.75rem 1.25rem;
+    }
+
+    .main-content {
+        margin-left: var(--sidebar-width);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: margin-left var(--transition-normal);
+    }
+
+    .top-bar {
+        background: var(--card-bg) !important;
+        height: var(--topbar-height);
+        padding: 0 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--shadow-sm);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        gap: 25rem;
+    }
+
+    .top-bar-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .menu-toggle {
+        display: none;
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: rgba(248, 248, 248, 0.07);
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        font-size: 1.25rem;
+        color: var(--gray-600);
+        transition: all var(--transition-fast);
+    }
+
+    .menu-toggle:hover {
+        background: var(--gray-200);
+        color: var(--gray-800);
+    }
+
+    .page-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .breadcrumb-nav a {
+        color: var(--primary-500);
+        text-decoration: none;
+        transition: color var(--transition-fast);
+    }
+
+    .breadcrumb-nav a:hover {
+        color: var(--primary-400);
+    }
+
+    .breadcrumb-nav i {
+        font-size: 0.6rem;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .search-box input {
+        width: 100%;
+        height: 44px;
+        padding: 0 1rem 0 2.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius-lg);
+        background: var(--body-bg);
+        font-size: 0.9rem;
+        color: var(--text-main);
+        transition: all var(--transition-fast);
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: var(--primary-400);
+        background: var(--card-bg);
+        box-shadow: 0 0 0 4px var(--primary-50);
+    }
+
+    .search-box input::placeholder {
+        color: var(--gray-400);
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-400);
+        font-size: 1rem;
+    }
+
+    .search-shortcut {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 0.2rem 0.5rem;
+        background: var(--gray-200);
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--gray-500);
+    }
+
+    .top-bar{
+        top: 0;
+        position: fixed;
+        width: calc(100% - var(--sidebar-width));
+        background: var(--gray-200);
+    }
+
+    .top-bar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .top-bar-btn {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        border: none;
+        background: transparent;
+        border-radius: var(--border-radius-md);
+        cursor: pointer;
+        font-size: 1.25rem;
+        color: var(--text-muted);
+        transition: all var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .top-bar-btn:hover, .top-bar-btn.active {
+        background: var(--body-bg);
+        color: var(--text-main);
+    }
+
+    .top-bar-btn .notification-dot {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 10px;
+        height: 10px;
+        background: var(--danger);
+        border-radius: 50%;
+        border: 2px solid var(--card-bg);
+        animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    .divider-vertical {
+        width: 1px;
+        height: 30px;
+        background: var(--gray-200);
+        margin: 0 0.5rem;
+    }
+
+    .user-dropdown {
+        position: relative;
+    }
+
+    .user-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem;
+        border: none;
+        background: transparent;
+        border-radius: var(--border-radius-md);
+        cursor: pointer;
+        transition: background var(--transition-fast);
+    }
+
+    .user-dropdown-toggle:hover {
+        background: var(--gray-100);
+    }
+
+    .user-dropdown-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .user-dropdown-info {
+        text-align: left;
+    }
+
+    .user-dropdown-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-main);
+    }
+
+    .user-dropdown-role {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .content-wrapper {
+        flex: 1;
+        padding: 2rem;
+    }
+
+    .alert-custom {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        border-radius: var(--border-radius-md);
+        border: none;
+        margin-bottom: 1rem;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert-custom.alert-success {
+        background: var(--success-light);
+        color: var(--success-dark);
+    }
+
+    .alert-custom.alert-warning {
+        background: var(--warning-light);
+        color: var(--warning-dark);
+    }
+
+    .alert-custom.alert-danger, .alert-custom.alert-error {
+        background: var(--danger-light);
+        color: var(--danger-dark);
+    }
+
+    .alert-custom.alert-info {
+        background: var(--info-light);
+        color: var(--info-dark);
+    }
+
+    .alert-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .alert-success .alert-icon { background: var(--success); color: white; }
+    .alert-warning .alert-icon { background: var(--warning); color: white; }
+    .alert-danger .alert-icon, .alert-error .alert-icon { background: var(--danger); color: white; }
+    .alert-info .alert-icon { background: var(--info); color: white; }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .alert-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .alert-custom .btn-close {
+        opacity: 0.5;
+        transition: opacity var(--transition-fast);
+    }
+
+    .alert-custom .btn-close:hover {
+        opacity: 1;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius-lg);
+        padding: 1.75rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: var(--border-radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        transition: transform var(--transition-fast);
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+    }
+
+    .badge-al-dia {
+        background: linear-gradient(135deg, var(--success), var(--success-dark));
+        color: white;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-por-vencer {
+        background: linear-gradient(135deg, var(--warning), var(--warning-dark));
+        color: white;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-atrasado {
+        background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+        color: white;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .btn {
+        font-weight: 500;
+        border-radius: var(--border-radius-sm);
+        transition: all var(--transition-fast);
+        padding: 0.6rem 1.25rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+        border: none;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--success), var(--success-dark));
+        border: none;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+        border: none;
+    }
+
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table thead th {
+        background: rgba(239, 239, 239, 0.07);
+        border-bottom: 2px solid var(--border-color);
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+    }
+
+    .table tbody td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-main);
+        vertical-align: middle;
+    }
+
+    .table tbody tr {
+        transition: background var(--transition-fast);
+    }
+
+    .table tbody tr:hover {
+        background: var(--primary-50);
+    }
+
+    .form-control, .form-select {
+        border: 2px solid var(--gray-200);
+        border-radius: var(--border-radius-sm);
+        padding: 0.65rem 1rem;
+        transition: all var(--transition-fast);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-400);
+        box-shadow: 0 0 0 4px var(--primary-50);
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-normal);
+    }
+
+    .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    @media (max-width: 1024px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .main-content {
+            margin-left: 0;
+        }
+
+        .menu-toggle {
+            display: flex;
+        }
+
+        .search-box {
+            display: none;
+        }
+
+        .user-dropdown-info {
+            display: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .top-bar {
+            padding: 0 1rem;
+        }
+
+        .content-wrapper {
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+        }
+
+        .breadcrumb-nav {
+            display: none;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .animate-fadeIn {
+        animation: fadeIn 0.5s ease;
+    }
+
+    .animate-slideIn {
+        animation: slideInRight 0.4s ease;
+    }
+
+    .text-gradient {
+        background: linear-gradient(135deg, #4763b1 0%, #00afef 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hover-lift {
+        transition: transform var(--transition-fast);
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-2px);
+    }
+
+    .fab-container {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 1000;
+    }
+
+    .fab-button {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4763b1 0%, #00afef 100%);
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .fab-button::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(0);
+        border-radius: 50%;
+        transition: transform 0.5s ease;
+    }
+
+    .fab-button:hover::before {
+        transform: scale(1);
+    }
+
+    .fab-button:hover {
+        transform: translateY(-4px) scale(1.05);
+    }
+
+    .fab-button:active {
+        transform: translateY(-2px) scale(0.98);
+    }
+
+    .fab-menu {
+        position: absolute;
+        bottom: 80px;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .fab-container.active .fab-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .fab-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .fab-menu-item:hover .fab-menu-button {
+        transform: translateX(-4px);
+    }
+
+    .fab-menu-label {
+        background: white;
+        color: #1e293b;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        white-space: nowrap;
+        opacity: 0;
+        transform: translateX(10px);
+        transition: all 0.3s ease;
+    }
+
+    .fab-container.active .fab-menu-label {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .fab-menu-button {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: white;
+        border: none;
+        background: linear-gradient(135deg, #4763b1 0%, #00afef 100%);
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .fab-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(2px);
+    }
+
+    .fab-container.active ~ .fab-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    @media (max-width: 768px) {
+        .fab-container {
+            bottom: 1.5rem;
+            right: 1.5rem;
+        }
+
+        .fab-button {
+            width: 56px;
+            height: 56px;
+            font-size: 1.3rem;
+        }
+    }
+
+    .nav-item.has-submenu > .nav-link {
+        position: relative;
+    }
+
+    .submenu-arrow {
+        font-size: 0.75rem;
+        transition: transform var(--transition-fast);
+        margin-left: auto;
+    }
+
+    .nav-link[aria-expanded="true"] .submenu-arrow {
+        transform: rotate(180deg);
+    }
+
+    .submenu-link {
+        display: flex;
+        align-items: center;
+        padding: 0.65rem 1rem 0.65rem 3rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: none;
+        border-radius: var(--border-radius-sm);
+        transition: all var(--transition-fast);
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        margin: 0.1rem 0.75rem;
+    }
+
+    .submenu-link i {
+        font-size: 1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .submenu-link:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.9);
+        padding-left: 3.25rem;
+    }
+
+    .submenu-link.active {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-weight: 500;
+    }
+
+    .nav-badge {
+        margin-left: auto;
+        padding: 0.15rem 0.5rem;
+        font-size: 0.65rem;
+        font-weight: 600;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--warning), var(--warning-dark));
+        color: white;
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-normal);
+        backdrop-filter: blur(2px);
+    }
+
+    .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    @media (max-width: 1024px) {
+        .sidebar {
+            transform: translateX(-100%);
+            z-index: 1050;
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .main-content {
+            margin-left: 0;
+        }
+
+        .menu-toggle {
+            display: flex;
+        }
+
+        .search-box {
+            max-width: 200px;
+        }
+
+        .user-dropdown-info {
+            display: none;
+        }
+
+        .content-wrapper {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .top-bar {
+            padding: 0 1rem;
+            height: 60px;
+        }
+
+        .content-wrapper {
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+        }
+
+        .search-box {
+            display: none;
+        }
+
+        .stat-card {
+            padding: 1.25rem;
+        }
+    }
+
+    /* Contenedor de notificaciones flotantes */
+    .notifications-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        width: 350px;
+        max-width: 90vw;
+    }
+
+    .notifications-container .alert {
+        box-shadow: var(--shadow-lg);
+        border: none;
+        margin-bottom: 10px;
+        animation: slideInRight 0.3s ease-out;
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .notification-item.fade-out {
+        animation: slideOutRight 0.3s ease-out forwards;
+    }
+
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .user-dropdown-toggle {
+            padding: 0.25rem;
+        }
+
+        .top-bar-btn {
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
+        }
+
+        .divider-vertical {
+            display: none;
+        }
+    }
+    /* Estilos adicionales para componentes mejorados */
+    .theme-toggle-btn i {
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] .theme-toggle-btn i {
+        transform: rotate(360deg);
+    }
+
+    .notification-panel {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 320px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-xl);
+        display: none;
+        z-index: 9999;
+        overflow: hidden;
+    }
+
+    .notification-panel.show {
+        display: block;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .notification-item {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s;
+        cursor: pointer;
+        display: flex;
+        gap: 12px;
+        align-items: start;
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        border-left: none;
+        border-right: none;
+    }
+
+    .notification-item:hover {
+        background: var(--body-bg);
+    }
+
+    .notification-item.is-read {
+        opacity: 0.6;
+    }
+
+    .notification-empty {
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--gray-500);
+    }
+
+    /* Mejora de transiciones globales */
+    body {
+        transition: background-color var(--transition-normal), color var(--transition-normal);
+    }
+
+    .main-content, .sidebar, .top-bar, .stat-card {
+        transition: background var(--transition-normal), border var(--transition-normal), box-shadow var(--transition-normal);
+    }
+    @keyframes spin-once {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .animate-spin-once {
+        animation: spin-once 0.5s ease-in-out;
+    }
+</style>
 <body>
-<!-- Skip to main content for accessibility -->
-<a href="#main-content" class="skip-to-main">Saltar al contenido principal</a>
 
 <!-- Overlay para móvil -->
 <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
@@ -48,7 +1422,7 @@
 <aside class="sidebar" id="sidebar" aria-label="Menú principal de navegación">
     <div class="sidebar-brand" role="banner">
         <div class="brand-logo" aria-hidden="true">
-            🎓
+            <img src="{% static 'img/logo.png' %}" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
         </div>
         <div class="brand-info">
             <h1 class="brand-name">ITS CEP</h1>
@@ -59,13 +1433,11 @@
     <nav class="sidebar-nav" aria-label="Menú lateral">
         <!-- Sección Principal -->
         <div class="nav-section">
-            <div class="nav-section-title">Principal</div>
             <div class="nav-item">
                 <a href="{% url 'dashboard' %}"
-                   class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
-                   {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>
-                <i class="bi bi-grid-1x2-fill" aria-hidden="true"></i>
-                <span>Inicio</span>
+                   class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="bi bi-grid-1x2-fill" aria-hidden="true"></i>
+                    <span>Inicio</span>
                 </a>
             </div>
         </div>
@@ -73,67 +1445,77 @@
         <!-- Sección Gestión -->
         <div class="nav-section">
             <div class="nav-section-title">Gestión</div>
+
+            <!-- Alumnos -->
             <div class="nav-item">
                 <a href="{% url 'lista_alumnos' %}"
-                   class="nav-link {% if 'alumno' in request.resolver_match.url_name %}active{% endif %}"
-                   {% if alumno in request.resolver_match.url_name %}aria-current="page"{% endif %}>
-                <i class="bi bi-people-fill" aria-hidden="true"></i>
-                <span>Alumnos</span>
+                   class="nav-link {% if 'alumno' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-people-fill" aria-hidden="true"></i>
+                    <span>Alumnos</span>
                 </a>
             </div>
+
+            <!-- Caja -->
             <div class="nav-item">
-                <a href="{% url 'lista_pagos' %}"
-                   class="nav-link {% if 'pago' in request.resolver_match.url_name %}active{% endif %}"
-                   {% if pago in request.resolver_match.url_name %}aria-current="page"{% endif %}>
-                <i class="bi bi-wallet2" aria-hidden="true"></i>
-                <span>Pagos</span>
-                {% if pagos_pendientes %}
-                <span class="nav-badge">{{ pagos_pendientes }}</span>
-                {% endif %}
+                <a href="{% url 'lista_caja' %}"
+                   class="nav-link {% if 'caja' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-cash-stack" aria-hidden="true"></i>
+                    <span>Caja</span>
                 </a>
             </div>
+
+            {% if user.is_staff %}
+            <!-- Funcionarios -->
             <div class="nav-item">
                 <a href="{% url 'lista_funcionarios' %}"
-                   class="nav-link {% if 'funcionario' in request.resolver_match.url_name %}active{% endif %}"
-                   {% if funcionario in request.resolver_match.url_name %}aria-current="page"{% endif %}>
-                <i class="bi bi-person-badge-fill" aria-hidden="true"></i>
-                <span>Funcionarios</span>
+                   class="nav-link {% if 'funcionario' in request.resolver_match.url_name or 'asistencia' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-person-badge-fill" aria-hidden="true"></i>
+                    <span>Funcionarios</span>
                 </a>
             </div>
+            {% endif %}
         </div>
 
         <!-- Sección Académico -->
         <div class="nav-section">
             <div class="nav-section-title">Académico</div>
+            {% if user.is_staff %}
             <div class="nav-item">
                 <a href="{% url 'lista_sedes' %}"
-                   class="nav-link {% if 'sede' in request.resolver_match.url_name %}active{% endif %}"
-                   {% if sede in request.resolver_match.url_name %}aria-current="page"{% endif %}>
-                <i class="bi bi-building" aria-hidden="true"></i>
-                <span>Sedes</span>
+                   class="nav-link {% if 'sede' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-building" aria-hidden="true"></i>
+                    <span>Sedes</span>
                 </a>
             </div>
+            {% endif %}
             <div class="nav-item">
                 <a href="{% url 'lista_carreras' %}"
-                   class="nav-link {% if 'carrera' in request.resolver_match.url_name %}active{% endif %}"
-                   {% if carrera in request.resolver_match.url_name %}aria-current="page"{% endif %}>
-                <i class="bi bi-mortarboard-fill" aria-hidden="true"></i>
-                <span>Carreras</span>
+                   class="nav-link {% if 'carrera' in request.resolver_match.url_name or 'materia' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-mortarboard-fill" aria-hidden="true"></i>
+                    <span>Carreras</span>
                 </a>
             </div>
         </div>
-        <div class="sidebar-divider"></div>
 
-        <!-- Sección Sistema -->
-        <div class="nav-section">
-            <div class="nav-section-title">Sistema</div>
-            <div class="nav-item">
-                <a href="/admin" class="nav-link" target="_blank">
-                    <i class="bi bi-gear-fill" aria-hidden="true"></i>
-                    <span>Administración</span>
-                </a>
+
+            {% if user.is_staff %}
+            <div class="nav-section">
+                <div class="nav-section-title">Sistema</div>
+                <div class="nav-item">
+                    <a href="{% url 'lista_usuarios' %}"
+                       class="nav-link {% if 'usuario' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-person-lock" aria-hidden="true"></i>
+                        <span>Usuarios</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/admin" class="nav-link" target="_blank">
+                        <i class="bi bi-gear-fill" aria-hidden="true"></i>
+                        <span>Django Admin</span>
+                    </a>
+                </div>
             </div>
-        </div>
+            {% endif %}
     </nav>
 </aside>
 
@@ -141,51 +1523,117 @@
 <main class="main-content" id="main-content" role="main">
     <!-- Top Bar -->
     <header class="top-bar" role="banner">
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" type="button">
+            <i class="bi bi-list"></i>
+        </button>
+
         <div class="search-box">
             <i class="bi bi-search" aria-hidden="true"></i>
             <input type="text" placeholder="Buscar alumnos, pagos, carreras..." id="globalSearch" aria-label="Buscar en el sistema">
         </div>
 
         <div class="top-bar-right">
-            <button class="top-bar-btn" id="themeToggle" aria-label="Cambiar tema">
+            <button class="top-bar-btn theme-toggle-btn" id="themeToggle" title="Cambiar tema" type="button">
                 <i class="bi bi-moon"></i>
             </button>
-            <button class="top-bar-btn" title="Notificaciones" aria-label="Notificaciones">
-                <i class="bi bi-bell"></i>
-                <span class="notification"></span>
-            </button>
-            <button class="top-bar-btn" title="Ayuda" aria-label="Ayuda">
+            <div class="position-relative d-inline-block">
+                <button class="top-bar-btn" id="notificationsToggle" title="Notificaciones" aria-label="Notificaciones" aria-expanded="false" type="button">
+                    <i class="bi bi-bell"></i>
+                    {% if total_notificaciones > 0 %}
+                    <span class="notification-dot" aria-hidden="true"></span>
+                    {% endif %}
+                </button>
+                <div class="notification-panel" id="notificationPanel" role="menu">
+                    <div class="notification-panel-header">
+                        <div>
+                            <strong>Notificaciones</strong>
+                            <span class="notification-count" id="notificationCount">{{ total_notificaciones }}</span>
+                        </div>
+                        <button class="btn btn-sm btn-link notification-clear" id="notificationsClear" type="button">Marcar todo</button>
+                    </div>
+                    <div class="notification-list" id="notificationList">
+                        {% for nota in examenes_proximos %}
+                        <div class="notification-item unread"
+                             data-id="{{ nota.id|default:'' }}"
+                             data-type="{{ nota.tipo }}"
+                             data-materia="{{ nota.materia }}"
+                             data-carrera="{{ nota.carrera }}"
+                             data-fecha="{{ nota.fecha|date:'d/m/Y' }}"
+                             data-icon="{{ nota.icon }}"
+                             data-color="{{ nota.color }}"
+                             data-url="{% if nota.carrera_id %}{% url 'detalle_carrera' nota.carrera_id %}{% elif nota.url_notif %}{% url nota.url_notif %}{% endif %}"
+                             {% if nota.es_solicitud %}
+                             data-es-solicitud="true"
+                             data-solicitud-id="{{ nota.solicitud_id }}"
+                             data-motivo="{{ nota.motivo }}"
+                             data-url-procesar="{{ nota.url_procesar }}"
+                             data-datos-objeto='{{ nota.datos_objeto|json_script:"temp"|safe }}'
+                             {% endif %}
+                             onclick="if(window.notificationManager) window.notificationManager.handleClick(this);">
+                            <div class="notification-item-icon {{ nota.color }}">
+                                <i class="bi {{ nota.icon }}"></i>
+                            </div>
+                            <div class="notification-item-content">
+                                <div class="notification-item-title d-flex justify-content-between">
+                                    <span>{{ nota.tipo }}</span>
+                                    <span class="badge bg-light text-dark border-0 small" style="font-size: 0.65rem;">Ver detalle</span>
+                                </div>
+                                <div class="notification-item-text">
+                                    {{ nota.materia }} - {{ nota.carrera }}
+                                </div>
+                                <div class="notification-item-time">
+                                    <i class="bi bi-calendar"></i> {{ nota.fecha|date:"d/m/Y" }}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="notification-empty" id="notificationEmpty">
+                            <i class="bi bi-bell-slash mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                            <p class="mb-0">No hay notificaciones nuevas</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="notification-panel-footer text-center border-top py-2">
+                        <button class="btn btn-sm btn-link text-decoration-none" id="btnHistorialNotif">
+                            <i class="bi bi-clock-history me-1"></i> Ver notificaciones anteriores
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button class="top-bar-btn" id="helpToggle" title="Ayuda" aria-label="Ayuda" data-bs-toggle="modal" data-bs-target="#helpModal">
                 <i class="bi bi-question-circle"></i>
             </button>
 
             <div class="divider-vertical"></div>
 
-            <div class="user-dropdown">
-                <button class="user-dropdown-toggle" id="userDropdownToggle" aria-expanded="false" aria-haspopup="true">
+            <div class="user-dropdown dropdown">
+                <button class="user-dropdown-toggle" id="userDropdownToggle" aria-expanded="false" type="button">
                     <div class="user-dropdown-avatar">
                         {{ user.username|first|upper }}
                     </div>
                     <div class="user-dropdown-info">
                         <div class="user-dropdown-name">{{ user.username }}</div>
-                        <div class="user-dropdown-role">{% if user.is_superuser %}Admin{% else %}Usuario{% endif %}</div>
                     </div>
                     <i class="bi bi-chevron-down" style="color: var(--gray-400);" aria-hidden="true"></i>
                 </button>
-                <div class="dropdown-menu-custom" id="userDropdownMenu" aria-labelledby="userDropdownToggle">
-                    <a href="#" class="dropdown-item-custom">
-                        <i class="bi bi-person" aria-hidden="true"></i>
-                        Mi Perfil
-                    </a>
-                    <a href="#" class="dropdown-item-custom">
-                        <i class="bi bi-gear" aria-hidden="true"></i>
-                        Configuración
-                    </a>
-                    <div class="dropdown-divider-custom"></div>
-                    <a href="{% url 'logout' %}" class="dropdown-item-custom danger">
-                        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-                        Cerrar Sesión
-                    </a>
-                </div>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" id="userDropdownMenu" aria-labelledby="userDropdownToggle">
+                    <li>
+                        <button type="button" class="dropdown-item py-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#perfilModal">
+                            <i class="bi bi-person me-2"></i> Mi Perfil
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item py-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#configuracionModal">
+                            <i class="bi bi-gear me-2"></i> Configuración
+                        </button>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a href="{% url 'logout' %}" class="dropdown-item py-2 d-flex align-items-center text-danger">
+                            <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </header>
@@ -193,38 +1641,25 @@
     <!-- Content -->
     <div class="content-wrapper animate-fadeIn">
         <!-- Sistema de notificaciones mejorado -->
-        <div id="notifications-container" class="notifications-container"></div>
-
-        <!-- Messages -->
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert-custom alert-{{ message.tags }} alert-dismissible fade show alert-auto-close"
-             role="alert"
-             data-alert-id="{{ forloop.counter }}">
-            <div class="alert-icon">
-                {% if message.tags == 'success' %}
-                <i class="bi bi-check-lg"></i>
-                {% elif message.tags == 'warning' %}
-                <i class="bi bi-exclamation-lg"></i>
-                {% elif message.tags == 'danger' or message.tags == 'error' %}
-                <i class="bi bi-x-lg"></i>
-                {% else %}
-                <i class="bi bi-info-lg"></i>
-                {% endif %}
-            </div>
-            <div class="alert-content">
-                <div class="alert-title">
-                    {% if message.tags == 'success' %}¡Éxito!
-                    {% elif message.tags == 'warning' %}Advertencia
-                    {% elif message.tags == 'danger' or message.tags == 'error' %}Error
-                    {% else %}Información{% endif %}
-                </div>
-                {{ message }}
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        <div id="notifications-container" class="notifications-container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {% if message.tags == 'success' %}
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                        {% else %}
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
         </div>
-        {% endfor %}
-        {% endif %}
 
         <!-- Loading overlay -->
         <div class="loading-overlay" id="loadingOverlay" style="display: none;">
@@ -232,13 +1667,270 @@
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Cargando...</span>
                 </div>
-                <p class="mt-3">Cargando...</p>
+                <p class="mt-3 fw-bold">Cargando...</p>
+            </div>
+        </div>
+
+        <!-- Modal Detalle Notificación -->
+        <div class="modal fade" id="modalDetalleNotif" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow-lg border-0 rounded-4 ">
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="notifTitle">Detalle de Notificación</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body pt-3" id="notifBody">
+                        <!-- Contenido dinámico -->
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0" id="notifFooter">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Historial Notificaciones -->
+        <div class="modal fade" id="modalHistorialNotif" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content shadow-lg border-0 rounded-4">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Historial de Notificaciones</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="list-group list-group-flush" id="historialList">
+                            <!-- Historial dinámico -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill" id="btnClearHistorial">
+                            <i class="bi bi-trash me-1"></i> Borrar Historial
+                        </button>
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
             </div>
         </div>
 
         {% block content %}{% endblock %}
     </div>
 </main>
+
+<!-- Modal Mi Perfil -->
+<div class="modal fade" id="perfilModal" tabindex="-1" aria-labelledby="perfilModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title" id="perfilModalLabel">Mi Perfil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <div class="text-center mb-4">
+                    <div class="user-dropdown-avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <h4 class="mb-0 text-main">{{ user.username }}</h4>
+                    <p class="text-muted small">Miembro desde {{ user.date_joined|date:"d/m/Y" }}</p>
+                </div>
+
+                <form method="post" action="{% url 'mi_perfil' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-main">Nombre de Usuario</label>
+                        <input type="text" class="form-control bg-light text-muted" value="{{ user.username }}" readonly disabled>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-main">Nombre</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-main">Apellido</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-main">Email</label>
+                        <input type="email" name="email" class="form-control" value="{{ user.email }}">
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Configuración -->
+<div class="modal fade" id="configuracionModal" tabindex="-1" aria-labelledby="configuracionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="configuracionModalLabel text-main"><i class="bi bi-gear-fill me-2"></i>Configuración</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalPasswordSectionHeader" class="text-center mb-3">
+                    <button type="button" class="btn btn-outline-dark w-100 py-3" id="modalBtnTogglePassword">
+                        <i class="bi bi-shield-lock me-2"></i> Cambiar contraseña
+                    </button>
+                </div>
+
+                <div id="modalPasswordFormContainer" class="d-none">
+                    <form method="post" action="{% url 'configuracion' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <!-- Nota: Los campos se renderizarán manualmente o simplificados ya que PasswordChangeForm es complejo -->
+                        <p class="small text-muted mb-3">Para cambiar tu contraseña, introduce la actual y luego la nueva dos veces.</p>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-main">Contraseña actual</label>
+                            <input type="password" name="old_password" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-main">Nueva contraseña</label>
+                            <input type="password" name="new_password1" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-main">Confirmar nueva contraseña</label>
+                            <input type="password" name="new_password2" class="form-control" required>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-dark">
+                                Actualizar Contraseña
+                            </button>
+                            <button type="button" class="btn btn-link text-muted" id="modalBtnCancelPassword">
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <hr class="my-4">
+
+                <h6 class="mb-3 text-main"><i class="bi bi-palette me-2"></i>Preferencias de Visualización</h6>
+                <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded">
+                    <span class="text-main">Tema Oscuro / Claro</span>
+                    <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('themeToggle').click()">
+                        Alternar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnToggle = document.getElementById('modalBtnTogglePassword');
+    const btnCancel = document.getElementById('modalBtnCancelPassword');
+    const container = document.getElementById('modalPasswordFormContainer');
+    const header = document.getElementById('modalPasswordSectionHeader');
+
+    if (btnToggle && btnCancel && container && header) {
+        btnToggle.addEventListener('click', () => {
+            container.classList.remove('d-none');
+            header.classList.add('d-none');
+        });
+        btnCancel.addEventListener('click', () => {
+            container.classList.add('d-none');
+            header.classList.remove('d-none');
+        });
+    }
+});
+</script>
+
+<style>
+    .text-main { color: var(--text-main) !important; }
+    [data-theme="dark"] .modal-content {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+    }
+    [data-theme="dark"] .modal-header, [data-theme="dark"] .modal-footer {
+        border-color: var(--border-color);
+    }
+    [data-theme="dark"] .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+    [data-theme="dark"] .bg-light {
+        background-color: var(--body-bg) !important;
+        color: var(--text-main) !important;
+    }
+    [data-theme="dark"] .btn-outline-dark {
+        color: var(--gray-300);
+        border-color: var(--border-color);
+    }
+    [data-theme="dark"] .btn-outline-dark:hover {
+        background-color: var(--primary-600);
+        color: white;
+    }
+
+    /* Modal Historial - Estilo Mejorado y Tema Oscuro */
+    #modalHistorialNotif .modal-content {
+        background: var(--card-bg);
+        color: var(--text-main);
+    }
+    #modalHistorialNotif .modal-header {
+        border-bottom: 1px solid var(--card-border);
+        background: var(--stat-bg);
+    }
+    #modalHistorialNotif .modal-footer {
+        border-top: 1px solid var(--card-border);
+    }
+    #modalHistorialNotif .list-group-item {
+        background: transparent;
+        border-color: var(--card-border);
+        transition: background 0.2s;
+        cursor: pointer;
+    }
+    #modalHistorialNotif .list-group-item:hover {
+        background: var(--table-row-hover);
+    }
+    #modalHistorialNotif .rounded-circle.bg-light {
+        background-color: var(--stat-bg) !important;
+    }
+    [data-theme="dark"] #modalHistorialNotif .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    /* Ajustes para el Modal de Detalle */
+    #modalDetalleNotif .modal-content {
+        background: var(--card-bg);
+        color: var(--text-main);
+    }
+    #modalDetalleNotif .modal-header {
+        border-bottom: 1px solid var(--card-border);
+    }
+    #modalDetalleNotif .bg-light {
+        background-color: var(--stat-bg) !important;
+        border-color: var(--card-border) !important;
+        color: var(--text-main);
+    }
+    #modalDetalleNotif .text-muted {
+        color: var(--text-muted) !important;
+    }
+    #modalDetalleNotif .form-control {
+        background-color: var(--stat-bg);
+        border-color: var(--card-border);
+        color: var(--text-main);
+    }
+    #modalDetalleNotif .btn-light {
+        background-color: var(--stat-bg);
+        border-color: var(--card-border);
+        color: var(--text-main);
+    }
+    #modalDetalleNotif .btn-light:hover {
+        background-color: var(--table-row-hover);
+    }
+</style>
 
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -247,6 +1939,27 @@
 <script src="{% static 'js/base.js'%}"></script>
 
 {% block extra_js %}{% endblock %}
+
+<div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <h5 class="modal-title mb-3" id="helpModalLabel">¿Necesitas Ayuda?</h5>
+                <p>Si tienes alguna duda o inconveniente al utilizar el sistema, no dudes en contactarnos. Estamos aquí para ayudarte.</p>
+                <div class="mt-4 p-3 bg-info bg-opacity-10 border border-info rounded">
+                    <h6 class="text-info"><i class="bi bi-info-circle me-2"></i>Soporte Técnico</h6>
+                    <p class="small mb-0">Contacto: <a href="mailto:soportecep-adm@gmail.com">soportecepadm@gmail.com</a></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

@@ -1,0 +1,357 @@
+
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    body {
+        margin: 0;
+        padding: 10px;
+        font-size: 9pt !important;
+        line-height: 1.2 !important;
+        color: #000 !important;
+        background: white !important;
+    }
+
+    /* Navegación y menús */
+    nav,
+    .navbar,
+    .sidebar,
+    .menu,
+    header,
+    footer,
+    .header,
+    .footer {
+        display: none !important;
+    }
+
+    /* Botones y controles */
+    button,
+    .btn,
+    .button,
+    input[type="button"],
+    input[type="submit"],
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    .btn-success,
+    .btn-warning,
+    .btn-info,
+    .action-buttons,
+    .acciones {
+        display: none !important;
+    }
+
+    /* Filtros y formularios */
+    form,
+    .filters,
+    .filtros,
+    .search-box,
+    .busqueda,
+    select,
+    input[type="text"],
+    input[type="search"],
+    textarea {
+        display: none !important;
+    }
+
+    /* Breadcrumbs y navegación */
+    .breadcrumb,
+    .breadcrumbs,
+    .pagination,
+    .paginacion {
+        display: none !important;
+    }
+
+    /* Alertas y mensajes */
+    .alert,
+    .message,
+    .notification,
+    .toast {
+        display: none !important;
+    }
+
+    /* Links y elementos interactivos */
+    a::after {
+        content: none !important;
+    }
+
+    /* ===== OPTIMIZACIÓN DE ESPACIOS ===== */
+
+    /* Encabezados más compactos */
+    h1 {
+        font-size: 14pt !important;
+        margin: 5px 0 !important;
+        padding: 0 !important;
+        font-weight: bold !important;
+    }
+
+    h2 {
+        font-size: 12pt !important;
+        margin: 4px 0 !important;
+        padding: 0 !important;
+    }
+
+    h3 {
+        font-size: 11pt !important;
+        margin: 3px 0 !important;
+        padding: 0 !important;
+    }
+
+    h4, h5, h6 {
+        font-size: 10pt !important;
+        margin: 2px 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Párrafos compactos */
+    p {
+        margin: 2px 0 !important;
+        padding: 0 !important;
+        font-size: 9pt !important;
+    }
+
+    /* ===== TABLAS OPTIMIZADAS ===== */
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 8pt !important;
+        margin: 5px 0 !important;
+        page-break-inside: auto !important;
+    }
+
+    thead {
+        display: table-header-group !important;
+    }
+
+    tr {
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
+    }
+
+    th {
+        background-color: #f0f0f0 !important;
+        border: 1px solid #ccc !important;
+        padding: 3px 5px !important;
+        font-size: 8pt !important;
+        font-weight: bold !important;
+        text-align: left !important;
+    }
+
+    td {
+        border: 1px solid #ddd !important;
+        padding: 2px 5px !important;
+        font-size: 8pt !important;
+    }
+
+    /* Alternar colores de filas (más sutil) */
+    tbody tr:nth-child(even) {
+        background-color: #f9f9f9 !important;
+    }
+
+    /* ===== TARJETAS Y CONTENEDORES ===== */
+    .card,
+    .box,
+    .panel {
+        border: 1px solid #ddd !important;
+        margin: 5px 0 !important;
+        padding: 5px !important;
+        page-break-inside: avoid !important;
+        box-shadow: none !important;
+    }
+
+    .card-header,
+    .card-title {
+        background-color: #f5f5f5 !important;
+        padding: 3px 5px !important;
+        margin: 0 0 3px 0 !important;
+        font-size: 20pt !important;
+        font-weight: bold !important;
+        border-bottom: 1px solid #ddd !important;
+    }
+
+    .card-body {
+        padding: 3px !important;
+        margin: 0 !important;
+    }
+
+    /* ===== LISTAS COMPACTAS ===== */
+    ul, ol {
+        margin: 3px 0 !important;
+        padding-left: 15px !important;
+    }
+
+    li {
+        margin: 1px 0 !important;
+        font-size: 9pt !important;
+    }
+
+    /* ===== INFORMACIÓN DEL ENCABEZADO ===== */
+    .print-header {
+        text-align: center;
+        margin-bottom: 8px !important;
+        padding-bottom: 5px !important;
+        border-bottom: 2px solid #333 !important;
+    }
+
+    .print-header h1 {
+        margin: 0 !important;
+        font-size: 14pt !important;
+    }
+
+    .print-header .subtitle {
+        font-size: 9pt !important;
+        margin: 2px 0 !important;
+    }
+
+    /* ===== SECCIÓN DE INFORMACIÓN ===== */
+    .info-section {
+        margin: 5px 0 !important;
+        padding: 3px !important;
+        font-size: 9pt !important;
+    }
+
+    .info-row {
+        margin: 2px 0 !important;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .info-label {
+        font-weight: bold !important;
+        margin-right: 5px !important;
+    }
+
+    /* ===== TOTALES Y RESÚMENES ===== */
+    .totales,
+    .summary,
+    .resumen {
+        background-color: #f5f5f5 !important;
+        border: 2px solid #333 !important;
+        padding: 5px !important;
+        margin: 8px 0 !important;
+        font-weight: bold !important;
+        page-break-inside: avoid !important;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 2px 0 !important;
+        font-size: 10pt !important;
+    }
+
+    .total-amount {
+        font-size: 11pt !important;
+        font-weight: bold !important;
+    }
+
+    /* ===== BALANCE (INGRESOS/EGRESOS) ===== */
+    .balance-positivo {
+        color: #006600 !important;
+    }
+
+    .balance-negativo {
+        color: #cc0000 !important;
+    }
+
+    /* ===== PAGINACIÓN Y SALTOS ===== */
+    .page-break {
+        page-break-after: always !important;
+    }
+
+    .no-break {
+        page-break-inside: avoid !important;
+    }
+
+    /* ===== IMÁGENES ===== */
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Logo más pequeño */
+    .logo {
+        max-height: 30px !important;
+        width: auto !important;
+    }
+
+    /* ===== PIE DE PÁGINA DE IMPRESIÓN ===== */
+    .print-footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 7pt !important;
+        padding: 3px 0;
+        border-top: 1px solid #ccc !important;
+    }
+
+    /* ===== CLASES AUXILIARES ===== */
+    .text-right {
+        text-align: right !important;
+    }
+
+    .text-center {
+        text-align: center !important;
+    }
+
+    .text-bold {
+        font-weight: bold !important;
+    }
+
+    .small-text {
+        font-size: 7pt !important;
+    }
+
+    /* ===== FORMATO ESPECÍFICO PARA INFORMES ===== */
+    .informe-compacto table {
+        font-size: 7pt !important;
+    }
+
+    .informe-compacto th,
+    .informe-compacto td {
+        padding: 1px 3px !important;
+    }
+
+    /* ===== MARGEN DE PÁGINA ===== */
+    @page {
+        margin: 1cm;
+        size: A4;
+    }
+
+    /* ===== FIRMA Y SELLOS ===== */
+    .firma-section {
+        margin-top: 20px !important;
+        padding-top: 10px !important;
+        border-top: 1px solid #ccc !important;
+        text-align: center;
+        font-size: 9pt !important;
+        page-break-inside: avoid !important;
+    }
+
+    .firma-linea {
+        border-top: 1px solid #000 !important;
+        width: 200px;
+        margin: 20px auto 5px auto;
+    }
+}
+
+/* ===== CLASES AUXILIARES PARA USAR EN TEMPLATES ===== */
+/* Agregar estas clases a elementos que NO deben imprimirse */
+.no-print {
+    display: none !important;
+}
+
+/* Agregar estas clases a elementos que SOLO deben verse al imprimir */
+.print-only {
+    display: none;
+}
+
+@media print {
+    .print-only {
+        display: block !important;
+    }
+}

@@ -1,6 +1,4 @@
-// ========================================
-// Theme Manager - Modo Oscuro/Claro
-// ========================================
+
 class ThemeManager {
     constructor() {
         this.themeToggle = document.getElementById('themeToggle');
@@ -53,13 +51,14 @@ class ThemeManager {
         const icon = this.themeToggle.querySelector('i');
         if (icon) {
             icon.className = theme === 'dark' ? 'bi bi-sun' : 'bi bi-moon';
+            // Añadir feedback visual extra
+            this.themeToggle.classList.add('animate-spin-once');
+            setTimeout(() => this.themeToggle.classList.remove('animate-spin-once'), 500);
         }
     }
 }
 
-// ========================================
 // Sidebar Manager
-// ========================================
 class SidebarManager {
     constructor() {
         this.sidebar = document.getElementById('sidebar');
@@ -136,9 +135,7 @@ class SidebarManager {
     }
 }
 
-// ========================================
 // Dropdown Manager
-// ========================================
 class DropdownManager {
     constructor() {
         this.dropdowns = new Map();
@@ -146,6 +143,7 @@ class DropdownManager {
     }
 
     init() {
+        console.log('DropdownManager initializing');
         // Inicializar todos los dropdowns
         document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
             const toggle = dropdown.querySelector('[data-dropdown-toggle]');
@@ -162,16 +160,32 @@ class DropdownManager {
         const userDropdownMenu = document.getElementById('userDropdownMenu');
 
         if (userDropdownToggle && userDropdownMenu) {
+            console.log('User dropdown elements found');
             userDropdownToggle.addEventListener('click', (e) => {
+                console.log('User dropdown toggle clicked');
+                e.preventDefault();
                 e.stopPropagation();
-                userDropdownMenu.classList.toggle('show');
+                
+                // Cerrar el de notificaciones si está abierto
+                if (window.app && window.app.notifications) {
+                    window.app.notifications.close();
+                }
+                
+                const isShowing = userDropdownMenu.classList.contains('show');
+                if (isShowing) {
+                    userDropdownMenu.classList.remove('show');
+                } else {
+                    userDropdownMenu.classList.add('show');
+                }
+                userDropdownToggle.setAttribute('aria-expanded', !isShowing);
             });
         }
 
         // Cerrar dropdowns al hacer clic fuera
         document.addEventListener('click', (e) => {
-            if (userDropdownMenu && !userDropdownToggle.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+            if (userDropdownMenu && userDropdownToggle && !userDropdownToggle.contains(e.target) && !userDropdownMenu.contains(e.target)) {
                 userDropdownMenu.classList.remove('show');
+                userDropdownToggle.setAttribute('aria-expanded', 'false');
             }
 
             this.dropdowns.forEach((data, dropdown) => {
@@ -184,8 +198,9 @@ class DropdownManager {
         // Cerrar con Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                if (userDropdownMenu) {
+                if (userDropdownMenu && userDropdownToggle) {
                     userDropdownMenu.classList.remove('show');
+                    userDropdownToggle.setAttribute('aria-expanded', 'false');
                 }
 
                 this.dropdowns.forEach((data, dropdown) => {
@@ -300,9 +315,467 @@ class SearchManager {
     }
 }
 
-// ========================================
+// Notification Manager
+class NotificationManager {
+    constructor() {
+        this.toggleButton = document.getElementById('notificationsToggle');
+        this.panel = document.getElementById('notificationPanel');
+        this.list = document.getElementById('notificationList');
+        this.count = document.getElementById('notificationCount');
+        this.empty = document.getElementById('notificationEmpty');
+        this.clearButton = document.getElementById('notificationsClear');
+        this.dot = this.toggleButton?.querySelector('.notification-dot');
+        this.isOpen = false;
+        
+        // Cargar notificaciones iniciales si el panel está vacío
+        this.notifications = []; // Las notificaciones reales vienen del servidor
+        this.init();
+    }
+
+    init() {
+        if (!this.toggleButton || !this.panel || !this.list) {
+            console.warn('Notification elements not found:', {
+                toggle: !!this.toggleButton,
+                panel: !!this.panel,
+                list: !!this.list
+            });
+            return;
+        }
+
+        console.log('NotificationManager initialized');
+
+        // Inicializar modales de Bootstrap
+        this.modalDetalle = new bootstrap.Modal(document.getElementById('modalDetalleNotif'));
+        this.modalHistorial = new bootstrap.Modal(document.getElementById('modalHistorialNotif'));
+        this.historialList = document.getElementById('historialList');
+        this.btnHistorial = document.getElementById('btnHistorialNotif');
+        this.btnClearHistorial = document.getElementById('btnClearHistorial');
+
+        // Verificar si hay notificaciones ya leídas persistidas
+        this.checkPersistedNotifications();
+
+        // Auto-close alerts after 5 seconds
+        const alerts = document.querySelectorAll('.notifications-container .alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                if (bsAlert) bsAlert.close();
+            }, 5000);
+        });
+
+        // NOTA: No llamamos a renderNotifications() para no sobreescribir el HTML del servidor
+        // a menos que queramos manejar estados de "leído" localmente.
+        // Pero checkPersistedNotifications ya lo llama si eliminó algo.
+        
+        // Si no se eliminó nada, igual sincronizamos el estado del dot/count inicial
+        this.renderNotifications();
+
+        this.toggleButton.addEventListener('click', (e) => {
+            console.log('Notification toggle clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            this.toggle();
+        });
+
+        // Prevenir que clics dentro del panel lo cierren
+        this.panel.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        this.clearButton?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.markAllRead();
+        });
+
+        this.btnHistorial?.addEventListener('click', () => {
+            this.close();
+            this.showHistory();
+        });
+
+        this.btnClearHistorial?.addEventListener('click', () => {
+            if (confirm('¿Estás seguro de que deseas borrar todo el historial de notificaciones?')) {
+                localStorage.removeItem('notifHistory');
+                this.renderHistory();
+            }
+        });
+
+        document.addEventListener('click', () => this.close());
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.close();
+            }
+        });
+    }
+
+    handleClick(element) {
+        const isSolicitud = element.getAttribute('data-es-solicitud') === 'true';
+        
+        if (isSolicitud) {
+            this.showDetail(element);
+        } else {
+            const url = element.getAttribute('data-url');
+            this.markRead(element);
+            if (url) {
+                setTimeout(() => { window.location.href = url; }, 300);
+            }
+        }
+    }
+
+    showDetail(element, isFromHistory = false) {
+        const title = element.getAttribute('data-type');
+        const materia = element.getAttribute('data-materia');
+        const carrera = element.getAttribute('data-carrera');
+        const fecha = element.getAttribute('data-fecha');
+        const isSolicitud = element.getAttribute('data-es-solicitud') === 'true';
+        
+        const titleEl = document.getElementById('notifTitle');
+        const bodyEl = document.getElementById('notifBody');
+        const footerEl = document.getElementById('notifFooter');
+        
+        titleEl.textContent = title;
+        
+        let html = `
+            <div class="mb-3">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="rounded-circle bg-light p-2 me-2">
+                        <i class="bi ${element.getAttribute('data-icon')} ${element.getAttribute('data-color')}"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold">${materia}</h6>
+                        <small class="text-muted">${carrera}</small>
+                    </div>
+                </div>
+                <div class="small text-muted mb-3">
+                    <i class="bi bi-clock me-1"></i> ${fecha}
+                </div>
+            </div>
+        `;
+        
+        if (isSolicitud) {
+            const motivo = element.getAttribute('data-motivo');
+            const urlProcesar = element.getAttribute('data-url-procesar');
+            const solicitudId = element.getAttribute('data-solicitud-id');
+            
+            let datos = {};
+            if (isFromHistory) {
+                try { datos = JSON.parse(element.getAttribute('data-datos-objeto')); } catch(e) {}
+            } else {
+                const rawData = element.querySelector('script[id="temp"]')?.textContent;
+                try { if(rawData) datos = JSON.parse(rawData); } catch(e) {}
+            }
+            
+            html += `
+                <div class="mb-3">
+                    <label class="small fw-bold text-muted text-uppercase">Motivo</label>
+                    <p class="mb-0 p-3 bg-light rounded border">${motivo}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="small fw-bold text-muted text-uppercase">Datos del Objeto</label>
+                    <div class="p-3 bg-light rounded border small">
+                        <ul class="list-unstyled mb-0">
+                            ${Object.entries(datos).map(([k, v]) => `<li><strong>${k.charAt(0).toUpperCase() + k.slice(1)}:</strong> ${v}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                <form action="${urlProcesar}" method="post" id="formProcesarNotif">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="${this.getCookie('csrftoken')}">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Observaciones (Opcional)</label>
+                        <textarea name="observaciones" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" name="accion" value="APROBAR" class="btn btn-danger rounded-pill">
+                            <i class="bi bi-check-circle me-1"></i> Aprobar y Eliminar
+                        </button>
+                        <button type="submit" name="accion" value="RECHAZAR" class="btn btn-outline-secondary rounded-pill">
+                            <i class="bi bi-x-circle me-1"></i> Rechazar
+                        </button>
+                    </div>
+                </form>
+            `;
+            footerEl.style.display = 'none';
+        } else {
+            html += `<p>Notificación de sistema sobre el examen de ${materia}.</p>`;
+            footerEl.style.display = 'flex';
+        }
+        
+        bodyEl.innerHTML = html;
+        this.modalDetalle.show();
+        if (!isFromHistory) {
+            this.markRead(element);
+        }
+    }
+
+    showHistory() {
+        this.renderHistory();
+        this.modalHistorial.show();
+    }
+
+    renderHistory() {
+        const history = JSON.parse(localStorage.getItem('notifHistory') || '[]');
+        if (history.length === 0) {
+            this.historialList.innerHTML = `
+                <div class="p-5 text-center text-muted">
+                    <i class="bi bi-clock-history mb-3 d-block" style="font-size: 3rem; opacity: 0.2;"></i>
+                    <p>No hay notificaciones anteriores guardadas</p>
+                </div>
+            `;
+            this.btnClearHistorial.style.display = 'none';
+            return;
+        }
+        
+        this.btnClearHistorial.style.display = 'block';
+        this.historialList.innerHTML = history.reverse().map(n => `
+            <div class="list-group-item p-3 border-start-0 border-end-0 notification-history-item" 
+                 data-type="${n.type}" 
+                 data-materia="${n.materia}" 
+                 data-carrera="${n.carrera}" 
+                 data-fecha="${n.date}" 
+                 data-icon="${n.icon}" 
+                 data-color="${n.color}"
+                 data-url="${n.url || ''}"
+                 data-es-solicitud="${n.es_solicitud || 'false'}"
+                 data-motivo="${n.motivo || ''}"
+                 data-url-procesar="${n.url_procesar || ''}"
+                 data-solicitud-id="${n.solicitud_id || ''}"
+                 data-datos-objeto='${JSON.stringify(n.datos_objeto || {})}'
+                 onclick="window.notificationManager.handleHistoryClick(this)">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <div class="rounded-circle bg-light p-2">
+                            <i class="bi ${n.icon} ${n.color}"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mb-0 fw-bold">${n.type}</h6>
+                            <small class="text-muted">${n.date}</small>
+                        </div>
+                        <div class="small text-muted mt-1">
+                            ${n.materia} - ${n.carrera}
+                        </div>
+                        <div class="mt-2">
+                            <span class="badge bg-light text-dark border small" style="font-size: 0.7rem;">Ver de nuevo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    handleHistoryClick(element) {
+        const isSolicitud = element.getAttribute('data-es-solicitud') === 'true';
+        this.modalHistorial.hide();
+        
+        if (isSolicitud) {
+            // Para solicitudes, mostramos el modal de detalle
+            this.showDetail(element, true); // true indica que no debe marcarse como leído (ya lo está)
+        } else {
+            // Para exámenes, redirigir a la materia/carrera
+            const url = element.getAttribute('data-url');
+            if (url) {
+                window.location.href = url;
+            }
+        }
+    }
+
+    getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    loadNotifications() {
+        return []; // Desactivamos las notificaciones de ejemplo
+    }
+
+    saveNotifications() {
+        // No guardamos nada por ahora
+    }
+
+    renderNotifications() {
+        const items = this.list.querySelectorAll('.notification-item');
+        const unreadCount = items.length;
+        
+        if (unreadCount === 0) {
+            this.list.innerHTML = `
+                <div class="notification-empty" id="notificationEmpty">
+                    <i class="bi bi-bell-slash mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                    <p class="mb-0">No hay notificaciones nuevas</p>
+                </div>
+            `;
+            if (this.dot && this.dot.style) {
+                this.dot.style.display = 'none';
+            }
+            if (this.count) {
+                this.count.textContent = '0';
+                this.count.classList.add('d-none');
+            }
+            return;
+        }
+
+        if (this.count) {
+            this.count.textContent = unreadCount;
+            this.count.classList.remove('d-none');
+        }
+        if (this.dot && this.dot.style) {
+            this.dot.style.display = 'block';
+        }
+    }
+
+    toggle() {
+        this.isOpen ? this.close() : this.open();
+    }
+
+    open() {
+        console.log('Opening notification panel');
+        // Cerrar el dropdown de usuario si está abierto
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
+        const userDropdownToggle = document.getElementById('userDropdownToggle');
+        if (userDropdownMenu) {
+            userDropdownMenu.classList.remove('show');
+            if (userDropdownToggle) userDropdownToggle.setAttribute('aria-expanded', 'false');
+        }
+
+        this.panel.classList.add('show');
+        this.toggleButton.setAttribute('aria-expanded', 'true');
+        this.toggleButton.classList.add('active');
+        this.isOpen = true;
+        console.log('Panel status: show class added');
+
+        // Ocultar el punto rojo al abrir el panel
+        if (this.dot) {
+            this.dot.style.display = 'none';
+        }
+    }
+
+    close() {
+        if (!this.isOpen) return;
+        console.log('Closing notification panel');
+        this.panel.classList.remove('show');
+        this.toggleButton.setAttribute('aria-expanded', 'false');
+        this.toggleButton.classList.remove('active');
+        this.isOpen = false;
+    }
+
+    markRead(element) {
+        if (element && element.classList.contains('notification-item')) {
+            element.classList.remove('unread');
+            element.classList.add('is-read');
+            
+            // Guardar en localStorage que esta notificación fue leída
+            this.persistReadState(element);
+            
+            setTimeout(() => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateX(20px)';
+                element.style.transition = 'all 0.3s ease';
+                
+                setTimeout(() => {
+                    element.remove();
+                    this.renderNotifications();
+                }, 300);
+            }, 300);
+        }
+    }
+
+    markAllRead() {
+        const items = this.list.querySelectorAll('.notification-item');
+        items.forEach(item => {
+            item.classList.add('fade-out');
+            this.persistReadState(item);
+        });
+        
+        setTimeout(() => {
+            this.list.innerHTML = '';
+            this.renderNotifications();
+        }, 300);
+    }
+
+    // Persistencia simple usando localStorage
+    persistReadState(element) {
+        const type = element.getAttribute('data-type');
+        const materia = element.getAttribute('data-materia');
+        const carrera = element.getAttribute('data-carrera');
+        const date = element.getAttribute('data-fecha');
+        const icon = element.getAttribute('data-icon');
+        const color = element.getAttribute('data-color');
+        const url = element.getAttribute('data-url');
+        const esSolicitud = element.getAttribute('data-es-solicitud') === 'true';
+        const motivo = element.getAttribute('data-motivo');
+        const urlProcesar = element.getAttribute('data-url-procesar');
+        const solicitudId = element.getAttribute('data-solicitud-id');
+        
+        let datosObjeto = {};
+        if (esSolicitud) {
+            const rawData = element.querySelector('script[id="temp"]')?.textContent;
+            try { if(rawData) datosObjeto = JSON.parse(rawData); } catch(e) {}
+        }
+        
+        if (type && materia && date) {
+            const id = btoa(`${type}-${materia}-${date}`); // Crear un ID simple
+            
+            // 1. Guardar IDs leídos
+            let readNotifications = JSON.parse(localStorage.getItem('readNotifications') || '[]');
+            if (!readNotifications.includes(id)) {
+                readNotifications.push(id);
+                if (readNotifications.length > 100) readNotifications.shift();
+                localStorage.setItem('readNotifications', JSON.stringify(readNotifications));
+            }
+            
+            // 2. Guardar en historial
+            let history = JSON.parse(localStorage.getItem('notifHistory') || '[]');
+            // Evitar duplicados en historial
+            if (!history.find(n => n.id === id)) {
+                history.push({ 
+                    id, type, materia, carrera, date, icon, color, url,
+                    es_solicitud: esSolicitud,
+                    motivo, url_procesar: urlProcesar, solicitud_id: solicitudId,
+                    datos_objeto: datosObjeto
+                });
+                if (history.length > 50) history.shift();
+                localStorage.setItem('notifHistory', JSON.stringify(history));
+            }
+        }
+    }
+
+    checkPersistedNotifications() {
+        const readNotifications = JSON.parse(localStorage.getItem('readNotifications') || '[]');
+        const items = this.list.querySelectorAll('.notification-item');
+        let countRemoved = 0;
+
+        items.forEach(item => {
+            const type = item.getAttribute('data-type');
+            const materia = item.getAttribute('data-materia');
+            const date = item.getAttribute('data-fecha');
+            
+            if (type && materia && date) {
+                const id = btoa(`${type}-${materia}-${date}`);
+                if (readNotifications.includes(id)) {
+                    item.remove();
+                    countRemoved++;
+                }
+            }
+        });
+
+        if (countRemoved > 0) {
+            this.renderNotifications();
+        }
+    }
+}
+
 // Alert Manager
-// ========================================
 class AlertManager {
     constructor() {
         this.init();
@@ -328,7 +801,6 @@ class AlertManager {
         });
     }
 
-    // Método para mostrar alertas dinámicas
     static showAlert(type, message, title = null) {
         const alertTypes = {
             'success': { icon: 'bi-check-lg', defaultTitle: '¡Éxito!' },
@@ -374,9 +846,7 @@ class AlertManager {
     }
 }
 
-// ========================================
 // Animation Manager
-// ========================================
 class AnimationManager {
     constructor() {
         this.observer = null;
@@ -410,9 +880,7 @@ class AnimationManager {
     }
 }
 
-// ========================================
 // Loading Manager
-// ========================================
 class LoadingManager {
     constructor() {
         this.loadingOverlay = document.getElementById('loadingOverlay');
@@ -435,28 +903,42 @@ class LoadingManager {
     }
 }
 
-// ========================================
 // Inicialización Principal
-// ========================================
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded: Initializing components...');
     // Inicializar componentes
-    const themeManager = new ThemeManager();
-    const sidebarManager = new SidebarManager();
-    const dropdownManager = new DropdownManager();
-    const searchManager = new SearchManager();
-    const alertManager = new AlertManager();
-    const animationManager = new AnimationManager();
-    const loadingManager = new LoadingManager();
+    try {
+        const themeManager = new ThemeManager();
+        console.log('ThemeManager initialized');
+        const sidebarManager = new SidebarManager();
+        console.log('SidebarManager initialized');
+        const dropdownManager = new DropdownManager();
+        console.log('DropdownManager initialized');
+        const searchManager = new SearchManager();
+        console.log('SearchManager initialized');
+        const notificationManager = new NotificationManager();
+        console.log('NotificationManager initialized');
+        window.notificationManager = notificationManager; // Acceso directo para onclick
+        const alertManager = new AlertManager();
+        console.log('AlertManager initialized');
+        const animationManager = new AnimationManager();
+        console.log('AnimationManager initialized');
+        const loadingManager = new LoadingManager();
+        console.log('LoadingManager initialized');
 
-    // Exponer componentes globalmente para acceso desde otros scripts
-    window.app = {
-        theme: themeManager,
-        sidebar: sidebarManager,
-        dropdown: dropdownManager,
-        search: searchManager,
-        alert: AlertManager, // Métodos estáticos
-        loading: loadingManager
-    };
+        // Exponer componentes globalmente para acceso desde otros scripts
+        window.app = {
+            theme: themeManager,
+            sidebar: sidebarManager,
+            dropdown: dropdownManager,
+            search: searchManager,
+            notifications: notificationManager,
+            alert: AlertManager,
+            loading: loadingManager
+        };
+    } catch (error) {
+        console.error('Error initializing components:', error);
+    }
 
     // Inicializar tooltips de Bootstrap
     const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -474,9 +956,8 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('ITS CEP - Sistema de Gestión inicializado');
 });
 
-// ========================================
 // Funciones de utilidad globales
-// ========================================
+
 window.utils = {
     formatCurrency: function(amount) {
         return new Intl.NumberFormat('es-AR', {

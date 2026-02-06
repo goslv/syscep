@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block title %}Detalle del Pago - ITS CEP{% endblock %}
 {% block page_title %}Detalle del Pago{% endblock %}
@@ -6,11 +7,36 @@
 {% block content %}
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+    :root {
+        --ink: #0f172a;
+        --muted: #64748b;
+        --line: rgba(148, 163, 184, 0.25);
+        --sand: #f8f5f0;
+        --coral: #f97316;
+        --ember: #ea580c;
+        --leaf: #0f766e;
+        --card-bg: #ffffff;
+        --border-color: rgba(148, 163, 184, 0.2);
+    }
+
+    [data-theme="dark"] {
+        --ink: #f8fafc;
+        --muted: #94a3b8;
+        --line: rgba(255, 255, 255, 0.1);
+        --sand: #0f172a;
+        --card-bg: #1e293b;
+        --border-color: #334155;
+    }
+
     .detail-card {
-        background: white;
-        border-radius: 12px;
+        background: var(--card-bg);
+        border-radius: 18px;
         padding: 2rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-color);
+        font-family: 'IBM Plex Sans', sans-serif;
         margin-bottom: 1.5rem;
     }
 
@@ -20,103 +46,116 @@
         align-items: center;
         margin-bottom: 2rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid #e5e7eb;
+        border-bottom: 2px solid var(--coral);
     }
 
     .detail-title {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
         font-weight: 600;
-        color: #1f2937;
+        color: var(--ink);
+        font-family: 'Space Grotesk', sans-serif;
     }
 
-    .detail-row {
-        display: flex;
-        padding: 1rem 0;
-        border-bottom: 1px solid #f3f4f6;
-    }
-
-    .detail-row:last-child {
-        border-bottom: none;
+    .detail-item {
+        margin-bottom: 1.25rem;
     }
 
     .detail-label {
+        font-size: 0.85rem;
         font-weight: 600;
-        color: #6b7280;
-        width: 200px;
-        flex-shrink: 0;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .detail-value {
-        color: #1f2937;
-        flex: 1;
+        color: var(--ink);
+        font-size: 1.1rem;
     }
 
     .detail-value strong {
-        color: #059669;
+        color: var(--leaf);
+        font-weight: 700;
     }
 
-    .action-buttons {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
+    .comprobante-container {
+        position: sticky;
+        top: 2rem;
     }
 
-    .btn-action {
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        border: none;
+    .comprobante-img {
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
         cursor: pointer;
-        font-weight: 500;
-        transition: all 0.3s ease;
+        transition: transform 0.3s ease;
+    }
+
+    .comprobante-img:hover {
+        transform: scale(1.02);
+    }
+
+    .recibo-badge {
+        background-color: var(--coral);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
     }
 
+    .btn-action {
+        padding: 0.6rem 1.2rem;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
     .btn-action:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .btn-back {
-        background-color: rgba(107, 114, 128, 0);
-        color: #000000;
-        font-size: 1.2rem;
-    }
-
-    @keyframes fadeInRight {
-        from {
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    .btn-back:hover {
-        background-color: rgba(255, 255, 255, 0);
-        color: #00040b;
-        animation: fadeInRight 0.3s forwards;
-        border: 0 !important;
-        box-shadow: none !important;
+        background-color: var(--line);
+        color: var(--ink);
+        margin-bottom: 1.5rem;
     }
 
     .btn-edit {
-        background-color: #f59e0b;
+        background-color: #3b82f6;
         color: white;
-        font-size: 1.5rem;
-    }
-
-    .btn-edit:hover {
-        background-color: #d97706;
     }
 
     .btn-delete {
         background-color: #ef4444;
         color: white;
-        font-size: 1.5rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    [data-theme="dark"] .btn-back {
+        background-color: #334155;
+    }
+
+    .btn-delete {
+        background-color: #ef4444;
+        color: white;
+        font-size: 1.2rem;
     }
 
     .btn-delete:hover {
@@ -124,13 +163,14 @@
     }
 
     .recibo-badge {
-        background: linear-gradient(135deg, rgba(18, 67, 2, 0.22) 0%, rgba(92, 251, 8, 0.25) 100%);
-        color: rgba(17, 32, 0, 0.65);
+        background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.2) 100%);
+        color: #9a3412;
         padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-size: 1.25rem;
+        border-radius: 999px;
+        font-size: 1.1rem;
         font-weight: 600;
         display: inline-block;
+        font-family: 'Space Grotesk', sans-serif;
     }
 
     .foto-container {
@@ -141,8 +181,85 @@
     .foto-container img {
         width: 100%;
         height: auto;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+    }
+
+    /* Modal de Imagen Modernizado */
+    .modal-fullscreen-custom {
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(8px);
+    }
+
+    .modal-image-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        padding: 2rem;
+    }
+
+    .modal-image-content {
+        max-width: 100%;
+        max-height: 90vh;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        transition: transform 0.3s ease;
+        cursor: zoom-in;
+    }
+
+    .modal-image-content.zoomed {
+        transform: scale(1.5);
+        cursor: zoom-out;
+    }
+
+    .modal-close-btn {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 1060;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .modal-close-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
+    }
+
+    .modal-download-btn {
+        position: absolute;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1060;
+        background: var(--coral);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.4);
+    }
+
+    .modal-download-btn:hover {
+        background: var(--ember);
+        color: white;
+        transform: translateX(-50%) translateY(-2px);
     }
 
     @media (max-width: 768px) {
@@ -161,254 +278,235 @@
             margin-bottom: 0.5rem;
         }
     }
+    [data-theme="dark"] .detail-value.text-muted {
+        color: var(--muted) !important;
+    }
 </style>
-
+<div class="mt-5">
+    {% if user.is_staff %}
+    <a href="{% url 'lista_pagos' %}" class="btn-action btn-back">
+        <i class="bi bi-arrow-left"></i> Volver al historial
+    </a>
+    {% else %}
+    <a href="{% url 'lista_caja' %}" class="btn-action btn-back">
+        <i class="bi bi-arrow-left"></i> Volver a caja
+    </a>
+    {% endif %}
+</div>
 <div class="row">
-    <div class="col-md-12">
+    {% if pago.foto_comprobante %}
+    <div class="col-md-5 mb-4">
+        <div class="comprobante-container">
+            <h5 class="detail-title mb-3"><i class="bi bi-image"></i> Comprobante</h5>
+            <img src="{{ pago.foto_comprobante.url }}"
+                 alt="Comprobante de pago"
+                 class="comprobante-img"
+                 onclick="abrirModalImagen('{{ pago.foto_comprobante.url }}')">
+            <p class="text-muted mt-2 small text-center">
+                <i class="bi bi-zoom-in"></i> Haz clic en la imagen para ampliar
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="{% if pago.foto_comprobante %}col-md-7{% else %}col-md-12{% endif %}">
         <div class="detail-card">
-            <a href="{% url 'lista_pagos' %}" class="btn-action btn-back">
-                        <i class="bi bi-arrow-left"></i>
-                    </a>
             <div class="detail-header">
-                <div>
-                    <div class="recibo-badge">
-                        <i class="bi bi-receipt"></i> Recibo N° {{ pago.numero_recibo }}
-                    </div>
+                <div class="recibo-badge">
+                    <i class="bi bi-receipt"></i> {% if pago.numero_recibo %}Recibo No. {{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}
                 </div>
                 <div class="action-buttons">
-                    <a href="{% url 'editar_pago' pago.id %}" class="btn-action btn-edit">
-                        <i class="bi bi-pencil"></i>
+                    <a href="{% url 'editar_pago' pago.id %}" class="btn-action btn-edit" title="Editar">
+                        <i class="bi bi-pencil-square"></i>
                     </a>
                     <button type="button"
                             class="btn-action btn-delete"
-                            onclick="confirmarEliminacion()">
-                        <i class="bi bi-trash"></i>
+                            onclick="confirmarAccionEliminar()"
+                            title="{% if user.is_staff %}Eliminar{% else %}Solicitar Eliminación{% endif %}">
+                        <i class="bi bi-trash-fill"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="detail-row">
-                <div class="detail-label">
-                    <i class="bi bi-calendar"></i> Fecha de Pago:
-                </div>
-                <div class="detail-value">
-                    {{ pago.fecha|date:"d/m/Y" }}
-                </div>
-            </div>
-
-            <div class="detail-row">
-                <div class="detail-label">
-                    <i class="bi bi-person"></i> {% if pago.es_cliente_diferenciado %}Cliente{% else %}Alumno{% endif %}:
-                </div>
-                <div class="detail-value">
-                    {% if pago.es_cliente_diferenciado %}
-                        {{ pago.nombre_cliente }}
-                        <span class="badge bg-info text-dark ms-2">
-                            <i class="bi bi-person-badge"></i> Cliente Diferenciado
-                        </span>
-                    {% else %}
-                        <a href="{% url 'detalle_alumno' pago.alumno.id %}">
-                            {{ pago.alumno.nombre_completo }}
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="detail-row">
-                <div class="detail-label">
-                    <i class="bi bi-building"></i> Sede:
-                </div>
-                <div class="detail-value">
-                    {{ pago.sede.nombre }}
-                </div>
-            </div>
-
-            {% if pago.es_cliente_diferenciado %}
-                {% if pago.curso %}
-                <div class="detail-row">
-                    <div class="detail-label">
-                        <i class="bi bi-book"></i> Curso:
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <div class="detail-label"><i class="bi bi-calendar-event"></i> Fecha de Pago</div>
+                        <div class="detail-value">{{ pago.fecha|date:"d/m/Y" }}</div>
                     </div>
-                    <div class="detail-value">
-                        {{ pago.curso }}
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <div class="detail-label"><i class="bi bi-building"></i> Sede</div>
+                        <div class="detail-value">{{ pago.sede.nombre }}</div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="detail-item">
+                        <div class="detail-label"><i class="bi bi-person-fill"></i> {% if pago.es_cliente_diferenciado %}Cliente{% else %}Alumno{% endif %}</div>
+                        <div class="detail-value">
+                            {% if pago.es_cliente_diferenciado %}
+                            {{ pago.nombre_cliente }}
+                            <span class="badge bg-info text-dark ms-2">Cliente Externo</span>
+                            {% else %}
+                            <a href="{% url 'detalle_alumno' pago.alumno.id %}" class="text-decoration-none">
+                                {{ pago.alumno.nombre_completo }}
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if pago.carrera %}
+                <div class="col-md-12">
+                    <div class="detail-item">
+                        <div class="detail-label"><i class="bi bi-journal-bookmark"></i> Carrera / Curso</div>
+                        <div class="detail-value">{{ pago.carrera.nombre }}</div>
                     </div>
                 </div>
                 {% endif %}
 
-                {% if pago.validez_pago %}
-                <div class="detail-row">
-                    <div class="detail-label">
-                        <i class="bi bi-calendar-check"></i> Validez del Pago:
-                    </div>
-                    <div class="detail-value">
-                        {{ pago.validez_pago|date:"d/m/Y" }}
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if pago.fecha_vencimiento %}
-                <div class="detail-row">
-                    <div class="detail-label">
-                        <i class="bi bi-calendar-x"></i> Fecha de Vencimiento:
-                    </div>
-                    <div class="detail-value">
-                        {{ pago.fecha_vencimiento|date:"d/m/Y" }}
+                {% if pago.numero_cuota %}
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <div class="detail-label"><i class="bi bi-hash"></i> Cuota N°</div>
+                        <div class="detail-value">{{ pago.numero_cuota }}</div>
                     </div>
                 </div>
                 {% endif %}
 
                 {% if pago.cantidad_cuotas %}
-                <div class="detail-row">
-                    <div class="detail-label">
-                        <i class="bi bi-123"></i> Cantidad de Cuotas:
-                    </div>
-                    <div class="detail-value">
-                        {{ pago.cantidad_cuotas }} cuota{{ pago.cantidad_cuotas|pluralize }}
+                <div class="col-md-6">
+                    <div class="detail-item">
+                        <div class="detail-label"><i class="bi bi-stack"></i> Cantidad</div>
+                        <div class="detail-value">{{ pago.cantidad_cuotas }} cuota{{ pago.cantidad_cuotas|pluralize }}</div>
                     </div>
                 </div>
                 {% endif %}
 
-                {% if pago.monto_unitario %}
-                <div class="detail-row">
-                    <div class="detail-label">
-                        <i class="bi bi-currency-exchange"></i> Monto Unitario:
+                <div class="col-md-12">
+                    <div class="detail-item">
+                        <div class="detail-label"><i class="bi bi-card-text"></i> Concepto</div>
+                        <div class="detail-value">{{ pago.concepto }}</div>
                     </div>
-                    <div class="detail-value">
-                        <strong class="text-success">Gs. {{ pago.monto_unitario|floatformat:0 }}</strong>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="detail-item">
+                        <div class="detail-label"><i class="bi bi-cash-stack"></i> Importe Total</div>
+                        <div class="detail-value">
+                            <strong style="font-size: 1.5rem;">Gs. {{ pago.importe_total|formato_guaranies }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                {% if pago.observaciones %}
+                <div class="col-md-12">
+                    <div class="detail-item">
+                        <div class="detail-label"><i class="bi bi-chat-dots"></i> Observaciones</div>
+                        <div class="detail-value text-muted">{{ pago.observaciones }}</div>
                     </div>
                 </div>
                 {% endif %}
-            {% else %}
-                <div class="detail-row">
-                    <div class="detail-label">
-                        <i class="bi bi-hash"></i> Número de Cuota:
-                    </div>
-                    <div class="detail-value">
-                        {{ pago.numero_cuota }}
-                    </div>
-                </div>
-            {% endif %}
 
-            <div class="detail-row">
-                <div class="detail-label">
-                    <i class="bi bi-card-text"></i> Concepto:
-                </div>
-                <div class="detail-value">
-                    {{ pago.concepto }}
-                </div>
-            </div>
-
-            <div class="detail-row">
-                <div class="detail-label">
-                    <i class="bi bi-cash-coin"></i> Importe Total:
-                </div>
-                <div class="detail-value">
-                    <strong style="font-size: 1.25rem;">Gs. {{ pago.importe_total|floatformat:0 }}</strong>
-                </div>
-            </div>
-
-            {% if pago.foto_comprobante %}
-            <div class="detail-row">
-                <div class="detail-label">
-                    <i class="bi bi-image"></i> Comprobante:
-                </div>
-                <div class="detail-value">
-                    <div class="foto-preview">
-                        <img src="{{ pago.foto_comprobante.url }}"
-                             alt="Comprobante de pago"
-                             class="img-thumbnail"
-                             onclick="abrirModalImagen('{{ pago.foto_comprobante.url }}')"
-                             style="cursor: pointer; max-width: 200px; border-radius: 8px;">
-                        <br>
-                        <small class="text-muted">
-                            <i class="bi bi-zoom-in"></i> Haz clic para ampliar
-                        </small>
+                {% if pago.usuario_registro %}
+                <div class="col-md-12 mt-3 pt-3 border-top">
+                    <div class="detail-item mb-0">
+                        <div class="detail-label"><i class="bi bi-person-check"></i> Registrado por</div>
+                        <div class="detail-value small">
+                            {{ pago.usuario_registro.get_full_name|default:pago.usuario_registro.username }}
+                        </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
-            {% endif %}
-
-            {% if pago.observaciones %}
-            <div class="detail-row">
-                <div class="detail-label">
-                    <i class="bi bi-chat-left-text"></i> Observaciones:
-                </div>
-                <div class="detail-value">
-                    {{ pago.observaciones }}
-                </div>
-            </div>
-            {% endif %}
-
-            {% if pago.usuario_registro %}
-            <div class="detail-row">
-                <div class="detail-label">
-                    <i class="bi bi-person-check"></i> Registrado por:
-                </div>
-                <div class="detail-value">
-                    {{ pago.usuario_registro.get_full_name|default:pago.usuario_registro.username }}
-                </div>
-            </div>
-            {% endif %}
         </div>
     </div>
 </div>
 
-<!-- Modal de confirmación para eliminar -->
+<!-- Modal de confirmación para eliminar/solicitar -->
 <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
+            <div class="modal-header {% if user.is_staff %}bg-danger{% else %}bg-warning{% endif %} text-white">
                 <h5 class="modal-title" id="modalEliminarLabel">
-                    <i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación
+                    <i class="bi bi-exclamation-triangle"></i> {% if user.is_staff %}Confirmar Eliminación{% else %}Solicitar Eliminación{% endif %}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>¿Está seguro que desea eliminar el pago con recibo <strong>{{ pago.numero_recibo }}</strong>?</p>
-                <p class="text-danger"><i class="bi bi-info-circle"></i> Esta acción no se puede deshacer.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Cancelar
-                </button>
-                <form action="{% url 'eliminar_pago' pago.id %}" method="post" style="display: inline;">
+                {% if user.is_staff %}
+                    {% if pago.numero_recibo %}¿Estás seguro que desea eliminar el pago con recibo <strong>{{ pago.numero_recibo }}</strong>?{% else %}¿Estás seguro que desea eliminar el pago sin recibo?{% endif %}
+                    <p class="text-danger mt-2"><i class="bi bi-info-circle"></i> Esta acción no se puede deshacer.</p>
+                {% else %}
+                    <p>Para eliminar este registro, debes enviar una solicitud al administrador detallando el motivo.</p>
+                {% endif %}
+
+                <form action="{% url 'eliminar_pago' pago.id %}" method="post" class="mt-3">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Eliminar
-                    </button>
+                    {% if not user.is_staff %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Motivo de la eliminación</label>
+                        <textarea name="motivo" class="form-control" rows="3" placeholder="Explica por qué es necesario eliminar este registro..." required></textarea>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn {% if user.is_staff %}btn-danger{% else %}btn-warning{% endif %}">
+                            <i class="bi bi-trash"></i> {% if user.is_staff %}Eliminar Permanentemente{% else %}Enviar Solicitud{% endif %}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal para visualizar imagen -->
-<div class="modal fade" id="modalImagen" tabindex="-1" aria-labelledby="modalImagenLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content" style="background: transparent; border: none;">
-            <div class="modal-header" style="border: none; background: rgba(0, 0, 0, 0.8); color: white;">
-                <h5 class="modal-title" id="modalImagenLabel">
-                    <i class="bi bi-image"></i> Comprobante de Pago - Recibo N° {{ pago.numero_recibo }}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center" style="background: rgba(0, 0, 0, 0.8); padding: 2rem;">
-                <img src="" id="imagenModal" alt="Comprobante" style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);">
+<!-- Modal para visualizar imagen modernizado -->
+<div class="modal fade modal-fullscreen-custom" id="modalImagen" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen m-0">
+        <div class="modal-content bg-transparent border-0">
+            <button type="button" class="modal-close-btn" data-bs-dismiss="modal" aria-label="Close">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            
+            <div class="modal-image-container" onclick="toggleZoom(event)">
+                <img src="" id="imagenModal" alt="Comprobante" class="modal-image-content">
+                
+                <a href="" id="btnDescargarImagen" download class="modal-download-btn no-print">
+                    <i class="bi bi-cloud-arrow-down"></i> Descargar Comprobante
+                </a>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    function confirmarEliminacion() {
+    function confirmarAccionEliminar() {
         const modal = new bootstrap.Modal(document.getElementById('modalEliminar'));
         modal.show();
     }
 
     function abrirModalImagen(urlImagen) {
-        document.getElementById('imagenModal').src = urlImagen;
+        const img = document.getElementById('imagenModal');
+        const downloadBtn = document.getElementById('btnDescargarImagen');
+        
+        img.src = urlImagen;
+        img.classList.remove('zoomed');
+        downloadBtn.href = urlImagen;
+        
         const modal = new bootstrap.Modal(document.getElementById('modalImagen'));
         modal.show();
+    }
+
+    function toggleZoom(event) {
+        // Evitar zoom si se hace clic en el botón de descarga
+        if (event.target.closest('.modal-download-btn')) return;
+        
+        const img = document.getElementById('imagenModal');
+        img.classList.toggle('zoomed');
     }
 </script>
 

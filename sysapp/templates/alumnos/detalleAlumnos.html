@@ -1,126 +1,289 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block title %}{{ alumno.nombre_completo }} - SysCEP{% endblock %}
 {% block page_title %}Detalle del Alumno{% endblock %}
 
+{% block extra_css %}
+<style>
+    .alumno-header {
+        background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+        color: white;
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+    }
+    .info-label {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+    .info-value {
+        font-weight: 600;
+        color: var(--text-main);
+    }
+    .info-value-white {
+        font-weight: 600;
+        color: white;
+    }
+    .star-badge {
+        background: rgba(255, 243, 205, 0.1);
+        color: #ffc107;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        font-weight: 700;
+        border: 1px solid rgba(255, 238, 186, 0.2);
+    }
+    [data-theme="dark"] .star-badge {
+        background: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+        border-color: rgba(255, 193, 7, 0.3);
+    }
+    [data-theme="light"] .star-badge {
+        background: #fff3cd;
+        color: #856404;
+        border-color: #ffeeba;
+    }
+    .section-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        height: 100%;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+    }
+    .nav-pills .nav-link {
+        border-radius: 50px;
+        padding: 0.5rem 1.25rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+    .nav-pills .nav-link.active {
+        background-color: var(--primary-500);
+    }
+    [data-theme="dark"] .badge.border {
+        background-color: #0f172a !important;
+        border-color: #334155 !important;
+        color: var(--gray-600) !important;
+    }
+
+    [data-theme="dark"] .table-hover tbody tr:hover {
+        background-color: rgba(148, 163, 184, 0.1) !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<!-- Información del Alumno -->
-<div class="row mb-4">
-    <div class="col-md-8">
-        <div class="stat-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">{{ alumno.nombre_completo }}</h4>
+<!-- Header del Alumno -->
+<div class="alumno-header mt-5">
+    <div class="row align-items-center">
+        <div class="col-md-7">
+            <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle p-3 me-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: rgba(255,255,255,0.2);">
+                    <i class="bi bi-person-fill text-white" style="font-size: 2.5rem;"></i>
+                </div>
                 <div>
-                    <a href="{% url 'editar_alumno' alumno.id %}" class="btn btn-warning btn-sm">
-                        <i class="bi bi-pencil"></i> Editar
-                    </a>
-                    <a href="{% url 'registrar_pago' %}?alumno={{ alumno.id }}" class="btn btn-success btn-sm">
-                        <i class="bi bi-cash"></i> Registrar Pago
-                    </a>
+                    <h2 class="mb-0 fw-bold text-white">{{ alumno.nombre_completo }}</h2>
+                    <p class="mb-0 text-white-50"><i class="bi bi-mortarboard-fill me-1"></i> {{ alumno.carrera.nombre }}</p>
                 </div>
             </div>
-            <hr>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Cédula:</strong> {{ alumno.cedula }}</p>
-                    <p><strong>Fecha de Nacimiento:</strong> {{ alumno.fecha_nacimiento|date:"d/m/Y" }}</p>
-                    <p><strong>Teléfono:</strong> {{ alumno.telefono }}</p>
-                    <p><strong>Sede:</strong> {{ alumno.sede.nombre }}</p>
+            <div class="d-flex flex-wrap gap-4 mt-3">
+                <div>
+                    <div class="small opacity-75">Cédula</div>
+                    <div class="fw-bold">{{ alumno.cedula }}</div>
                 </div>
-                <div class="col-md-6">
-                    <p><strong>Carrera:</strong> {{ alumno.carrera.nombre }}</p>
-                    <p><strong>Curso Actual:</strong> {{ alumno.curso_actual }}º</p>
-                    <p><strong>Fecha de Inicio:</strong> {{ alumno.fecha_inicio|date:"d/m/Y" }}</p>
-                    <p><strong>Estado:</strong>
-                        {% if alumno.activo %}
-                            <span class="badge bg-success">Activo</span>
-                        {% else %}
-                            <span class="badge bg-danger">Inactivo</span>
-                        {% endif %}
-                    </p>
+                <div>
+                    <div class="small opacity-75">Sede</div>
+                    <div class="fw-bold">{{ alumno.sede.nombre }}</div>
+                </div>
+                <div>
+                    <div class="small opacity-75">Estado</div>
+                    {% if alumno.activo %}
+                        <span class="badge bg-success">Activo</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactivo</span>
+                    {% endif %}
                 </div>
             </div>
-            <hr>
-            <h6>Contacto de Emergencia</h6>
-            <p><strong>Nombre:</strong> {{ alumno.contacto_emergencia_nombre }}</p>
-            <p><strong>Teléfono:</strong> {{ alumno.contacto_emergencia_telefono }}</p>
-            <p><strong>Relación:</strong> {{ alumno.contacto_emergencia_relacion }}</p>
+        </div>
+        <div class="col-md-5 text-md-end mt-4 mt-md-0">
+            <div class="star-badge mb-3">
+                <i class="bi bi-star-fill text-warning me-2"></i>
+                <span class="fs-4">{{ total_estrellas }}</span>
+                <span class="ms-2">Puntos</span>
+            </div>
+            <div class="d-flex justify-content-md-end gap-2">
+                <a href="{% url 'editar_alumno' alumno.id %}" class="btn btn-light btn-sm rounded-pill px-3">
+                    <i class="bi bi-pencil me-1"></i> Editar
+                </a>
+                <a href="{% url 'registrar_pago' %}?alumno={{ alumno.id }}" class="btn btn-success btn-sm rounded-pill px-3">
+                    <i class="bi bi-cash-stack me-1"></i> Cobrar
+                </a>
+                <button type="button" class="btn btn-warning btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalCanje">
+                    <i class="bi bi-gift me-1"></i> Canjear
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Información Personal -->
+    <div class="col-md-8">
+        <div class="section-card">
+            <h5 class="mb-4 d-flex align-items-center">
+                <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                Información Detallada
+            </h5>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <div class="info-label">Fecha de Nacimiento</div>
+                        <div class="info-value">{{ alumno.fecha_nacimiento|date:"d M, Y" }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Teléfono</div>
+                        <div class="info-value">{{ alumno.telefono }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Curso Actual</div>
+                        <div class="info-value">{{ alumno.curso_actual }}º Año</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <div class="info-label">Fecha de Inicio</div>
+                        <div class="info-value">{{ alumno.fecha_inicio|date:"d M, Y" }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Carrera Naturalidad</div>
+                        <div class="info-value">{{ alumno.carrera.get_naturalidad_display }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Fecha de Registro</div>
+                        <div class="info-value text-muted small">{{ alumno.fecha_registro|date:"d/m/Y H:i" }}</div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <hr class="text-muted opacity-25">
+                    <h6 class="mb-3 text-primary">Contacto de Emergencia</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="info-label">Nombre</div>
+                            <div class="info-value">{{ alumno.contacto_emergencia_nombre }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-label">Teléfono</div>
+                            <div class="info-value">{{ alumno.contacto_emergencia_telefono }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-label">Relación</div>
+                            <div class="info-value">{{ alumno.contacto_emergencia_relacion }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Estado Financiero -->
     <div class="col-md-4">
-        <!-- Estado de Pagos -->
-        <div class="stat-card mb-3">
-            <h6 class="mb-3">Estado de Pagos</h6>
-            {% if alumno.estado_pagos == 'AL_DIA' %}
-                <div class="alert alert-success">
-                    <i class="bi bi-check-circle"></i> Al día con los pagos
-                </div>
-            {% elif alumno.estado_pagos == 'CERCANO_VENCIMIENTO' %}
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i> Pago próximo a vencer
-                </div>
-            {% elif alumno.estado_pagos == 'ATRASADO' %}
-                <div class="alert alert-danger">
-                    <i class="bi bi-x-circle"></i> Pagos atrasados
-                </div>
-            {% else %}
-                <div class="alert alert-secondary">
-                    <i class="bi bi-info-circle"></i> Sin pagos registrados
-                </div>
-            {% endif %}
+        <div class="section-card">
+            <h5 class="mb-4 d-flex align-items-center">
+                <i class="bi bi-wallet2 text-primary me-2"></i>
+                Estado Financiero
+            </h5>
+            
+            <div class="mb-4">
+                <div class="info-label">Situación de Pagos</div>
+                {% if alumno.estado_pagos == 'AL_DIA' %}
+                    <div class="alert alert-success d-flex align-items-center border-0 shadow-sm py-2">
+                        <i class="bi bi-check-circle-fill me-2"></i> Al día
+                    </div>
+                {% elif alumno.estado_pagos == 'CERCANO_VENCIMIENTO' %}
+                    <div class="alert alert-warning d-flex align-items-center border-0 shadow-sm py-2">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Próximo a vencer
+                    </div>
+                {% elif alumno.estado_pagos == 'ATRASADO' %}
+                    <div class="alert alert-danger d-flex align-items-center border-0 shadow-sm py-2">
+                        <i class="bi bi-x-circle-fill me-2"></i> Atrasado
+                    </div>
+                {% else %}
+                    <div class="alert alert-secondary d-flex align-items-center border-0 shadow-sm py-2">
+                        <i class="bi bi-info-circle-fill me-2"></i> Sin pagos
+                    </div>
+                {% endif %}
+            </div>
 
-            <p class="mb-1"><strong>Total Estrellas:</strong></p>
-            <h2 style="color: gold;">⭐ {{ alumno.total_estrellas }}</h2>
-
-            <hr>
-
-            <p class="mb-1"><strong>Total Pagado:</strong></p>
-            <h5>Gs. {{ total_pagado|floatformat:0 }}</h5>
+            <div class="mb-3">
+                <div class="info-label">Total Pagado</div>
+                <div class="h4 fw-bold text-success mb-0">Gs. {{ total_pagado|formato_guaranies }}</div>
+            </div>
 
             {% if alumno.carrera.naturalidad == 'TS' %}
-                <hr>
-                <p class="mb-1"><strong>Puede rendir examen:</strong></p>
-                {% if alumno.puede_rendir_examen %}
-                    <span class="badge bg-success">✓ Sí</span>
-                {% else %}
-                    <span class="badge bg-danger">✗ No (debe estar al día)</span>
-                {% endif %}
+                <div class="mt-4 p-3 rounded-3 border" style="background-color: var(--gray-100);">
+                    <div class="info-label mb-2">Habilitación de Examen</div>
+                    {% if alumno.puede_rendir_examen %}
+                        <div class="text-success fw-bold"><i class="bi bi-check-lg"></i> Habilitado</div>
+                    {% else %}
+                        <div class="text-danger fw-bold"><i class="bi bi-x-lg"></i> No Habilitado</div>
+                        <small class="text-muted">Debe estar al día con sus cuotas</small>
+                    {% endif %}
+                </div>
             {% endif %}
         </div>
     </div>
 </div>
 
-<!-- Historial de Pagos -->
-<div class="row">
-    <div class="col-md-12">
-        <div class="stat-card">
-            <h5 class="mb-3">Historial de Pagos</h5>
+<!-- Tabs de Movimientos -->
+<div class="section-card mb-4">
+    <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pills-pagos-tab" data-bs-toggle="pill" data-bs-target="#pills-pagos" type="button" role="tab">
+                <i class="bi bi-cash me-1"></i> Historial de Pagos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-canjes-tab" data-bs-toggle="pill" data-bs-target="#pills-canjes" type="button" role="tab">
+                <i class="bi bi-gift me-1"></i> Canjes Realizados
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="pills-tabContent">
+        <!-- Panel de Pagos -->
+        <div class="tab-pane fade show active" id="pills-pagos" role="tabpanel">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover align-middle">
                     <thead>
                         <tr>
                             <th>Recibo</th>
                             <th>Fecha</th>
                             <th>Cuota</th>
                             <th>Concepto</th>
-                            <th>Importe</th>
-                            <th>Vencimiento</th>
-                            <th>Estrellas</th>
+                            <th class="text-end">Importe</th>
+                            <th class="text-center">Puntos</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for pago in pagos %}
                         <tr>
-                            <td><strong>{{ pago.numero_recibo }}</strong></td>
+                            <td><span class="badge border" style="background-color: var(--gray-100); color: var(--text-main);">{{ pago.numero_recibo }}</span></td>
                             <td>{{ pago.fecha|date:"d/m/Y" }}</td>
                             <td>{{ pago.numero_cuota }}</td>
-                            <td>{{ pago.concepto|truncatewords:5 }}</td>
-                            <td><strong>Gs. {{ pago.importe_total|floatformat:0 }}</strong></td>
-                            <td>{{ pago.fecha_vencimiento|date:"d/m/Y" }}</td>
-                            <td>
+                            <td>{{ pago.concepto|truncatechars:40 }}</td>
+                            <td class="text-end fw-bold">Gs. {{ pago.importe_total|formato_guaranies }}</td>
+                            <td class="text-center">
                                 {% if pago.estrellas > 0 %}
-                                    <span style="color: gold;">{% for i in "x"|ljust:pago.estrellas %}⭐{% endfor %}</span>
+                                    <span class="text-warning">
+                                        {% for i in "x"|ljust:pago.estrellas %}⭐{% endfor %}
+                                    </span>
                                 {% else %}
                                     <span class="text-muted">—</span>
                                 {% endif %}
@@ -128,8 +291,42 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 No hay pagos registrados
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Panel de Canjes -->
+        <div class="tab-pane fade" id="pills-canjes" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Concepto</th>
+                            <th class="text-center">Cantidad</th>
+                            <th>Registrado por</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for canje in canjes %}
+                        <tr>
+                            <td>{{ canje.fecha|date:"d/m/Y H:i" }}</td>
+                            <td>{{ canje.concepto }}</td>
+                            <td class="text-center fw-bold text-danger">-{{ canje.cantidad }} ⭐</td>
+                            <td>{{ canje.usuario_registro.get_full_name|default:canje.usuario_registro.username }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-gift fs-1 d-block mb-2"></i>
+                                No hay canjes registrados
                             </td>
                         </tr>
                         {% endfor %}
@@ -140,9 +337,44 @@
     </div>
 </div>
 
-<div class="mt-3">
-    <a href="{% url 'lista_alumnos' %}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Volver a la lista
+<div class="mt-4 mb-5">
+    <a href="{% url 'lista_alumnos' %}" class="btn btn-outline-secondary rounded-pill">
+        <i class="bi bi-arrow-left me-1"></i> Volver a la lista
     </a>
+</div>
+
+<!-- Modal de Canje -->
+<div class="modal fade" id="modalCanje" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark border-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-gift-fill me-2"></i> Registrar Canje de Estrellas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'canjear_estrellas' alumno.id %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="display-6 fw-bold text-warning">⭐ {{ total_estrellas }}</div>
+                        <div class="text-muted">Estrellas Disponibles</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cantidad a Canjear</label>
+                        <input type="number" name="cantidad" class="form-control form-control-lg" min="1" max="{{ total_estrellas }}" required placeholder="0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Concepto / Premio</label>
+                        <input type="text" name="concepto" class="form-control" required placeholder="Ej: Vale de fotocopias, Kit de dibujo...">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">Confirmar Canje</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

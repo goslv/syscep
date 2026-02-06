@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Informe de Caja{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #0d6efd;
+        --success-color: #198754;
+        --danger-color: #dc3545;
+        --card-bg: #ffffff;
+        --text-main: #212529;
+        --text-muted: #6c757d;
+        --border-color: #dee2e6;
+        --body-bg: #f8f9fa;
+    }
+
+    [data-theme="dark"] {
+        --card-bg: #1e293b;
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+        --border-color: #334155;
+        --body-bg: #0f172a;
+        --primary-color: #3b82f6;
+        --success-color: #22c55e;
+        --danger-color: #ef4444;
+    }
+
+    body {
+        background-color: var(--body-bg);
+        color: var(--text-main);
+    }
+
+    .card {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-main);
+    }
+
+    .card-header {
+        border-bottom-color: var(--border-color);
+    }
+
+    .table {
+        color: var(--text-main);
+        border-color: var(--border-color);
+    }
+
+    .table-light {
+        background-color: rgba(0,0,0,0.05);
+        color: var(--text-main);
+    }
+
+    [data-theme="dark"] .table-light {
+        background-color: rgba(255,255,255,0.05);
+    }
+
+    [data-theme="dark"] .card-header {
+        background-color: rgba(11, 18, 32, 0.6) !important;
+        color: #a4a7ae;
+    }
+
+    .form-control, .form-select {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-main);
+    }
+
+    .form-control:focus, .form-select:focus {
+        background-color: var(--card-bg);
+        color: var(--text-main);
+    }
+
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    [data-theme="dark"] .stat-mini-card {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    [data-theme="dark"] .badge.bg-light.text-dark {
+        background-color: var(--gray-800) !important;
+        color: var(--gray-300) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    [data-theme="dark"] .table-light,
+    [data-theme="dark"] .bg-light {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: var(--text-main) !important;
+    }
+
+    [data-theme="dark"] .table-success,
+    [data-theme="dark"] .bg-success.bg-opacity-10 {
+        background-color: rgba(34, 197, 94, 0.15) !important;
+    }
+
+    [data-theme="dark"] .table-danger,
+    [data-theme="dark"] .bg-danger.bg-opacity-10 {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+    }
+
+    [data-theme="dark"] .bg-primary.bg-opacity-10 {
+        background-color: rgba(59, 130, 246, 0.15) !important;
+    }
+
+    [data-theme="dark"] .bg-warning.bg-opacity-10 {
+        background-color: rgba(245, 158, 11, 0.15) !important;
+    }
+
+    .report-header {
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-mini-card {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .firma-linea {
+        border-top: 1px solid var(--text-main);
+        margin-top: 3rem;
+        width: 200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    @media print {
+        body {
+            background-color: white !important;
+            color: black !important;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .card-body {
+            padding: 0 !important;
+        }
+        .informe-compacto {
+            font-size: 8pt !important;
+        }
+        .informe-compacto th,
+        .informe-compacto td {
+            padding: 2px 4px !important;
+            border: 1px solid #dee2e6 !important;
+        }
+        .print-only {
+            display: block !important;
+        }
+        .report-header {
+            margin-bottom: 1rem;
+        }
+        .stat-summary-print {
+            display: flex !important;
+            justify-content: space-between;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .stat-item-print {
+            text-align: center;
+            flex: 1;
+        }
+        .stat-item-print:not(:last-child) {
+            border-right: 1px solid #dee2e6;
+        }
+        .resumen-ejecutivo {
+            display: none !important;
+        }
+        .balance-final-card {
+            margin-top: 10px !important;
+            border: 1px solid #dee2e6 !important;
+        }
+        .table-success { background-color: #e2f0d9 !important; }
+        .table-danger { background-color: #fbe5e1 !important; }
+        .text-success { color: #2e7d32 !important; }
+        .text-danger { color: #c62828 !important; }
+        .text-primary { color: #1565c0 !important; }
+        
+        .card-header {
+            background-color: #f8f9fa !important;
+            color: black !important;
+            border: 1px solid #dee2e6 !important;
+            font-weight: bold !important;
+        }
+    }
+
+    .print-only {
+        display: none;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print mt-5">
+        <h2 class="mb-0"><i class="fas fa-file-invoice-dollar text-primary me-2"></i>Informe de Caja</h2>
+        <div>
+            <button onclick="window.print()" class="btn btn-primary me-2">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+            <a href="{% url 'lista_caja' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Encabezado de Impresión -->
+    <div class="print-only report-header text-center">
+        <h1 class="h3 mb-1">INFORME DE CAJA</h1>
+        <h2 class="h5 mb-2">Instituto Técnico Superior CEP</h2>
+        <div class="d-flex justify-content-center gap-4 small">
+            <span><strong>Sede:</strong> {% if sede %}{{ sede.nombre }}{% else %}Todas las Sedes{% endif %}</span>
+            <span><strong>Período:</strong> {{ fecha_desde|date:"d/m/Y" }} - {{ fecha_hasta|date:"d/m/Y" }}</span>
+            <span><strong>Emisión:</strong> {{ "now"|date:"d/m/Y H:i" }}</span>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4 no-print shadow-sm">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="sede" class="form-label small fw-bold">Sede</label>
+                    <select name="sede" id="sede" class="form-select">
+                        <option value="">Todas las sedes</option>
+                        {% for s in sedes %}
+                            <option value="{{ s.id }}" {% if sede and sede.id == s.id %}selected{% endif %}>
+                                {{ s.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="fecha_desde" class="form-label small fw-bold">Fecha Desde</label>
+                    <input type="date" name="fecha_desde" id="fecha_desde" class="form-control"
+                           value="{{ fecha_desde|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="fecha_hasta" class="form-label small fw-bold">Fecha Hasta</label>
+                    <input type="date" name="fecha_hasta" id="fecha_hasta" class="form-control"
+                           value="{{ fecha_hasta|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-sync-alt"></i> Actualizar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resumen para Impresión (Compacto) -->
+    <div class="print-only stat-summary-print">
+        <div class="stat-item-print">
+            <div class="small text-muted">Total Ingresos</div>
+            <div class="fw-bold text-success">Gs. {{ total_ingresos|formato_guaranies }}</div>
+        </div>
+        <div class="stat-item-print">
+            <div class="small text-muted">Total Egresos</div>
+            <div class="fw-bold text-danger">Gs. {{ total_egresos|formato_guaranies }}</div>
+        </div>
+        <div class="stat-item-print">
+            <div class="small text-muted">Balance</div>
+            <div class="fw-bold {% if balance >= 0 %}text-primary{% else %}text-danger{% endif %}">
+                Gs. {{ balance|formato_guaranies }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen Ejecutivo (Vista Web) -->
+    <div class="row mb-4 resumen-ejecutivo no-print">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+                <div class="card-body text-center">
+                    <h6 class="text-success text-uppercase small fw-bold">Total Ingresos</h6>
+                    <h3 class="text-success mb-0">Gs. {{ total_ingresos|formato_guaranies }}</h3>
+                    <small class="text-muted">{{ ingresos|length }} registros</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-danger bg-opacity-10">
+                <div class="card-body text-center">
+                    <h6 class="text-danger text-uppercase small fw-bold">Total Egresos</h6>
+                    <h3 class="text-danger mb-0">Gs. {{ total_egresos|formato_guaranies }}</h3>
+                    <small class="text-muted">{{ egresos|length }} registros</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm {% if balance >= 0 %}bg-primary{% else %}bg-warning{% endif %} bg-opacity-10">
+                <div class="card-body text-center">
+                    <h6 class="{% if balance >= 0 %}text-primary{% else %}text-warning{% endif %} text-uppercase small fw-bold">Balance</h6>
+                    <h3 class="{% if balance >= 0 %}text-primary{% else %}text-warning{% endif %} mb-0">
+                        Gs. {{ balance|formato_guaranies }}
+                    </h3>
+                    <small class="text-muted">Ingresos - Egresos</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalle de Ingresos -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+            <span class="fw-bold"><i class="fas fa-arrow-up text-success me-2"></i>Detalle de Ingresos</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0 informe-compacto">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Fecha</th>
+                            <th>Recibo</th>
+                            <th>Sede</th>
+                            <th>Alumno/Cliente</th>
+                            <th>Concepto</th>
+                            <th class="text-end pe-3">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ingreso in ingresos %}
+                        <tr>
+                            <td class="ps-3">{{ ingreso.fecha|date:"d/m/Y" }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ ingreso.numero_recibo }}</span></td>
+                            <td>{{ ingreso.sede.nombre }}</td>
+                            <td>
+                                {% if ingreso.alumno %}
+                                    {{ ingreso.alumno.nombre_completo }}
+                                {% else %}
+                                    {{ ingreso.nombre_cliente }}
+                                {% endif %}
+                            </td>
+                            <td>{{ ingreso.concepto|truncatewords:8 }}</td>
+                            <td class="text-end pe-3 text-success fw-medium">Gs. {{ ingreso.importe_total|formato_guaranies }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No hay ingresos registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if ingresos %}
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td colspan="5" class="text-end">SUBTOTAL INGRESOS:</td>
+                            <td class="text-end pe-3 text-success">Gs. {{ total_ingresos|formato_guaranies }}</td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalle de Egresos -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+            <span class="fw-bold"><i class="fas fa-arrow-down text-danger me-2"></i>Detalle de Egresos</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0 informe-compacto">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Fecha</th>
+                            <th>Comprobante</th>
+                            <th>Sede</th>
+                            <th>Categoría</th>
+                            <th>Concepto</th>
+                            <th class="text-end pe-3">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for egreso in egresos %}
+                        <tr>
+                            <td class="ps-3">{{ egreso.fecha|date:"d/m/Y" }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ egreso.numero_comprobante }}</span></td>
+                            <td>{{ egreso.sede.nombre }}</td>
+                            <td><span class="small text-muted">{{ egreso.get_categoria_display }}</span></td>
+                            <td>{{ egreso.concepto|truncatewords:8 }}</td>
+                            <td class="text-end pe-3 text-danger fw-medium">Gs. {{ egreso.monto|formato_guaranies }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No hay egresos registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if egresos %}
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td colspan="5" class="text-end">SUBTOTAL EGRESOS:</td>
+                            <td class="text-end pe-3 text-danger">Gs. {{ total_egresos|formato_guaranies }}</td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Balance Final (Compacto para impresión) -->
+    <div class="row justify-content-end">
+        <div class="col-md-5">
+            <div class="card border-primary balance-final-card mb-4 shadow-sm">
+                <div class="card-body p-0">
+                    <table class="table table-bordered mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="text-end fw-bold bg-light" style="width: 50%;">Total Ingresos:</td>
+                                <td class="text-end text-success fw-bold">Gs. {{ total_ingresos|formato_guaranies }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-end fw-bold bg-light">Total Egresos:</td>
+                                <td class="text-end text-danger fw-bold">Gs. {{ total_egresos|formato_guaranies }}</td>
+                            </tr>
+                            <tr class="table-primary">
+                                <td class="text-end fw-bold fs-5">BALANCE FINAL:</td>
+                                <td class="text-end fw-bold fs-5 {% if balance >= 0 %}text-primary{% else %}text-danger{% endif %}">
+                                    Gs. {{ balance|formato_guaranies }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firmas -->
+    <div class="firma-section print-only mt-4">
+        <div class="row">
+            <div class="col-6 text-center">
+                <div class="firma-linea"></div>
+                <p class="mb-0 small fw-bold">Preparado por</p>
+                <small class="text-muted">Firma y Aclaración</small>
+            </div>
+            <div class="col-6 text-center">
+                <div class="firma-linea"></div>
+                <p class="mb-0 small fw-bold">Aprobado por</p>
+                <small class="text-muted">Firma y Aclaración</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer de impresión -->
+    <div class="print-only text-center mt-4 pt-3 border-top small text-muted">
+        Documento generado por el Sistema de Gestión CEP - {{ "now"|date:"d/m/Y H:i" }}
+    </div>
+</div>
+{% endblock %}

@@ -1,29 +1,194 @@
 
 {% extends 'base.html' %}
+{% load custom_filters %}
 
-{% block title %}Rendición {{ sede.nombre }} - SysCEP{% endblock %}
-{% block page_title %}Rendición de Caja{% endblock %}
+{% block title %}Rendición {{ sede.nombre }} - ITS CEP{% endblock %}
 {% block breadcrumb_current %}{{ sede.nombre }}{% endblock %}
 {% load static %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/rendicion.css' %}">
 <style>
+    :root {
+        --card-bg: #ffffff;
+        --card-border: rgba(0, 0, 0, 0.05);
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --stat-bg: #f8fafc;
+        --table-row-hover: #f1f5f9;
+        --accent-color: #0ea5e9;
+        --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+    }
 
+    [data-theme="dark"] {
+        --card-bg: #1e293b;
+        --card-border: rgba(255, 255, 255, 0.05);
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+        --stat-bg: #0f172a;
+        --table-row-hover: #2d3748;
+    }
+
+    .rendicion-header {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        margin-bottom: 2rem;
+        color: var(--text-main);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+
+    .rendicion-header h2 {
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        margin-bottom: 0.25rem;
+    }
+
+    .filtro-fecha {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        margin-bottom: 2rem;
+        color: var(--text-main);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .resumen-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .resumen-card {
+        background: var(--card-bg);
+        padding: 1.75rem;
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        color: var(--text-main);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .resumen-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+
+    .resumen-card .value {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0.75rem 0;
+        letter-spacing: -0.025em;
+    }
+
+    .resumen-card h6 {
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .resumen-card.total { border-top: 5px solid #10b981; }
+    .resumen-card.egreso { border-top: 5px solid #ef4444; }
+    .resumen-card.balance { border-top: 5px solid #f59e0b; }
+
+    .pagos-table-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+
+    .table-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--card-border);
+        background: var(--stat-bg);
+    }
+
+    .pago-row {
+        padding: 1.25rem 2rem;
+        border-bottom: 1px solid var(--card-border);
+        transition: all 0.2s;
+    }
+
+    .pago-row:hover {
+        background: var(--table-row-hover);
+    }
+
+    .recibo-badge {
+        background: var(--accent-gradient);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
+    }
+
+    .importe-badge {
+        font-weight: 800;
+        color: #10b981;
+        font-size: 1.1rem;
+    }
+
+    .nav-tabs {
+        padding: 0 1rem;
+        gap: 1rem;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        border-radius: 12px 12px 0 0;
+        transition: all 0.3s;
+    }
+
+    .nav-tabs .nav-link.active {
+        background: var(--card-bg);
+        color: var(--accent-color);
+        border-bottom: 3px solid var(--accent-color);
+    }
+    [data-theme="dark"] .btn-light {
+        background-color: var(--gray-200) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-main) !important;
+    }
+
+    [data-theme="dark"] .nav-tabs .nav-link.active {
+        background: var(--card-bg);
+        border-bottom-color: var(--accent-color);
+        color: var(--accent-color);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="mt-5">
+    <a href="{% url 'lista_sedes' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a Sedes
+    </a>
+</div>
 <!-- Header -->
-<div class="rendicion-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2>{{ sede.nombre }}</h2>
-            <p>Fecha: {{ fecha|date:'Y-m-d' }}</p>
+<div class="rendicion-header mt-3">
+    <div class="d-flex align-items-center gap-4">
+        <div class="sede-icon-wrapper d-none d-md-flex" style="width: 64px; height: 64px; border-radius: 20px; background: var(--accent-gradient); color: white; align-items: center; justify-content: center; font-size: 2rem;">
+            <i class="bi bi-building"></i>
         </div>
         <div>
-            <button onclick="window.print()" class="btn btn-light">
-                <i class="bi bi-printer"></i> Imprimir
-            </button>
+            <h2 class="mb-0">{{ sede.nombre }}</h2>
         </div>
     </div>
 </div>
@@ -39,108 +204,146 @@
             <input type="date"
                    name="fecha"
                    class="form-control"
-                   value="{{ fecha|date:'Y-m-d' }}"
-                   max="{{ fecha|date:'Y-m-d' }}">
+                   value="{{ fecha|date:'Y-m-d' }}">
         </div>
         <div class="col-md-2">
             <button type="submit" class="btn btn-primary w-100">
                 <i class="bi bi-search"></i> Buscar
             </button>
         </div>
-        <div class="col-md-6 text-end">
-            <a href="{% url 'lista_sedes' %}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Volver a Sedes
-            </a>
-        </div>
+
     </form>
 </div>
 
 <div class="resumen-cards">
     <div class="resumen-card total">
-        <h6><i class="bi bi-cash-stack me-1"></i>Total Recaudado</h6>
-        <div class="value">Gs. {{ rendicion.total|floatformat:0 }}</div>
-        <div class="subtext">Suma de todos los pagos</div>
+        <h6><i class="bi bi-cash-stack"></i> Total Recaudado</h6>
+        <div class="value">Gs. {{ rendicion.total_ingresos|formato_guaranies }}</div>
+        <div class="subtext text-muted small">Suma de todos los pagos</div>
     </div>
 
-    <div class="resumen-card cantidad">
-        <h6><i class="bi bi-receipt me-1"></i>Cantidad de Pagos</h6>
-        <div class="value">{{ rendicion.cantidad_pagos }}</div>
-        <div class="subtext">Transacciones realizadas</div>
+    <div class="resumen-card egreso">
+        <h6><i class="bi bi-cash-dash"></i> Total Egresos</h6>
+        <div class="value">Gs. {{ rendicion.total_egresos|formato_guaranies }}</div>
+        <div class="subtext text-muted small">Suma de todos los egresos</div>
     </div>
+
+    <div class="resumen-card balance">
+        <h6><i class="bi bi-wallet2"></i> Balance Neto</h6>
+        <div class="value">Gs. {{ rendicion.balance|formato_guaranies }}</div>
+        <div class="subtext text-muted small">Diferencia ingresos - egresos</div>
+    </div>
+
 </div>
 
 <!-- Tabla de Pagos -->
 <div class="pagos-table-card">
     <div class="table-header">
-        <h5>
-            <i class="bi bi-list-ul me-2"></i>
-            Detalle de Pagos ({{ pagos|length }})
-        </h5>
-        <button onclick="exportarExcel()" class="btn-exportar">
-            <i class="bi bi-file-earmark-excel"></i>
-            Exportar a Excel
-        </button>
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <h5 class="mb-0 fw-800">
+                <i class="bi bi-list-stars me-2 text-primary"></i>
+                Detalle de Movimientos
+            </h5>
+        </div>
     </div>
 
-    {% if pagos %}
-        <div class="table-responsive">
-            {% for pago in pagos %}
-            <div class="pago-row">
-                <div class="row align-items-center g-3">
-                    <div class="col-md-2">
-                        <span class="recibo-badge">{{ pago.numero_recibo }}</span>
-                    </div>
-                    <div class="col-md-3">
-                        <span class="alumno-name">{{ pago.alumno.nombre_completo }}</span>
-                        <span class="cuota-info">
-                            <i class="bi bi-layers me-1"></i>Cuota {{ pago.numero_cuota }}
-                        </span>
-                    </div>
-                    <div class="col-md-2">
-                        <small class="text-muted">
-                            <i class="bi bi-clock me-1"></i>
-                            {{ pago.fecha|date }}
-                        </small>
-                    </div>
-                    <div class="col-md-2">
-                        <span class="importe-badge">
-                            Gs. {{ pago.importe_total|floatformat:0 }}
-                        </span>
-                    </div>
-                    <div class="col-md-2 text-center">
-                        <div class="estrellas-display">
-                            {% if pago.estrellas > 0 %}
-                                <span style="color: #fbbf24;">
-                                    {% for i in "x"|ljust:pago.estrellas %}⭐{% endfor %}
+    {% if pagos or rendicion.egresos %}
+    <div class="table-responsive">
+        <ul class="nav nav-tabs px-3 border-0" id="rendicionTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pagos-tab" data-bs-toggle="tab" data-bs-target="#pagos-panel" type="button" role="tab">
+                    Pagos ({{ pagos|length }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="egresos-tab" data-bs-toggle="tab" data-bs-target="#egresos-panel" type="button" role="tab">
+                    Egresos ({{ rendicion.egresos|length }})
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="rendicionTabsContent">
+            <div class="tab-pane fade show active" id="pagos-panel" role="tabpanel">
+                {% for pago in pagos %}
+                <div class="pago-row">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-2">
+                            <span class="recibo-badge">{{ pago.numero_recibo }}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <span class="alumno-name fw-bold fs-5">{{ pago.alumno.nombre_completo }}</span>
+                            <span class="cuota-info">
+                                    <i class="bi bi-layers me-1"></i>Cuota {{ pago.numero_cuota }}
                                 </span>
-                            {% else %}
-                                <span class="text-muted">—</span>
+                        </div>
+                        <div class="col-md-2">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                {{ pago.fecha|date:"d M, Y" }}
+                            </small>
+                        </div>
+                        <div class="col-md-3">
+                                <span class="importe-badge">
+                                    Gs. {{ pago.importe_total|formato_guaranies }}
+                                </span>
+                        </div>
+                        <div class="col-md-1 text-end">
+                            <a href="{% url 'detalle_alumno' pago.alumno.id %}" class="btn btn-sm btn-light rounded-pill px-3 border">
+                                <i class="bi bi-person-lines-fill"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-4 text-center text-muted">No hay pagos registrados</div>
+                {% endfor %}
+            </div>
+
+            <div class="tab-pane fade" id="egresos-panel" role="tabpanel">
+                {% for egreso in rendicion.egresos %}
+                <div class="pago-row">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-2">
+                            <span class="recibo-badge bg-danger text-white border-0">{{ egreso.id }}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <span class="alumno-name fw-bold fs-5 text-danger">{{ egreso.concepto|truncatechars:30 }}</span>
+                            <span class="cuota-info">
+                                    <i class="bi bi-tag-fill me-1"></i>{{ egreso.get_categoria_display }}
+                                </span>
+                        </div>
+                        <div class="col-md-2">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                {{ egreso.fecha|date:"d M, Y" }}
+                            </small>
+                        </div>
+                        <div class="col-md-3">
+                                <span class="importe-badge text-danger">
+                                    Gs. {{ egreso.monto|formato_guaranies }}
+                                </span>
+                        </div>
+                        <div class="col-md-1 text-end">
+                            {% if egreso.comprobante %}
+                            <a href="{{ egreso.comprobante.url }}" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill">
+                                <i class="bi bi-file-earmark-image"></i>
+                            </a>
                             {% endif %}
                         </div>
                     </div>
-                    <div class="col-md-1 text-end">
-                        <a href="{% url 'detalle_alumno' pago.alumno.id %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                    </div>
                 </div>
+                {% empty %}
+                <div class="p-4 text-center text-muted">No hay egresos registrados</div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
+    </div>
     {% else %}
-        <div class="empty-state-table">
-            <i class="bi bi-inbox"></i>
-            <h5>No hay pagos registrados</h5>
-            <p>No se realizaron transacciones en esta fecha para esta sede</p>
-        </div>
+    <div class="empty-state-table">
+        <i class="bi bi-inbox"></i>
+        <h5>Sin movimientos</h5>
+        <p>No se realizaron transacciones ni egresos en esta fecha para esta sede</p>
+    </div>
     {% endif %}
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    function exportarExcel() {
-        alert('Función de exportación a Excel. Próximamente disponible.');
-    }
-</script>
 {% endblock %}

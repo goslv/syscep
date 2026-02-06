@@ -10,6 +10,21 @@
         padding: 0.4em 0.6em;
         border-radius: 0.25rem;
     }
+    [data-theme="dark"] .btn {
+        background-color: rgba(255,255,255,0.05) !important;
+        color: rgba(239, 241, 244, 0.88);
+
+    }
+    [data-theme="dark"] .btn-primary {
+        background-color: var(--primary-500) !important;
+        border-color: var(--primary-500) !important;
+        color: white !important;
+    }
+    [data-theme="dark"] .btn-secondary {
+        background-color: var(--gray-300) !important;
+        border-color: var(--gray-300) !important;
+        color: var(--text-main) !important;
+    }
     .btn:hover {
         animation: fadeIn 1s;
         background-color: rgba(11, 94, 215, 0.76);
@@ -24,18 +39,17 @@
         border-radius: 100px;
         padding: 0.75rem 1rem;
         font-size: 1.1rem;
-        box-shadow: 0 12px 30px rgba(102, 126, 234, 0);
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background: rgba(209, 213, 219, 0.05) !important;
+        background: rgba(209, 213, 219, 0) !important;
         transition: transform 0.35s ease, box-shadow 0.35s ease;
         transform-origin: center center;
     }
 
     .btn-primary-custom.fab-register i {
         font-size: 5rem;
-        color: rgba(118, 75, 162, 0.8) !important;
+        color: rgba(53, 133, 182, 0.85);
         display: inline-block;
         transform-origin: center center;
         will-change: transform;
@@ -48,11 +62,60 @@
 
     .btn-primary-custom.fab-register:hover {
         transform: translateY(-6px);
-        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
     }
 
     .btn-primary-custom.fab-register:hover i {
         animation: spin 0.5s linear;
+    }
+
+    .stat-card {
+        border-radius: 18px;
+        border: 1px solid var(--border-color);
+        background: var(--card-bg);
+        box-shadow: var(--shadow-md);
+    }
+
+    .table thead th {
+        background: rgba(239, 239, 239, 0.05);
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .table tbody td {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .form-control, .form-select {
+        background-color: var(--body-bg);
+        border-color: var(--border-color);
+        color: var(--text-main);
+    }
+
+    .form-control:focus, .form-select:focus {
+        background-color: var(--card-bg);
+        color: var(--text-main);
+        border-color: var(--primary-400);
+    }
+
+    .form-label {
+        color: var(--text-main);
+    }
+
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    [data-theme="dark"] .badge.bg-warning.text-dark,
+    [data-theme="dark"] .badge.bg-info.text-dark,
+    [data-theme="dark"] .badge.bg-light.text-dark {
+        color: #0f172a !important;
+    }
+
+    [data-theme="dark"] .table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.05);
     }
 
     .btn-primary-custom.fab-register hover:after i {
@@ -72,11 +135,11 @@
 
 </style>
 <!-- Filtros -->
-<div class="row mb-3 mt-1">
-    <div class="col-md-12">
+<div class="row mb-3 mt-3">
+    <div class="col-md-12 mt-4">
         <div class="stat-card">
             <form method="get" class="row g-3">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label">Buscar</label>
                     <input type="text" name="busqueda" class="form-control"
                            placeholder="Nombre, apellido o cédula">
@@ -87,7 +150,7 @@
                         <option value="">Todas las sedes</option>
                         {% for sede in sedes %}
                         <option value="{{ sede.id }}" {% if filtros.sede == sede.id|stringformat:"s" %}selected{% endif %}>
-                        {{ sede.nombre }}
+                            {{ sede.nombre }}
                         </option>
                         {% endfor %}
                     </select>
@@ -98,12 +161,12 @@
                         <option value="">Todas las carreras</option>
                         {% for carrera in carreras %}
                         <option value="{{ carrera.id }}" {% if filtros.carrera == carrera.id|stringformat:"s" %}selected{% endif %}>
-                        {{ carrera.nombre }}
+                            {{ carrera.nombre }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label">Estado de Pago</label>
                     <select name="estado" class="form-select">
                         <option value="">Todos</option>
@@ -114,10 +177,10 @@
                 </div>
                 <div class="col-md-12">
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-search"></i> Buscar
+                        <i class="bi bi-search"></i>
                     </button>
                     <a href="{% url 'lista_alumnos' %}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Limpiar
+                        <i class="bi bi-x-circle"></i>
                     </a>
                 </div>
             </form>
@@ -183,7 +246,7 @@
                 <p class="text-muted mb-0">Total: {{ alumnos|length }} alumno{{ alumnos|length|pluralize }}</p>
             </div>
         </div>
-        <a href="{% url 'registrar_pago' %}" class="btn-primary-custom fab-register" aria-label="Registrar pago">
+        <a href="{% url 'crear_alumno' %}" class="btn-primary-custom fab-register" aria-label="Registrar alumno">
             <i class="bi bi-plus-circle-fill"></i></a>
     </div>
 

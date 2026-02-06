@@ -11,14 +11,14 @@
     }
 
     .form-card {
-        background: white;
+        background: var(--card-bg, white);
         border-radius: 16px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         overflow: hidden;
     }
 
     .form-header {
-        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        background: linear-gradient(135deg, #1b3a4b 0%, #2e6481 100%);
         color: white;
         padding: 2rem;
     }
@@ -78,9 +78,9 @@
         margin-bottom: 1.25rem;
         font-size: 1rem;
         font-weight: 600;
-        color: #1e293b;
+        color: var(--text-main, #1e293b);
         padding-bottom: 0.75rem;
-        border-bottom: 2px solid #f1f5f9;
+        border-bottom: 2px solid var(--border-color, #f1f5f9);
     }
 
     .section-icon {
@@ -97,7 +97,7 @@
 
     .form-label {
         font-weight: 600;
-        color: #334155;
+        color: var(--text-main, #334155);
         margin-bottom: 0.5rem;
         font-size: 0.875rem;
         display: flex;
@@ -154,32 +154,6 @@
         color: #94a3b8;
     }
 
-    .info-card {
-        background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
-        border-left: 4px solid #3b82f6;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-    }
-
-    .info-card-title {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 600;
-        color: #1e40af;
-        margin-bottom: 0.5rem;
-        font-size: 0.938rem;
-    }
-
-    .info-card-text {
-        color: #1e40af;
-        margin: 0;
-        font-size: 0.875rem;
-        line-height: 1.5;
-    }
-
-    /* Grid de campos */
     .form-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -190,13 +164,10 @@
         grid-column: 1 / -1;
     }
 
-    /* Botones de acción */
     .form-actions {
-        display: flex;
+        max-width: 50%;
         gap: 1rem;
-        margin-top: 2rem;
         padding-top: 2rem;
-        border-top: 2px solid #f1f5f9;
     }
 
     .btn {
@@ -226,15 +197,15 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
         flex: 1;
     }
 
     .btn-primary:hover {
-        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
     .text-danger {
@@ -250,7 +221,6 @@
         font-size: 0.875rem;
     }
 
-    /* Indicador de campo opcional */
     .optional-badge {
         display: inline-block;
         background: #f1f5f9;
@@ -281,47 +251,44 @@
         }
 
         .form-actions {
-            flex-direction: column;
+            flex-direction: row;
+            max-width: 100%;
+
         }
 
         .btn-primary {
             order: -1;
         }
     }
+    [data-theme="dark"] .section-title {
+        border-bottom-color: #334155 !important;
+        color: var(--text-main) !important;
+    }
+
+    [data-theme="dark"] .form-label {
+        color: var(--text-main) !important;
+    }
+
+    [data-theme="dark"] .section-icon {
+        background: rgba(37, 99, 235, 0.2) !important;
+        color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] .btn-secondary {
+        background: #334155 !important;
+        color: whitesmoke !important;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="form-container">
+
+<div class="form-container mt-5">
     <div class="form-card">
         <div class="form-header">
-            <div class="header-content">
-                <div class="header-icon">
-                    <i class="bi bi-book-half"></i>
-                </div>
-                <div class="header-text">
-                    <h3>{{ titulo }}</h3>
-                    <p>Complete la información de la materia para el plan de estudio</p>
-                </div>
-            </div>
-            <div class="carrera-badge">
-                <i class="bi bi-mortarboard-fill"></i>
-                {{ carrera.nombre }}
-            </div>
         </div>
 
         <div class="form-body">
-            {% if carrera.naturalidad == 'TS' %}
-            <div class="info-card">
-                <div class="info-card-title">
-                    <i class="bi bi-info-circle-fill"></i>
-                    Carrera de Técnico Superior
-                </div>
-                <p class="info-card-text">
-                    Esta carrera utiliza el sistema de bimestres. Asegúrate de especificar correctamente el bimestre al que pertenece la materia.
-                </p>
-            </div>
-            {% endif %}
 
             <form method="post" id="materiaForm">
                 {% csrf_token %}
@@ -407,12 +374,13 @@
                 <div class="form-section">
                     <div class="section-title">
                         <div class="section-icon">
-                            <i class="bi bi-person-video3"></i>
+                            <i class="bi bi-person"></i>
                         </div>
-                        Docente y Recursos
+                        Docentes y Recursos
                     </div>
 
                     <div class="form-grid">
+
                         <div class="form-grid-full">
                             <label class="form-label">
                                 Docente Asignado
@@ -428,10 +396,6 @@
                                 {{ form.docente.errors }}
                             </div>
                             {% endif %}
-                            <small class="help-text">
-                                <i class="bi bi-info-circle"></i>
-                                Puedes asignar el docente ahora o más tarde
-                            </small>
                         </div>
 
                         <div class="form-grid-full">
@@ -449,16 +413,12 @@
                                 {{ form.link_classroom.errors }}
                             </div>
                             {% endif %}
-                            <small class="help-text">
-                                <i class="bi bi-google"></i>
-                                URL completa del aula virtual (ej: https://classroom.google.com/c/...)
-                            </small>
                         </div>
                     </div>
                 </div>
 
                 <!-- Botones de acción -->
-                <div class="form-actions">
+                <div class="form-actions d-flex justify-content-between">
                     <a href="{% url 'detalle_carrera' carrera.id %}" class="btn btn-secondary">
                         <i class="bi bi-x-circle"></i>
                         Cancelar
