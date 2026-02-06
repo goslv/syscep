@@ -64,6 +64,7 @@ class SidebarManager {
         this.sidebar = document.getElementById('sidebar');
         this.sidebarOverlay = document.getElementById('sidebarOverlay');
         this.menuToggle = document.getElementById('menuToggle');
+        this.closeSidebar = document.getElementById('closeSidebar');
         this.body = document.body;
         this.isMobile = window.innerWidth <= 1024;
 
@@ -79,6 +80,7 @@ class SidebarManager {
     bindEvents() {
         this.menuToggle?.addEventListener('click', () => this.toggle());
         this.sidebarOverlay?.addEventListener('click', () => this.close());
+        this.closeSidebar?.addEventListener('click', () => this.close());
 
         // Cerrar sidebar al hacer clic en enlace (móvil)
         document.querySelectorAll('.nav-link').forEach(link => {

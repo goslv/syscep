@@ -1,0 +1,143 @@
+/* Mejoras de responsividad global para SysCEP */
+
+/* 1. Ajustes de Layout y Contenedores */
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: 1rem 0.75rem !important;
+    }
+
+    .stat-card, .form-card, .card {
+        padding: 1.25rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .page-title {
+        font-size: 1.4rem !important;
+    }
+}
+
+/* 2. Tablas Responsivas (Efecto Stack en móviles) */
+@media (max-width: 576px) {
+    .table-responsive-stack .table thead {
+        display: none;
+    }
+
+    .table-responsive-stack .table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        background: var(--card-bg);
+        padding: 0.5rem;
+    }
+
+    .table-responsive-stack .table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--gray-100);
+        padding: 0.75rem 0.5rem;
+        text-align: right;
+    }
+
+    .table-responsive-stack .table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        text-align: left;
+        margin-right: 1rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    .table-responsive-stack .table td:last-child {
+        border-bottom: none;
+        justify-content: center;
+        background: rgba(var(--primary-rgb), 0.05);
+        margin-top: 0.5rem;
+        border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
+    }
+}
+
+/* 3. Ajustes de Formularios */
+@media (max-width: 576px) {
+    .form-section {
+        padding: 1rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .d-flex.gap-3.justify-content-end,
+    .form-actions {
+        flex-direction: column-reverse;
+        gap: 0.75rem !important;
+    }
+
+    .form-actions > * {
+        width: 100%;
+        margin: 0 !important;
+    }
+
+    .btn-submit, .btn-cancel, .btn {
+        padding: 0.8rem 1.5rem !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+/* 4. Mejoras en el Sidebar Móvil */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 85% !important;
+        max-width: 300px !important;
+    }
+
+    .sidebar-brand {
+        padding: 1.5rem !important;
+    }
+
+    .nav-link {
+        padding: 0.85rem 1.25rem !important;
+        font-size: 1rem !important;
+    }
+
+    .btn-close-sidebar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        margin-left: auto;
+    }
+}
+
+/* 5. Dashboard y Gráficos */
+@media (max-width: 768px) {
+    .stat-card-icon {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 1.25rem !important;
+    }
+
+    .stat-card-value {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Utility classes for responsive visibility */
+@media (max-width: 576px) {
+    .hide-on-mobile {
+        display: none !important;
+    }
+}

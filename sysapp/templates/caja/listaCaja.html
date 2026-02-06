@@ -134,7 +134,7 @@
             <div class="tab-content" id="cajaTabsContent">
                 <!-- Tab Ingresos -->
                 <div class="tab-pane fade show active" id="ingresos" role="tabpanel">
-                    <div class="table-responsive">
+                    <div class="table-responsive table-responsive-stack">
                         <table class="table table-hover align-middle mb-0">
                             <thead>
                             <tr>
@@ -149,9 +149,9 @@
                             <tbody>
                             {% for pago in ingresos %}
                             <tr>
-                                <td class="ps-4 text-muted small">{{ pago.fecha|date:"d/m/Y" }}</td>
-                                <td><span class="badge bg-light text-primary border">{{ pago.numero_recibo }}</span></td>
-                                <td>
+                                <td data-label="Fecha" class="ps-4 text-muted small">{{ pago.fecha|date:"d/m/Y" }}</td>
+                                <td data-label="Recibo"><span class="badge bg-light text-primary border">{{ pago.numero_recibo }}</span></td>
+                                <td data-label="Alumno/Cliente">
                                     <div class="fw-bold">
                                         {% if pago.alumno %}
                                         {{ pago.alumno.nombre_completo }}
@@ -161,15 +161,15 @@
                                     </div>
                                     <div class="small text-muted">{{ pago.sede.nombre }}</div>
                                 </td>
-                                <td>{{ pago.concepto|truncatewords:8 }}</td>
-                                <td class="text-end text-success fw-bold">Gs. {{ pago.importe_total|formato_guaranies }}</td>
-                                <td class="text-center no-print">
+                                <td data-label="Concepto">{{ pago.concepto|truncatewords:8 }}</td>
+                                <td data-label="Monto" class="text-end text-success fw-bold">Gs. {{ pago.importe_total|formato_guaranies }}</td>
+                                <td data-label="Acciones" class="text-center no-print">
                                     <div class="btn-group">
                                         <a href="{% url 'detalle_pago' pago.id %}" class="btn btn-sm btn-light border" title="Ver">
-                                            <i class="fas fa-eye"></i>Detalle
+                                            <i class="bi bi-eye"></i> Detalle
                                         </a>
                                         <a href="{% url 'editar_pago' pago.id %}" class="btn btn-sm btn-dark border" title="Editar">
-                                            <i class="fas fa-edit"></i>Editar
+                                            <i class="bi bi-pencil"></i> Editar
                                         </a>
                                     </div>
                                 </td>
@@ -191,7 +191,7 @@
 
                 <!-- Tab Egresos -->
                 <div class="tab-pane fade" id="egresos" role="tabpanel">
-                    <div class="table-responsive">
+                    <div class="table-responsive table-responsive-stack">
                         <table class="table table-hover align-middle mb-0">
                             <thead>
                             <tr>
@@ -205,21 +205,21 @@
                             <tbody>
                             {% for egreso in egresos %}
                             <tr>
-                                <td class="ps-4 text-muted small">{{ egreso.fecha|date:"d/m/Y" }}</td>
-                                <td><span class="badge bg-light text-secondary border">{{ egreso.numero_comprobante }}</span></td>
-                                <td>
+                                <td data-label="Fecha" class="ps-4 text-muted small">{{ egreso.fecha|date:"d/m/Y" }}</td>
+                                <td data-label="Comprobante"><span class="badge bg-light text-secondary border">{{ egreso.numero_comprobante }}</span></td>
+                                <td data-label="Categoría / Concepto">
                                     <div class="fw-bold">{{ egreso.get_categoria_display }}</div>
                                     <div class="small text-muted">{{ egreso.concepto|truncatewords:8 }}</div>
                                     <div class="small text-muted fst-italic">{{ egreso.sede.nombre }}</div>
                                 </td>
-                                <td class="text-end text-danger fw-bold">Gs. {{ egreso.monto|formato_guaranies }}</td>
-                                <td class="text-center no-print">
+                                <td data-label="Monto" class="text-end text-danger fw-bold">Gs. {{ egreso.monto|formato_guaranies }}</td>
+                                <td data-label="Acciones" class="text-center no-print">
                                     <div class="btn-group">
                                         <a href="{% url 'detalle_egreso' egreso.id %}" class="btn btn-sm btn-light border" title="Ver">
-                                            <i class="fas fa-eye text-info"></i> Detalle
+                                            <i class="bi bi-eye text-info"></i> Detalle
                                         </a>
                                         <a href="{% url 'editar_egreso' egreso.id %}" class="btn btn-sm btn-dark border" title="Editar">
-                                            <i class="fas fa-edit text-warning"></i> Editar
+                                            <i class="bi bi-pencil text-warning"></i> Editar
                                         </a>
                                     </div>
                                 </td>

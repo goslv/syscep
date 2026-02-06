@@ -34,6 +34,7 @@
 
     <!-- Estilos base -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive_improvements.css' %}">
     <link rel="stylesheet" href="{% static 'css/print.css' %}" media="print">
 
     {% block extra_css %}{% endblock %}
@@ -49,6 +50,7 @@
         --primary-300: #69c0ff;
         --primary-400: #40a9ff;
         --primary-500: #00bfff; /* Azul claro del logo */
+        --primary-rgb: 0, 191, 255;
         --primary-600: #1b3a4b; /* Azul oscuro del logo */
         --primary-700: #0050b3;
         --primary-800: #003a8c;
@@ -1428,6 +1430,10 @@
             <h1 class="brand-name">ITS CEP</h1>
             <div class="brand-tagline">Sistema de Gestión</div>
         </div>
+        <!-- Botón cerrar para móvil -->
+        <button class="btn-close-sidebar d-lg-none" id="closeSidebar" aria-label="Cerrar menú" type="button">
+            <i class="bi bi-x-lg"></i>
+        </button>
     </div>
 
     <nav class="sidebar-nav" aria-label="Menú lateral">

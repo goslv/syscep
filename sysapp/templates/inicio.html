@@ -625,16 +625,27 @@
 
     @media (max-width: 768px) {
         .dashboard-container {
-            padding: 1.5rem;
+            padding: 1rem 0.75rem !important;
         }
 
         .dashboard-header h1 {
-            font-size: 2rem;
+            font-size: 1.8rem !important;
         }
 
         .payment-status-card,
         .recent-payments-card {
-            padding: 1.5rem;
+            padding: 1.25rem !important;
+            border-radius: 16px !important;
+        }
+
+        .status-grid {
+            gap: 1rem;
+        }
+
+        .status-item {
+            flex: 1 1 100%;
+            min-width: 0;
+            padding: 0.75rem;
         }
 
         .section-header h5 {
@@ -644,14 +655,11 @@
         .card-header-custom {
             flex-direction: column;
             align-items: flex-start;
-        }
-
-        .table-container {
-            overflow-x: auto;
+            gap: 1rem;
         }
 
         .table-modern {
-            min-width: 800px;
+            min-width: 100%;
         }
     }
 
@@ -738,7 +746,7 @@
             </div>
         </div>
 
-        <div class="table-container">
+        <div class="table-container table-responsive-stack">
             <table class="table-modern">
                 <thead>
                 <tr>
@@ -752,24 +760,24 @@
                 <tbody>
                 {% for pago in pagos_recientes %}
                 <tr>
-                    <td>
+                    <td data-label="N° Recibo">
                         <span class="recibo-number">{{ pago.numero_recibo }}</span>
                     </td>
-                    <td>
+                    <td data-label="Alumno">
                         <a href="{% url 'detalle_alumno' pago.alumno.id %}" class="alumno-link">
                             {{ pago.alumno.nombre_completo }}
                             <i class="bi bi-arrow-right"></i>
                         </a>
                     </td>
-                    <td>
+                    <td data-label="Sede">
                         <span class="sede-badge">
                             {{ pago.sede.nombre }}
                         </span>
                     </td>
-                    <td class="fecha-cell">
+                    <td data-label="Fecha" class="fecha-cell">
                         {{ pago.fecha|date:"d/m/Y" }}
                     </td>
-                    <td class="importe-cell">
+                    <td data-label="Importe" class="importe-cell">
                         Gs. {{ pago.importe_total|formato_guaranies }}
                     </td>
                 </tr>

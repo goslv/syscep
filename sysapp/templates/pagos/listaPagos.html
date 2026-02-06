@@ -169,7 +169,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="stat-card">
-            <div class="table-responsive">
+            <div class="table-responsive table-responsive-stack">
                 <table class="table table-hover">
                     <thead>
                     <tr>
@@ -186,9 +186,9 @@
                     <tbody>
                     {% for pago in pagos %}
                     <tr>
-                        <td><strong>{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</strong></td>
-                        <td>{{ pago.fecha|date:"d/m/Y" }}</td>
-                        <td>
+                        <td data-label="N° Recibo"><strong>{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</strong></td>
+                        <td data-label="Fecha">{{ pago.fecha|date:"d/m/Y" }}</td>
+                        <td data-label="Alumno">
                             {% if pago.es_cliente_diferenciado %}
                             <span class="badge bg-info text-dark ms-1" style="font-size: 0.7rem;">
                                     <i class="bi bi-person-badge"></i> Cliente
@@ -199,11 +199,11 @@
                             </a>
                             {% endif %}
                         </td>
-                        <td>{{ pago.sede.nombre }}</td>
-                        <td>{{ pago.numero_cuota|default:"-" }}</td>
-                        <td>{{ pago.concepto|truncatewords:5 }}</td>
-                        <td><strong class="text-success">Gs. {{ pago.importe_total|formato_guaranies }}</strong></td>
-                        <td>
+                        <td data-label="Sede">{{ pago.sede.nombre }}</td>
+                        <td data-label="Cuotas">{{ pago.numero_cuota|default:"-" }}</td>
+                        <td data-label="Concepto">{{ pago.concepto|truncatewords:5 }}</td>
+                        <td data-label="Importe"><strong class="text-success">Gs. {{ pago.importe_total|formato_guaranies }}</strong></td>
+                        <td data-label="Detalles">
                             <div class="d-flex justify-content-center">
                                 <a href="{% url 'detalle_pago' pago.id %}"
                                    class="btn-action btn-view"
