@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ titulo }} - SysCEP{% endblock %}
+{% block title %}{{ titulo }} - ITS CEP{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row mt-5">
     <div class="col-md-8 mx-auto">
         <div class="stat-card">
             <form method="post">
@@ -12,7 +12,7 @@
                 
                 <!-- Información de Acceso -->
                 <h5 class="mb-3">
-                    <i class="bi bi-person-badge"></i> Información de Acceso
+                    Información de Acceso
                 </h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
@@ -51,7 +51,7 @@
 
                 <!-- Información Personal -->
                 <h5 class="mb-3">
-                    <i class="bi bi-person"></i> Información Personal
+                    Información Personal
                 </h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
@@ -71,16 +71,7 @@
                 </div>
 
                 <!-- Permisos y Estado -->
-                <h5 class="mb-3">
-                    <i class="bi bi-shield-check"></i> Permisos y Estado
-                </h5>
                 <div class="row g-3 mb-4">
-                    <div class="col-md-12">
-                        <div class="alert alert-warning">
-                            <strong>Importante:</strong> Los usuarios <strong>staff (administradores)</strong> tienen acceso a todos los módulos. 
-                            Los usuarios <strong>no-staff</strong> solo pueden acceder a Alumnos y Pagos.
-                        </div>
-                    </div>
                     <div class="col-md-6">
                         <div class="form-check form-switch">
                             {{ form.is_staff }}
