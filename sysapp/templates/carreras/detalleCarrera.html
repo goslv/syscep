@@ -328,13 +328,11 @@
                 </div>
             </div>
         </div>
-        {% if user.is_staff %}
         <div class="col-md-4 text-end">
             <a href="{% url 'crear_materia' carrera.id %}" class="btn btn-light btn-lg">
                 <i class="bi bi-plus-circle"></i> Agregar Materia
             </a>
         </div>
-        {% endif %}
     </div>
 </div>
 
@@ -363,7 +361,6 @@
                     </span>
                     {% endif %}
                 </div>
-                {% if user.is_staff %}
                 <div class="dropdown">
                     <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
                         <i class="bi bi-three-dots-vertical"></i>
@@ -385,7 +382,6 @@
                         </a></li>
                     </ul>
                 </div>
-                {% endif %}
             </div>
 
             {% if materia.docente %}
@@ -403,18 +399,12 @@
                     </p>
                 </div>
             </div>
-            {% elif user.is_staff %}
+            {% else %}
             <div class="no-docente">
                 <a href="#" class="btn btn-asignar" data-bs-toggle="modal" data-bs-target="#modalDocente"
                    data-materia-id="{{ materia.id }}" data-materia-nombre="{{ materia.nombre }}">
                     <i class="bi bi-person-plus"></i> Asignar Docente
                 </a>
-            </div>
-            {% else %}
-            <div class="docente-info py-2" style="background: rgba(0,0,0,0.02); border: 1px dashed var(--border-color);">
-                <div class="small text-muted w-100 text-center">
-                    <i class="bi bi-person-slash"></i> Docente no asignado
-                </div>
             </div>
             {% endif %}
 
@@ -457,14 +447,10 @@
         <div class="empty-state" style="background: white; border-radius: 16px; padding: 3rem;">
             <i class="bi bi-journal-x" style="font-size: 4rem; color: #cbd5e1;"></i>
             <h5 style="color: #64748b;">No hay materias en esta carrera</h5>
-            {% if user.is_staff %}
             <p style="color: #94a3b8;">Comienza agregando las materias del plan de estudios</p>
             <a href="{% url 'crear_materia' carrera.id %}" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Agregar Primera Materia
             </a>
-            {% else %}
-            <p style="color: #94a3b8;">El plan de estudios aún no ha sido cargado.</p>
-            {% endif %}
         </div>
     </div>
     {% endfor %}

@@ -137,7 +137,6 @@ def lista_alumnos(request):
     return render(request, 'alumnos/listaAlumnos.html', context)
 
 @login_required
-@admin_required
 def detalle_alumno(request, alumno_uuid):
     """Detalle de un alumno con historial de pagos"""
     alumno = get_object_or_404(Alumno, uuid=alumno_uuid)
@@ -156,7 +155,6 @@ def detalle_alumno(request, alumno_uuid):
 
 
 @login_required
-@admin_required
 def canjear_estrellas(request, alumno_uuid):
     """Registrar un canje de estrellas para un alumno"""
     if request.method == 'POST':
@@ -183,7 +181,6 @@ def canjear_estrellas(request, alumno_uuid):
 
 
 @login_required
-@admin_required
 def crear_alumno(request):
     """Crear un nuevo alumno"""
     if request.method == 'POST':
@@ -203,7 +200,6 @@ def crear_alumno(request):
 
 
 @login_required
-@admin_required
 def editar_alumno(request, alumno_uuid):
     """Editar un alumno existente"""
     alumno = get_object_or_404(Alumno, uuid=alumno_uuid)
@@ -287,7 +283,6 @@ def lista_pagos(request):
 
 
 @login_required
-@admin_required
 def detalle_pago(request, pago_uuid):
     """Vista para ver el detalle completo de un pago"""
     pago = get_object_or_404(Pago.objects.select_related('alumno', 'sede', 'carrera'), uuid=pago_uuid)
@@ -300,7 +295,6 @@ def detalle_pago(request, pago_uuid):
 
 
 @login_required
-@admin_required
 def registrar_pago(request):
     """Vista para registrar un nuevo pago"""
     if request.method == 'POST':
@@ -698,7 +692,6 @@ def detalle_carrera(request, carrera_id):
 
 
 @login_required
-@admin_required
 def crear_carrera(request):
     """Crear una nueva carrera"""
     if request.method == 'POST':
@@ -718,7 +711,6 @@ def crear_carrera(request):
 
 
 @login_required
-@admin_required
 def crear_materia(request, carrera_id):
     carrera = get_object_or_404(Carrera, pk=carrera_id)
 
@@ -746,7 +738,6 @@ def crear_materia(request, carrera_id):
 
 
 @login_required
-@admin_required
 def editar_materia(request, materia_id):
     materia = get_object_or_404(Materia, pk=materia_id)
 
@@ -771,7 +762,6 @@ def editar_materia(request, materia_id):
 
 
 @login_required
-@admin_required
 def asignar_docente(request, materia_id):
     materia = get_object_or_404(Materia, pk=materia_id)
 
@@ -803,7 +793,6 @@ def asignar_docente(request, materia_id):
 
 
 @login_required
-@admin_required
 def asignar_fechas(request, materia_id):
     materia = get_object_or_404(Materia, pk=materia_id)
 
