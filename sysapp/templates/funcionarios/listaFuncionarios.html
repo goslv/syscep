@@ -82,42 +82,44 @@
 </style>
 
 <!-- Filtros -->
-<div class="row mb-4">
-    <div class="col-md-12 mt-5">
-        <div class="stat-card">
-            <form method="get" class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Cargo</label>
-                    <select name="cargo" class="form-select">
-                        <option value="">Todos los cargos</option>
-                        {% for cargo_key, cargo_nombre in cargos %}
-                            <option value="{{ cargo_key }}">{{ cargo_nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Sede</label>
-                    <select name="sede" class="form-select">
-                        <option value="">Todas las sedes</option>
-                        {% for sede in sedes %}
-                            <option value="{{ sede.id }}">{{ sede.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-12 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">
-                        <i class="bi bi-search"></i> Buscar
-                    </button>
-                    <a href="{% url 'lista_funcionarios' %}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Limpiar
-                    </a>
-                    <a href="{% url 'lista_asistencias' %}" class="btn btn-outline-info">
-                        <i class="bi bi-list-check"></i> Asistencias
-                    </a>
-                </div>
-            </form>
+<div class="row mb-4 mt-5">
+        <div class="col-md-12">
+            <div class="stat-card">
+                <form method="get" class="row g-3">
+                    <div class="col-md-5">
+                        <label class="form-label">Cargo</label>
+                        <select name="cargo" class="form-select">
+                            <option value="">Todos los cargos</option>
+                            {% for cargo_key, cargo_nombre in cargos %}
+                                <option value="{{ cargo_key }}">{{ cargo_nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Sede</label>
+                        <select name="sede" class="form-select">
+                            <option value="">Todas las sedes</option>
+                            {% for sede in sedes %}
+                                <option value="{{ sede.id }}">{{ sede.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                    <div class="col-md-12 d-flex gap-2 pt-2">
+                        <a href="{% url 'lista_funcionarios' %}" class="btn btn-secondary flex-grow-1">
+                            <i class="bi bi-x-circle"></i> Limpiar Filtros
+                        </a>
+                        <a href="{% url 'lista_asistencias' %}" class="btn btn-outline-info flex-grow-1">
+                            <i class="bi bi-list-check"></i> Ver Asistencias
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
 </div>
 
 <div class="row mb-4">
