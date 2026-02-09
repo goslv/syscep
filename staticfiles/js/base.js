@@ -64,6 +64,7 @@ class SidebarManager {
         this.sidebar = document.getElementById('sidebar');
         this.sidebarOverlay = document.getElementById('sidebarOverlay');
         this.menuToggle = document.getElementById('menuToggle');
+        this.closeSidebar = document.getElementById('closeSidebar');
         this.body = document.body;
         this.isMobile = window.innerWidth <= 1024;
 
@@ -79,6 +80,7 @@ class SidebarManager {
     bindEvents() {
         this.menuToggle?.addEventListener('click', () => this.toggle());
         this.sidebarOverlay?.addEventListener('click', () => this.close());
+        this.closeSidebar?.addEventListener('click', () => this.close());
 
         // Cerrar sidebar al hacer clic en enlace (móvil)
         document.querySelectorAll('.nav-link').forEach(link => {
@@ -247,11 +249,35 @@ class DropdownManager {
 class SearchManager {
     constructor() {
         this.searchInput = document.getElementById('globalSearch');
+        this.searchContainer = document.getElementById('globalSearchContainer');
+        this.searchToggleMobile = document.getElementById('searchToggleMobile');
+        this.closeSearchMobile = document.getElementById('closeSearchMobile');
         this.init();
     }
 
     init() {
         if (!this.searchInput) return;
+
+        // Toggle móvil
+        this.searchToggleMobile?.addEventListener('click', () => {
+            this.searchContainer?.classList.add('show-mobile');
+            this.searchInput.focus();
+        });
+
+        this.closeSearchMobile?.addEventListener('click', () => {
+            this.searchContainer?.classList.remove('show-mobile');
+            this.searchInput.value = '';
+        });
+
+        // Manejar el envío de la búsqueda (Enter)
+        this.searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = this.searchInput.value.trim();
+                if (query) {
+                    window.location.href = `/alumnos/?busqueda=${encodeURIComponent(query)}`;
+                }
+            }
+        });
 
         // Atajo de teclado
         document.addEventListener('keydown', (e) => {

@@ -1,4 +1,5 @@
 import os
+import uuid
 from typing import Any
 
 from django.core.validators import MinValueValidator
@@ -11,8 +12,8 @@ def path_comprobante_pago(instance, filename):
     ext = filename.split('.')[-1]
     # Nombre del archivo basado en la fecha o id si no hay fecha
     fecha_str = instance.fecha.strftime('%d-%m-%Y') if instance.fecha else timezone.now().strftime('%d-%m-%Y')
-    # Carpeta: comprobantes/recibos/DD-MM-YYYY/
-    return os.path.join('comprobantes', 'recibos', fecha_str, filename)
+    # Carpeta: Comprobantes/Ingreso/DD-MM-YYYY/
+    return os.path.join('Comprobantes', 'Ingreso', fecha_str, filename)
 
 
 def path_comprobante_egreso(instance, filename):
@@ -20,8 +21,10 @@ def path_comprobante_egreso(instance, filename):
     ext = filename.split('.')[-1]
     # Nombre del archivo basado en la fecha o id si no hay fecha
     fecha_str = instance.fecha.strftime('%d-%m-%Y') if instance.fecha else timezone.now().strftime('%d-%m-%Y')
-    # Carpeta: comprobantes/egresos/DD-MM-YYYY/
-    return os.path.join('comprobantes', 'egresos', fecha_str, filename)
+    # Categoría del egreso
+    categoria = instance.categoria if hasattr(instance, 'categoria') else 'OTROS'
+    # Carpeta: Comprobantes/Egreso/CATEGORIA/DD-MM-YYYY/
+    return os.path.join('Comprobantes', 'Egreso', categoria, fecha_str, filename)
 
 
 class Sede(models.Model):
@@ -194,6 +197,7 @@ class AsistenciaFuncionario(models.Model):
 
 
 class Alumno(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     sede = models.ForeignKey(Sede, on_delete=models.CASCADE, related_name='alumnos', verbose_name="Sede")
     carrera = models.ForeignKey(Carrera, on_delete=models.PROTECT, related_name='alumnos', verbose_name="Carrera")
     nombre = models.CharField(max_length=100, verbose_name="Nombre")
@@ -256,6 +260,7 @@ class Alumno(models.Model):
 
 
 class Pago(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     sede = models.ForeignKey(Sede, on_delete=models.CASCADE, related_name='pagos', verbose_name="Sede")
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name='pagos',
                                verbose_name="Alumno", null=True, blank=True)
@@ -310,7 +315,7 @@ class Pago(models.Model):
         verbose_name_plural = "Pagos"
 
     def __str__(self):
-        numero = self.numero_recibo or "sin recibo"
+        numero = self.numero_recibo or "Sin recibo"
         return f"Pago {numero} - {self.nombre_pagador}"
 
     def calcular_estrellas(self):
@@ -330,8 +335,8 @@ class Pago(models.Model):
             return 0  # Más de 3 días atrasado
 
     def save(self, *args, **kwargs):
-        """Calcula automáticamente las estrellas al guardar"""
-        if not self.pk:  # Solo para pagos nuevos
+        """Calcula automáticamente las estrellas al guardar si no se especificaron"""
+        if not self.pk and self.estrellas == 0:  # Solo para pagos nuevos y si no se definieron estrellas
             self.estrellas = self.calcular_estrellas()
         super().save(*args, **kwargs)
 
@@ -368,6 +373,7 @@ class CanjeEstrellas(models.Model):
 
 
 class Egreso(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     CATEGORIA_CHOICES = [
         ('SERVICIOS', 'Servicios (Luz, Agua, Internet)'),
         ('SUELDOS', 'Sueldos y Salarios'),

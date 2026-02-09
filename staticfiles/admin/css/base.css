@@ -1,3 +1,8 @@
+/*
+    DJANGO Admin styles
+*/
+
+/* VARIABLE DEFINITIONS */
 html[data-theme="light"],
 :root {
     --primary: #79aec8;
@@ -97,6 +102,8 @@ body {
     background: var(--body-bg);
 }
 
+/* LINKS */
+
 a:link, a:visited {
     color: var(--link-fg);
     text-decoration: none;
@@ -123,6 +130,8 @@ a.section:link, a.section:visited {
 a.section:focus, a.section:hover {
     text-decoration: underline;
 }
+
+/* GLOBAL DEFAULTS */
 
 p, ol, ul, dl {
     margin: .2em 0 .8em 0;
@@ -251,6 +260,8 @@ hr {
     line-height: 1px;
 }
 
+/* TEXT STYLES & MODIFIERS */
+
 .small {
     font-size: 0.6875rem;
 }
@@ -292,6 +303,8 @@ p img, h1 img, h2 img, h3 img, h4 img, td img {
 .hidden {
     display: none !important;
 }
+
+/* TABLES */
 
 table {
     border-collapse: collapse;
@@ -345,6 +358,8 @@ tr:nth-child(odd) + .row-form-errors,
 tr:nth-child(odd) + .row-form-errors .errorlist {
     background: var(--darkened-bg);
 }
+
+/* SORTABLE TABLES */
 
 thead th {
     padding: 5px 10px;
@@ -456,6 +471,8 @@ table thead th.sorted .sortoptions a.descending:hover {
     background-position: 0 -70px;
 }
 
+/* FORM DEFAULTS */
+
 input, textarea, select, .form-row p, form .button {
     margin: 2px 0;
     padding: 2px 3px;
@@ -472,6 +489,10 @@ textarea {
     vertical-align: top;
 }
 
+/*
+Minifiers remove the default (text) "type" attribute from "input" HTML tags.
+Add input:not([type]) to make the CSS stylesheet work the same.
+*/
 input:not([type]), input[type=text], input[type=password], input[type=email],
 input[type=url], input[type=number], input[type=tel], textarea, select,
 .vTextField {
@@ -483,6 +504,10 @@ input[type=url], input[type=number], input[type=tel], textarea, select,
     background-color: var(--body-bg);
 }
 
+/*
+Minifiers remove the default (text) "type" attribute from "input" HTML tags.
+Add input:not([type]) to make the CSS stylesheet work the same.
+*/
 input:not([type]):focus, input[type=text]:focus, input[type=password]:focus,
 input[type=email]:focus, input[type=url]:focus, input[type=number]:focus,
 input[type=tel]:focus, textarea:focus, select:focus, .vTextField:focus {
@@ -494,9 +519,12 @@ select {
 }
 
 select[multiple] {
+    /* Allow HTML size attribute to override the height in the rule above. */
     height: auto;
     min-height: 150px;
 }
+
+/* FORM BUTTONS */
 
 .button, input[type=submit], input[type=button], .submit-row input, a.button {
     background: var(--button-bg);
@@ -539,6 +567,9 @@ input[type=submit][disabled].default,
 input[type=button][disabled].default {
     opacity: 0.4;
 }
+
+
+/* MODULES */
 
 .module {
     border: none;
@@ -679,6 +710,8 @@ td ul.errorlist + input, td ul.errorlist + select, td ul.errorlist + textarea {
     font-size: 0.75rem;
     padding: 5px 0 0 12px;
 }
+
+/* BREADCRUMBS */
 
 div.breadcrumbs {
     background: var(--breadcrumbs-bg);
@@ -825,6 +858,15 @@ a.deletelink:focus, a.deletelink:hover {
 .main > .content {
     flex:  1 0;
     max-width: 100%;
+}
+
+.skip-to-content-link {
+    position: absolute;
+    top: -999px;
+    margin: 5px;
+    padding: 5px;
+    background: var(--body-bg);
+    z-index: 1;
 }
 
 .skip-to-content-link:focus {

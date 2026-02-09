@@ -131,25 +131,179 @@
         .card-header-custom .btn-primary-custom {
             display: none;
         }
+
+        /* Estilos para filtros compactos en móvil */
+        .stat-card form.row {
+            --bs-gutter-y: 0.5rem;
+        }
+        
+        .stat-card .form-label {
+            margin-bottom: 0.2rem;
+            font-size: 0.85rem;
+        }
+
+        /* Diseño de filtros colapsables para móvil */
+        .filter-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 0;
+        }
+
+        .filter-header h6 {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-body {
+            display: none;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 0.5rem;
+        }
+
+        .filter-body.show {
+            display: block;
+        }
+
+        .filter-toggle-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .filter-body.show + .filter-header .filter-toggle-icon,
+        .filter-container.active .filter-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Tabla estilo tarjeta interactiva */
+        .table-responsive-stack tr {
+            display: block;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            padding: 0.5rem;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .table-responsive-stack tr:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .table-responsive-stack td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: none !important;
+            padding: 0.4rem 0.75rem !important;
+        }
+
+        .table-responsive-stack td:before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .table-responsive-stack thead {
+            display: none;
+        }
+
+        .td-actions {
+            display: none !important;
+        }
     }
 
 </style>
 <!-- Filtros -->
 <div class="row mb-3 mt-3">
     <div class="col-md-12 mt-4">
-        <div class="stat-card">
+        <!-- Vista Móvil: Filtros Colapsables -->
+        <div class="d-md-none filter-container" id="filterContainer">
+            <div class="filter-header" onclick="toggleFilters()">
+                <h6><i class="bi bi-funnel"></i> Filtros de búsqueda</h6>
+                <i class="bi bi-chevron-down filter-toggle-icon"></i>
+            </div>
+            <div class="filter-body" id="filterBody">
+                <form method="get" class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Buscar</label>
+                        <input type="text" name="busqueda" class="form-control"
+                               placeholder="Nombre, apellido o cédula" value="{{ request.GET.busqueda }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Sede</label>
+                        <select name="sede" class="form-select">
+                            <option value="">Todas las sedes</option>
+                            {% for sede in sedes %}
+                            <option value="{{ sede.id }}" {% if request.GET.sede == sede.id|stringformat:"s" %}selected{% endif %}>
+                                {{ sede.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Carrera</label>
+                        <select name="carrera" class="form-select">
+                            <option value="">Todas las carreras</option>
+                            {% for carrera in carreras %}
+                            <option value="{{ carrera.id }}" {% if request.GET.carrera == carrera.id|stringformat:"s" %}selected{% endif %}>
+                                {{ carrera.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Estado de Pago</label>
+                        <select name="estado" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="AL_DIA" {% if request.GET.estado == "AL_DIA" %}selected{% endif %}>Al día</option>
+                            <option value="CERCANO_VENCIMIENTO" {% if request.GET.estado == "CERCANO_VENCIMIENTO" %}selected{% endif %}>Por vencer</option>
+                            <option value="ATRASADO" {% if request.GET.estado == "ATRASADO" %}selected{% endif %}>Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                        <a href="{% url 'lista_alumnos' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Vista Escritorio: Filtros Siempre Visibles -->
+        <div class="stat-card d-none d-md-block">
             <form method="get" class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Buscar</label>
                     <input type="text" name="busqueda" class="form-control"
-                           placeholder="Nombre, apellido o cédula">
+                           placeholder="Nombre, apellido o cédula" value="{{ request.GET.busqueda }}">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Sede</label>
                     <select name="sede" class="form-select">
                         <option value="">Todas las sedes</option>
                         {% for sede in sedes %}
-                        <option value="{{ sede.id }}" {% if filtros.sede == sede.id|stringformat:"s" %}selected{% endif %}>
+                        <option value="{{ sede.id }}" {% if request.GET.sede == sede.id|stringformat:"s" %}selected{% endif %}>
                             {{ sede.nombre }}
                         </option>
                         {% endfor %}
@@ -160,27 +314,27 @@
                     <select name="carrera" class="form-select">
                         <option value="">Todas las carreras</option>
                         {% for carrera in carreras %}
-                        <option value="{{ carrera.id }}" {% if filtros.carrera == carrera.id|stringformat:"s" %}selected{% endif %}>
+                        <option value="{{ carrera.id }}" {% if request.GET.carrera == carrera.id|stringformat:"s" %}selected{% endif %}>
                             {{ carrera.nombre }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Estado de Pago</label>
+                    <label class="form-label">Estado</label>
                     <select name="estado" class="form-select">
                         <option value="">Todos</option>
-                        <option value="AL_DIA" {% if filtros.estado == "AL_DIA" %}selected{% endif %}>Al día</option>
-                        <option value="CERCANO_VENCIMIENTO" {% if filtros.estado == "CERCANO_VENCIMIENTO" %}selected{% endif %}>Por vencer</option>
-                        <option value="ATRASADO" {% if filtros.estado == "ATRASADO" %}selected{% endif %}>Atrasado</option>
+                        <option value="AL_DIA" {% if request.GET.estado == "AL_DIA" %}selected{% endif %}>Al día</option>
+                        <option value="CERCANO_VENCIMIENTO" {% if request.GET.estado == "CERCANO_VENCIMIENTO" %}selected{% endif %}>Por vencer</option>
+                        <option value="ATRASADO" {% if request.GET.estado == "ATRASADO" %}selected{% endif %}>Atrasado</option>
                     </select>
                 </div>
-                <div class="col-md-12">
+                <div class="col-md-12 d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-search"></i>
+                        <i class="bi bi-search"></i> Buscar
                     </button>
                     <a href="{% url 'lista_alumnos' %}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i>
+                        <i class="bi bi-arrow-clockwise"></i>
                     </a>
                 </div>
             </form>
@@ -206,7 +360,7 @@
                     </thead>
                     <tbody>
                     {% for alumno in alumnos %}
-                    <tr>
+                    <tr onclick="window.location='{% url 'detalle_alumno' alumno.uuid %}'">
                         <td data-label="Nombre">
                             <strong>{{ alumno.nombre_completo }}</strong><br>
                             <small class="text-muted">{{ alumno.telefono }}</small>
@@ -225,8 +379,8 @@
                             <span class="badge bg-secondary">Sin pagos</span>
                             {% endif %}
                         </td>
-                        <td data-label="Acciones">
-                            <a href="{% url 'detalle_alumno' alumno.id %}" class="btn" title="Ver detalle">
+                        <td data-label="Acciones" class="td-actions">
+                            <a href="{% url 'detalle_alumno' alumno.uuid %}" class="btn" title="Ver detalle">
                                 <i class="bi bi-eye"></i>
                             </a>
                         </td>
@@ -255,6 +409,13 @@
 
 
 <script>
+    function toggleFilters() {
+        const body = document.getElementById('filterBody');
+        const container = document.getElementById('filterContainer');
+        body.classList.toggle('show');
+        container.classList.toggle('active');
+    }
+
     const fabButton = document.getElementById('fabButton');
     const fabContainer = document.getElementById('fabContainer');
     const fabIcon = document.getElementById('fabIcon');

@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Sede, Carrera, Materia, Funcionario, AsistenciaFuncionario, Alumno, Pago, CanjeEstrellas
+from .models import Sede, Carrera, Materia, Funcionario, AsistenciaFuncionario, Alumno, Pago, CanjeEstrellas, Egreso
 
 
 @admin.register(CanjeEstrellas)
@@ -173,24 +173,24 @@ class PagoAdmin(admin.ModelAdmin):
     list_display = ['numero_recibo', 'alumno_display', 'fecha', 'numero_cuota',
                     'importe_total_display', 'estrellas_display', 'sede']
     list_filter = ['fecha', 'sede', 'estrellas']
-    search_fields = ['numero_recibo', 'alumno__nombre', 'alumno__apellido', 'recibido_de']
+    search_fields = ['numero_recibo', 'alumno__nombre', 'alumno__apellido', 'recibido_de', 'nombre_cliente']
     date_hierarchy = 'fecha'
-    readonly_fields = ['estrellas', 'fecha_creacion', 'preview_foto']
+    readonly_fields = ['estrellas', 'fecha_creacion', 'preview_foto', 'preview_comprobante']
     ordering = ['-fecha', '-fecha_creacion']
 
     fieldsets = (
         ('Información del Recibo', {
-            'fields': ('numero_recibo', 'foto_recibo', 'preview_foto', 'sede', 'alumno', 'carrera')
+            'fields': ('numero_recibo', 'foto_recibo', 'preview_foto', 'foto_comprobante', 'preview_comprobante', 'sede', 'alumno', 'carrera')
         }),
         ('Datos del Pago', {
-            'fields': (('fecha', 'recibido_de'), 'suma_de', 'concepto', 'curso')
+            'fields': (('fecha', 'recibido_de'), 'suma_de', 'concepto', 'curso', 'nombre_cliente')
         }),
         ('Detalles de la Cuota', {
             'fields': (('numero_cuota', 'fecha_vencimiento'),
-                       'valido_hasta', 'importe_total')
+                       'valido_hasta', 'importe_total', 'monto_unitario', 'cantidad_cuotas')
         }),
         ('Información Adicional', {
-            'fields': ('recibido_por', ('estrellas', 'fecha_creacion'))
+            'fields': ('recibido_por', 'usuario_registro', 'observaciones', ('estrellas', 'fecha_creacion'))
         }),
     )
 
@@ -241,7 +241,60 @@ class PagoAdmin(admin.ModelAdmin):
             )
         return "No hay foto"
 
-    preview_foto.short_description = 'Vista Previa'
+    preview_foto.short_description = 'Vista Previa Recibo'
+
+    def preview_comprobante(self, obj):
+        if obj.foto_comprobante:
+            return format_html(
+                '<a href="{}" target="_blank"><img src="{}" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;"/></a>',
+                obj.foto_comprobante.url,
+                obj.foto_comprobante.url
+            )
+        return "No hay comprobante"
+
+    preview_comprobante.short_description = 'Vista Previa Comprobante'
+
+
+@admin.register(Egreso)
+class EgresoAdmin(admin.ModelAdmin):
+    list_display = ['numero_comprobante', 'fecha', 'categoria', 'monto_display', 'sede', 'usuario_registro']
+    list_filter = ['fecha', 'categoria', 'sede']
+    search_fields = ['numero_comprobante', 'concepto', 'observaciones']
+    date_hierarchy = 'fecha'
+    readonly_fields = ['fecha_creacion', 'preview_comprobante']
+    
+    def monto_display(self, obj):
+        return format_html(
+            '<strong>Gs. {:,.0f}</strong>',
+            obj.monto
+        ).replace(',', '.')
+    monto_display.short_description = 'Monto'
+    monto_display.admin_order_field = 'monto'
+
+    def preview_comprobante(self, obj):
+        if obj.comprobante:
+            return format_html(
+                '<a href="{}" target="_blank"><img src="{}" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;"/></a>',
+                obj.comprobante.url,
+                obj.comprobante.url
+            )
+        return "No hay comprobante"
+    preview_comprobante.short_description = 'Vista Previa'
+
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('sede', 'numero_comprobante', 'fecha', 'categoria')
+        }),
+        ('Detalles del Gasto', {
+            'fields': ('concepto', 'monto')
+        }),
+        ('Soporte', {
+            'fields': ('comprobante', 'preview_comprobante')
+        }),
+        ('Registro', {
+            'fields': ('usuario_registro', 'observaciones', 'fecha_creacion')
+        }),
+    )
 
 # Personalización del sitio admin
 admin.site.site_header = "SysCEP - Sistema Administrativo CEP"

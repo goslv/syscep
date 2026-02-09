@@ -15,9 +15,9 @@ urlpatterns = [
     # Alumnos
     path('alumnos/', views.lista_alumnos, name='lista_alumnos'),
     path('alumnos/crear/', views.crear_alumno, name='crear_alumno'),
-    path('alumnos/<int:alumno_id>/', views.detalle_alumno, name='detalle_alumno'),
-    path('alumnos/<int:alumno_id>/editar/', views.editar_alumno, name='editar_alumno'),
-    path('alumnos/<int:alumno_id>/canjear-estrellas/', views.canjear_estrellas, name='canjear_estrellas'),
+    path('alumnos/<uuid:alumno_uuid>/', views.detalle_alumno, name='detalle_alumno'),
+    path('alumnos/<uuid:alumno_uuid>/editar/', views.editar_alumno, name='editar_alumno'),
+    path('alumnos/<uuid:alumno_uuid>/canjear-estrellas/', views.canjear_estrellas, name='canjear_estrellas'),
     path('buscar-alumno/', views.buscar_alumno, name='buscar_alumno'),
 
     # Caja (Ingresos y Egresos)
@@ -27,16 +27,16 @@ urlpatterns = [
     # Egresos
     path('egresos/', views.lista_egresos, name='lista_egresos'),
     path('egresos/registrar/', views.registrar_egreso, name='registrar_egreso'),
-    path('egresos/<int:egreso_id>/', views.detalle_egreso, name='detalle_egreso'),
-    path('egresos/<int:egreso_id>/editar/', views.editar_egreso, name='editar_egreso'),
-    path('egresos/<int:egreso_id>/eliminar/', views.eliminar_egreso, name='eliminar_egreso'),
+    path('egresos/<uuid:egreso_uuid>/', views.detalle_egreso, name='detalle_egreso'),
+    path('egresos/<uuid:egreso_uuid>/editar/', views.editar_egreso, name='editar_egreso'),
+    path('egresos/<uuid:egreso_uuid>/eliminar/', views.eliminar_egreso, name='eliminar_egreso'),
 
     # Pagos
     path('pagos/', views.lista_pagos, name='lista_pagos'),
     path('pagos/registrar/', views.registrar_pago, name='registrar_pago'),
-    path('detalle/<int:id>/', views.detalle_pago, name='detalle_pago'),
-    path('editar/<int:id>/', views.editar_pago, name='editar_pago'),
-    path('eliminar/<int:id>/', views.eliminar_pago, name='eliminar_pago'),
+    path('pagos/<uuid:pago_uuid>/', views.detalle_pago, name='detalle_pago'),
+    path('pagos/<uuid:pago_uuid>/editar/', views.editar_pago, name='editar_pago'),
+    path('pagos/<uuid:pago_uuid>/eliminar/', views.eliminar_pago, name='eliminar_pago'),
 
     # Funcionarios
     path('funcionarios/', views.lista_funcionarios, name='lista_funcionarios'),

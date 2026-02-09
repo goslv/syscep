@@ -258,14 +258,14 @@
                         </td>
                         <td class="text-center">
                             <div class="d-flex justify-content-center">
-                                <a href="{% url 'detalle_egreso' egreso.id %}" class="btn-action btn-view" title="Ver Detalle">
+                                <a href="{% url 'detalle_egreso' egreso.uuid %}" class="btn-action btn-view" title="Ver Detalle">
                                     <i class="bi bi-eye-fill"></i>
                                 </a>
-                                <a href="{% url 'editar_egreso' egreso.id %}" class="btn-action btn-edit" title="Editar">
+                                <a href="{% url 'editar_egreso' egreso.uuid %}" class="btn-action btn-edit" title="Editar">
                                     <i class="bi bi-pencil-fill"></i>
                                 </a>
                                 <button type="button" class="btn-action btn-delete" title="Eliminar"
-                                        onclick="confirmarEliminacion('{{ egreso.id }}', '{{ egreso.numero_comprobante }}')">
+                                        onclick="confirmarEliminacion('{{ egreso.uuid }}', '{{ egreso.numero_comprobante }}')">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </div>
@@ -332,9 +332,9 @@
 </div>
 
 <script>
-function confirmarEliminacion(egresoId, numeroComprobante) {
+function confirmarEliminacion(egresoUuid, numeroComprobante) {
     document.getElementById('comprobanteEliminar').textContent = numeroComprobante;
-    document.getElementById('formEliminar').action = `/egresos/${egresoId}/eliminar/`;
+    document.getElementById('formEliminar').action = `/egresos/${egresoUuid}/eliminar/`;
     new bootstrap.Modal(document.getElementById('modalEliminar')).show();
 }
 </script>

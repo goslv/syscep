@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
 
-{% block title %}{{ alumno.nombre_completo }} - SysCEP{% endblock %}
+{% block title %}{{ alumno.nombre_completo }} - ITS CEP{% endblock %}
 {% block page_title %}Detalle del Alumno{% endblock %}
 
 {% block extra_css %}
@@ -76,6 +76,104 @@
     [data-theme="dark"] .table-hover tbody tr:hover {
         background-color: rgba(148, 163, 184, 0.1) !important;
     }
+
+    /* Estilos para tablas responsivas en móviles */
+    @media (max-width: 768px) {
+        .alumno-header {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .alumno-header .d-flex.align-items-center {
+            flex-direction: column;
+        }
+        .alumno-header .rounded-circle {
+            margin-right: 0 !important;
+            margin-bottom: 1rem;
+        }
+        .alumno-header .d-flex.flex-wrap {
+            justify-content: center;
+        }
+        .alumno-header .star-badge {
+            width: 100%;
+            justify-content: center;
+        }
+        .alumno-header .d-flex.justify-content-md-end {
+            justify-content: center;
+            width: 100%;
+            gap: 0.5rem !important;
+        }
+        .alumno-header .btn {
+            flex: 1;
+            padding: 0.6rem 0.4rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .alumno-header .btn i {
+            margin-right: 2px !important;
+        }
+
+        /* Tabs lado a lado en móvil */
+        .nav-pills {
+            flex-wrap: nowrap !important;
+            overflow-x: auto;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        .nav-pills .nav-item {
+            flex: 1;
+        }
+        .nav-pills .nav-link {
+            padding: 0.5rem 0.5rem;
+            font-size: 0.85rem;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .nav-pills .nav-link i {
+            display: none; /* Ocultar iconos en tabs para ahorrar espacio en móvil */
+        }
+
+        .table-responsive-stack thead {
+            display: none;
+        }
+        .table-responsive-stack tr {
+            display: block;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            border-radius: var(--border-radius-md);
+            padding: 0.5rem;
+            background: var(--card-bg);
+        }
+        .table-responsive-stack td {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem !important;
+            border-bottom: 1px solid var(--border-color);
+            text-align: right !important;
+        }
+        .table-responsive-stack td:last-child {
+            border-bottom: none;
+        }
+        .table-responsive-stack td::before {
+            content: attr(data-label);
+            font-weight: 700;
+            text-align: left;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-right: 1rem;
+        }
+        
+        /* Ajustes específicos para las estrellas en móvil */
+        .puntos-estrellas {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            max-width: 150px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -119,10 +217,10 @@
                 <span class="ms-2">Puntos</span>
             </div>
             <div class="d-flex justify-content-md-end gap-2">
-                <a href="{% url 'editar_alumno' alumno.id %}" class="btn btn-light btn-sm rounded-pill px-3">
+                <a href="{% url 'editar_alumno' alumno.uuid %}" class="btn btn-light btn-sm rounded-pill px-3">
                     <i class="bi bi-pencil me-1"></i> Editar
                 </a>
-                <a href="{% url 'registrar_pago' %}?alumno={{ alumno.id }}" class="btn btn-success btn-sm rounded-pill px-3">
+                <a href="{% url 'registrar_pago' %}?alumno={{ alumno.id }}&sede={{ alumno.sede.id }}&carrera={{ alumno.carrera.id }}&nombre={{ alumno.nombre_completo|urlencode }}" class="btn btn-success btn-sm rounded-pill px-3">
                     <i class="bi bi-cash-stack me-1"></i> Cobrar
                 </a>
                 <button type="button" class="btn btn-warning btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalCanje">
@@ -246,12 +344,12 @@
     <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="pills-pagos-tab" data-bs-toggle="pill" data-bs-target="#pills-pagos" type="button" role="tab">
-                <i class="bi bi-cash me-1"></i> Historial de Pagos
+                <i class="bi bi-cash me-1"></i> <span class="d-none d-sm-inline">Historial de Pagos</span><span class="d-inline d-sm-none">Historial</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="pills-canjes-tab" data-bs-toggle="pill" data-bs-target="#pills-canjes" type="button" role="tab">
-                <i class="bi bi-gift me-1"></i> Canjes Realizados
+                <i class="bi bi-gift me-1"></i> <span class="d-none d-sm-inline">Canjes Realizados</span><span class="d-inline d-sm-none">Canjes</span>
             </button>
         </li>
     </ul>
@@ -260,7 +358,7 @@
         <!-- Panel de Pagos -->
         <div class="tab-pane fade show active" id="pills-pagos" role="tabpanel">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle table-responsive-stack">
                     <thead>
                         <tr>
                             <th>Recibo</th>
@@ -274,16 +372,16 @@
                     <tbody>
                         {% for pago in pagos %}
                         <tr>
-                            <td><span class="badge border" style="background-color: var(--gray-100); color: var(--text-main);">{{ pago.numero_recibo }}</span></td>
-                            <td>{{ pago.fecha|date:"d/m/Y" }}</td>
-                            <td>{{ pago.numero_cuota }}</td>
-                            <td>{{ pago.concepto|truncatechars:40 }}</td>
-                            <td class="text-end fw-bold">Gs. {{ pago.importe_total|formato_guaranies }}</td>
-                            <td class="text-center">
+                            <td data-label="Recibo"><span class="badge border" style="background-color: var(--gray-100); color: var(--text-main);">{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</span></td>
+                            <td data-label="Fecha">{{ pago.fecha|date:"d/m/Y" }}</td>
+                            <td data-label="Cuota">{{ pago.numero_cuota }}</td>
+                            <td data-label="Concepto">{{ pago.concepto|truncatechars:40 }}</td>
+                            <td data-label="Importe" class="text-end fw-bold">Gs. {{ pago.importe_total|formato_guaranies }}</td>
+                            <td data-label="Puntos" class="text-center">
                                 {% if pago.estrellas > 0 %}
-                                    <span class="text-warning">
+                                    <div class="puntos-estrellas">
                                         {% for i in "x"|ljust:pago.estrellas %}⭐{% endfor %}
-                                    </span>
+                                    </div>
                                 {% else %}
                                     <span class="text-muted">—</span>
                                 {% endif %}
@@ -305,7 +403,7 @@
         <!-- Panel de Canjes -->
         <div class="tab-pane fade" id="pills-canjes" role="tabpanel">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle table-responsive-stack">
                     <thead>
                         <tr>
                             <th>Fecha</th>
@@ -317,10 +415,10 @@
                     <tbody>
                         {% for canje in canjes %}
                         <tr>
-                            <td>{{ canje.fecha|date:"d/m/Y H:i" }}</td>
-                            <td>{{ canje.concepto }}</td>
-                            <td class="text-center fw-bold text-danger">-{{ canje.cantidad }} ⭐</td>
-                            <td>{{ canje.usuario_registro.get_full_name|default:canje.usuario_registro.username }}</td>
+                            <td data-label="Fecha">{{ canje.fecha|date:"d/m/Y H:i" }}</td>
+                            <td data-label="Concepto">{{ canje.concepto }}</td>
+                            <td data-label="Cantidad" class="text-center fw-bold text-danger">-{{ canje.cantidad }} ⭐</td>
+                            <td data-label="Registrado por">{{ canje.usuario_registro.get_full_name|default:canje.usuario_registro.username }}</td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -348,15 +446,15 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-warning text-dark border-0">
-                <h5 class="modal-title fw-bold"><i class="bi bi-gift-fill me-2"></i> Registrar Canje de Estrellas</h5>
+                <h5 class="modal-title fw-bold"><i class="bi bi-gift-fill me-2"></i> Registrar canje</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{% url 'canjear_estrellas' alumno.id %}" method="POST">
+            <form action="{% url 'canjear_estrellas' alumno.uuid %}" method="POST">
                 {% csrf_token %}
                 <div class="modal-body p-4">
                     <div class="text-center mb-4">
                         <div class="display-6 fw-bold text-warning">⭐ {{ total_estrellas }}</div>
-                        <div class="text-muted">Estrellas Disponibles</div>
+                        <div class="text-muted">Puntos disponibles</div>
                     </div>
                     
                     <div class="mb-3">
@@ -371,7 +469,7 @@
                 </div>
                 <div class="modal-footer border-0 p-4 pt-0">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">Confirmar Canje</button>
+                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">Confirmar</button>
                 </div>
             </form>
         </div>

@@ -39,6 +39,46 @@
     [data-theme="dark"] .badge.bg-info.text-dark {
         color: #0f172a !important;
     }
+
+    @media (max-width: 768px) {
+        .stat-card form.row {
+            --bs-gutter-y: 0.5rem;
+        }
+
+        .stat-card .form-label {
+            margin-bottom: 0.1rem;
+            font-size: 0.85rem;
+        }
+
+        .row.mb-4:has(.btn-primary) {
+            margin-bottom: 1rem !important;
+        }
+
+        .row.mb-4 .col-md-12 {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .row.mb-4 .btn {
+            flex: 1 1 calc(50% - 0.5rem);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        /* Botón de búsqueda ocupa el 100% en móvil */
+        form .col-md-12 .btn-primary {
+            flex: 1 1 100%;
+        }
+        
+        form .col-md-12 .btn-secondary,
+        form .col-md-12 .btn-outline-info {
+            flex: 1 1 calc(50% - 0.5rem);
+        }
+    }
 </style>
 
 <!-- Filtros -->
@@ -64,15 +104,15 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-12">
-                    <button type="submit" class="btn btn-primary">
+                <div class="col-md-12 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
                         <i class="bi bi-search"></i> Buscar
                     </button>
                     <a href="{% url 'lista_funcionarios' %}" class="btn btn-secondary">
                         <i class="bi bi-x-circle"></i> Limpiar
                     </a>
                     <a href="{% url 'lista_asistencias' %}" class="btn btn-outline-info">
-                        <i class="bi bi-list-check"></i> Ver Asistencias
+                        <i class="bi bi-list-check"></i> Asistencias
                     </a>
                 </div>
             </form>

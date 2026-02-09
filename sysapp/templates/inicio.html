@@ -236,6 +236,7 @@
         flex: 1 1 calc(33.333% - 1rem);
         min-width: 220px;
         box-sizing: border-box;
+        text-decoration: none !important;
     }
 
     .status-item::before {
@@ -624,6 +625,19 @@
     }
 
     @media (max-width: 768px) {
+        .empty-state {
+            padding: 2.5rem 1.5rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+        }
+
         .dashboard-container {
             padding: 1rem 0.75rem !important;
         }
@@ -660,6 +674,22 @@
 
         .table-modern {
             min-width: 100%;
+        }
+
+        .empty-state {
+            align-items: center;
+            max-width: 65%;
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+
+            text-align: center;
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.3;
         }
     }
 
@@ -706,32 +736,32 @@
         </div>
 
         <div class="status-grid">
-            <div class="status-item">
+            <a href="{% url 'lista_alumnos' %}?estado=AL_DIA" class="status-item">
                 <div class="status-badge al-dia">
                     {{ alumnos_al_dia|default:"0" }}
                 </div>
                 <div class="status-info">
                     <h6>Al día</h6>
                 </div>
-            </div>
+            </a>
 
-            <div class="status-item">
+            <a href="{% url 'lista_alumnos' %}?estado=CERCANO_VENCIMIENTO" class="status-item">
                 <div class="status-badge por-vencer">
                     {{ alumnos_por_vencer|default:"0" }}
                 </div>
                 <div class="status-info">
                     <h6>Por vencer</h6>
                 </div>
-            </div>
+            </a>
 
-            <div class="status-item">
+            <a href="{% url 'lista_alumnos' %}?estado=ATRASADO" class="status-item">
                 <div class="status-badge atrasado">
                     {{ alumnos_atrasados|default:"0" }}
                 </div>
                 <div class="status-info">
                     <h6>Atrasados</h6>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -761,10 +791,10 @@
                 {% for pago in pagos_recientes %}
                 <tr>
                     <td data-label="N° Recibo">
-                        <span class="recibo-number">{{ pago.numero_recibo }}</span>
+                        <span class="recibo-number">{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</span>
                     </td>
                     <td data-label="Alumno">
-                        <a href="{% url 'detalle_alumno' pago.alumno.id %}" class="alumno-link">
+                        <a href="{% url 'detalle_alumno' pago.alumno.uuid %}" class="alumno-link">
                             {{ pago.alumno.nombre_completo }}
                             <i class="bi bi-arrow-right"></i>
                         </a>
@@ -786,11 +816,7 @@
                     <td colspan="8">
                         <div class="empty-state">
                             <i class="bi bi-inbox"></i>
-                            <p>No hay pagos registrados hoy</p>
-                            <a href="{% url 'registrar_pago' %}" class="btn-primary-custom">
-                                <i class="bi bi-plus-circle-fill"></i>
-                                Registrar primer pago
-                            </a>
+                            <p>No hay pagos registrados</p>
                         </div>
                     </td>
                 </tr>

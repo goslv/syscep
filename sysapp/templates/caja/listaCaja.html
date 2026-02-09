@@ -84,31 +84,99 @@
         [data-theme="dark"] .table thead th {
             color: var(--gray-400) !important;
         }
+
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+
+            /* Botones de acción en la cabecera */
+            .header-actions {
+                flex-direction: column !important;
+                gap: 0.5rem !important;
+            }
+
+            .header-actions .d-flex {
+                width: 100%;
+                justify-content: space-between;
+                gap: 0.5rem !important;
+            }
+
+            .header-actions .btn {
+                flex: 1;
+                justify-content: center;
+                padding: 0.6rem 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            /* Enlaces de "Ver todos" */
+            .view-all-links {
+                justify-content: center !important;
+                gap: 1rem !important;
+                margin-top: 0.5rem !important;
+                margin-bottom: 1rem !important;
+            }
+            .view-all-links a {
+                font-size: 0.75rem !important;
+                white-space: nowrap;
+            }
+
+            /* Tabs lado a lado */
+            .nav-tabs {
+                flex-wrap: nowrap !important;
+                background: var(--gray-50);
+                border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+                overflow: hidden;
+            }
+            .nav-tabs .nav-item {
+                flex: 1;
+            }
+            .nav-tabs .nav-link {
+                padding: 0.75rem 0.1rem !important;
+                font-size: 0.75rem !important;
+                white-space: nowrap;
+                text-align: center;
+                border-bottom: 2px solid transparent !important;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .nav-tabs .nav-link.active {
+                background: transparent !important;
+                border-bottom: 3px solid var(--primary-500) !important;
+            }
+            .nav-tabs .nav-link i {
+                display: block;
+                margin-bottom: 2px;
+                margin-right: 0 !important;
+                font-size: 1rem;
+            }
+        }
     </style>
     <div class="row">
         <div class="col-12 mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
-                <h2 class="mb-0"><i class="fas fa-cash-register me-2 text-primary"></i></h2>
-                <div class="no-print">
+            <div class="header-actions d-flex justify-content-between align-items-center mb-3 mt-4">
+                <div class="no-print d-flex gap-2">
                     {% if user.is_staff %}
-                    <a href="{% url 'informe_caja' %}" class="btn btn-primary">
-                        <i class="fas fa-file-invoice-dollar me-1"></i> Informe
+                    <a href="{% url 'informe_caja' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-file-invoice-dollar me-1"></i> <span class="d-none d-sm-inline">Informe</span><span class="d-inline d-sm-none">Informe</span>
                     </a>
                     {% endif %}
                 </div>
-
+                <div class="d-flex gap-2">
+                    <a href="{% url 'registrar_pago' %}" class="btn btn-success">
+                        <i class="fas fa-plus-circle me-1"></i><span class="d-none d-sm-inline">Registrar Ingreso</span><span class="d-inline d-sm-none">Ingreso</span>
+                    </a>
+                    <a href="{% url 'registrar_egreso' %}" class="btn btn-danger">
+                        <i class="fas fa-minus-circle me-1"></i><span class="d-none d-sm-inline">Registrar Egreso</span><span class="d-inline d-sm-none">Egreso</span>
+                    </a>
+                </div>
             </div>
-            <a href="{% url 'registrar_pago' %}" class="btn btn-success">
-                <i class="fas fa-plus me-1"></i>Registrar Ingreso
-            </a>
-            <a href="{% url 'registrar_egreso' %}" class="btn btn-danger">
-                <i class="fas fa-minus me-1"></i>Registrar Egreso
-            </a>
-
         </div>
         {% if user.is_staff %}
-        <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="view-all-links d-flex justify-content-center align-items-center mb-4 mt-2">
             <a href="{% url 'lista_pagos' %}" class="btn btn-link btn-sm text-decoration-none">Ver todos los ingresos</a>
+            <div class="divider-vertical d-none d-md-block" style="height: 15px;"></div>
             <a href="{% url 'lista_egresos' %}" class="btn btn-link btn-sm text-decoration-none text-danger">Ver todos los egresos</a>
         </div>
         {% endif %}
@@ -119,12 +187,12 @@
         <div class="card-header p-0">
             <ul class="nav nav-tabs nav-fill border-0" id="cajaTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active py-3 border-0 border-bottom border-3" id="ingresos-tab" data-bs-toggle="tab" data-bs-target="#ingresos" type="button">
+                    <button class="nav-link active py-3 border-0" id="ingresos-tab" data-bs-toggle="tab" data-bs-target="#ingresos" type="button">
                         <i class="fas fa-arrow-up text-success me-2"></i>INGRESOS
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link py-3 border-0 border-bottom border-3" id="egresos-tab" data-bs-toggle="tab" data-bs-target="#egresos" type="button">
+                    <button class="nav-link py-3 border-0" id="egresos-tab" data-bs-toggle="tab" data-bs-target="#egresos" type="button">
                         <i class="fas fa-arrow-down text-danger me-2"></i>EGRESOS
                     </button>
                 </li>
@@ -150,7 +218,7 @@
                             {% for pago in ingresos %}
                             <tr>
                                 <td data-label="Fecha" class="ps-4 text-muted small">{{ pago.fecha|date:"d/m/Y" }}</td>
-                                <td data-label="Recibo"><span class="badge bg-light text-primary border">{{ pago.numero_recibo }}</span></td>
+                                <td data-label="Recibo"><span class="badge bg-light text-primary border">{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</span></td>
                                 <td data-label="Alumno/Cliente">
                                     <div class="fw-bold">
                                         {% if pago.alumno %}
@@ -165,10 +233,10 @@
                                 <td data-label="Monto" class="text-end text-success fw-bold">Gs. {{ pago.importe_total|formato_guaranies }}</td>
                                 <td data-label="Acciones" class="text-center no-print">
                                     <div class="btn-group">
-                                        <a href="{% url 'detalle_pago' pago.id %}" class="btn btn-sm btn-light border" title="Ver">
+                                        <a href="{% url 'detalle_pago' pago.uuid %}" class="btn btn-sm btn-light border" title="Ver">
                                             <i class="bi bi-eye"></i> Detalle
                                         </a>
-                                        <a href="{% url 'editar_pago' pago.id %}" class="btn btn-sm btn-dark border" title="Editar">
+                                        <a href="{% url 'editar_pago' pago.uuid %}" class="btn btn-sm btn-dark border" title="Editar">
                                             <i class="bi bi-pencil"></i> Editar
                                         </a>
                                     </div>
@@ -197,7 +265,7 @@
                             <tr>
                                 <th class="ps-4">Fecha</th>
                                 <th>Comprobante</th>
-                                <th>Categoría / Concepto</th>
+                                <th>Concepto</th>
                                 <th class="text-end">Monto</th>
                                 <th class="text-center no-print">Acciones</th>
                             </tr>
@@ -215,10 +283,10 @@
                                 <td data-label="Monto" class="text-end text-danger fw-bold">Gs. {{ egreso.monto|formato_guaranies }}</td>
                                 <td data-label="Acciones" class="text-center no-print">
                                     <div class="btn-group">
-                                        <a href="{% url 'detalle_egreso' egreso.id %}" class="btn btn-sm btn-light border" title="Ver">
+                                        <a href="{% url 'detalle_egreso' egreso.uuid %}" class="btn btn-sm btn-light border" title="Ver">
                                             <i class="bi bi-eye text-info"></i> Detalle
                                         </a>
-                                        <a href="{% url 'editar_egreso' egreso.id %}" class="btn btn-sm btn-dark border" title="Editar">
+                                        <a href="{% url 'editar_egreso' egreso.uuid %}" class="btn btn-sm btn-dark border" title="Editar">
                                             <i class="bi bi-pencil text-warning"></i> Editar
                                         </a>
                                     </div>

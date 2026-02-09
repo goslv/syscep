@@ -268,7 +268,7 @@
                 <div class="pago-row">
                     <div class="row align-items-center g-3">
                         <div class="col-md-2">
-                            <span class="recibo-badge">{{ pago.numero_recibo }}</span>
+                            <span class="recibo-badge">{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</span>
                         </div>
                         <div class="col-md-3">
                             <span class="alumno-name fw-bold fs-5">{{ pago.alumno.nombre_completo }}</span>
@@ -288,7 +288,7 @@
                                 </span>
                         </div>
                         <div class="col-md-1 text-end">
-                            <a href="{% url 'detalle_alumno' pago.alumno.id %}" class="btn btn-sm btn-light rounded-pill px-3 border">
+                            <a href="{% url 'detalle_alumno' pago.alumno.uuid %}" class="btn btn-sm btn-light rounded-pill px-3 border">
                                 <i class="bi bi-person-lines-fill"></i>
                             </a>
                         </div>

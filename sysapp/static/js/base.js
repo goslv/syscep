@@ -249,11 +249,35 @@ class DropdownManager {
 class SearchManager {
     constructor() {
         this.searchInput = document.getElementById('globalSearch');
+        this.searchContainer = document.getElementById('globalSearchContainer');
+        this.searchToggleMobile = document.getElementById('searchToggleMobile');
+        this.closeSearchMobile = document.getElementById('closeSearchMobile');
         this.init();
     }
 
     init() {
         if (!this.searchInput) return;
+
+        // Toggle móvil
+        this.searchToggleMobile?.addEventListener('click', () => {
+            this.searchContainer?.classList.add('show-mobile');
+            this.searchInput.focus();
+        });
+
+        this.closeSearchMobile?.addEventListener('click', () => {
+            this.searchContainer?.classList.remove('show-mobile');
+            this.searchInput.value = '';
+        });
+
+        // Manejar el envío de la búsqueda (Enter)
+        this.searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = this.searchInput.value.trim();
+                if (query) {
+                    window.location.href = `/alumnos/?busqueda=${encodeURIComponent(query)}`;
+                }
+            }
+        });
 
         // Atajo de teclado
         document.addEventListener('keydown', (e) => {

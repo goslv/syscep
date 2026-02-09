@@ -203,14 +203,13 @@
 <div class="container-fluid mt-4">
     <!-- Encabezado -->
     <div class="d-flex justify-content-between align-items-center mb-4 no-print mt-5">
-        <h2 class="mb-0"><i class="fas fa-file-invoice-dollar text-primary me-2"></i>Informe de Caja</h2>
-        <div>
-            <button onclick="window.print()" class="btn btn-primary me-2">
-                <i class="fas fa-print"></i> Imprimir
-            </button>
+        <div class="d-flex gap-3">
             <a href="{% url 'lista_caja' %}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
+            <button onclick="window.print()" class="btn btn-primary me-2">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
         </div>
     </div>
 
@@ -418,15 +417,15 @@
                     <table class="table table-bordered mb-0">
                         <tbody>
                             <tr>
-                                <td class="text-end fw-bold bg-light" style="width: 50%;">Total Ingresos:</td>
+                                <td class="text-end fw-bold bg-light" style="width: 50%;">Total ingresos:</td>
                                 <td class="text-end text-success fw-bold">Gs. {{ total_ingresos|formato_guaranies }}</td>
                             </tr>
                             <tr>
-                                <td class="text-end fw-bold bg-light">Total Egresos:</td>
+                                <td class="text-end fw-bold bg-light">Total egresos:</td>
                                 <td class="text-end text-danger fw-bold">Gs. {{ total_egresos|formato_guaranies }}</td>
                             </tr>
                             <tr class="table-primary">
-                                <td class="text-end fw-bold fs-5">BALANCE FINAL:</td>
+                                <td class="text-end fw-bold fs-5">BALANCE:</td>
                                 <td class="text-end fw-bold fs-5 {% if balance >= 0 %}text-primary{% else %}text-danger{% endif %}">
                                     Gs. {{ balance|formato_guaranies }}
                                 </td>

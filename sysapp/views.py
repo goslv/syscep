@@ -137,9 +137,10 @@ def lista_alumnos(request):
     return render(request, 'alumnos/listaAlumnos.html', context)
 
 @login_required
-def detalle_alumno(request, alumno_id):
+@admin_required
+def detalle_alumno(request, alumno_uuid):
     """Detalle de un alumno con historial de pagos"""
-    alumno = get_object_or_404(Alumno, pk=alumno_id)
+    alumno = get_object_or_404(Alumno, uuid=alumno_uuid)
     pagos = alumno.pagos.all().order_by('-fecha')
 
     context = {
@@ -155,10 +156,11 @@ def detalle_alumno(request, alumno_id):
 
 
 @login_required
-def canjear_estrellas(request, alumno_id):
+@admin_required
+def canjear_estrellas(request, alumno_uuid):
     """Registrar un canje de estrellas para un alumno"""
     if request.method == 'POST':
-        alumno = get_object_or_404(Alumno, pk=alumno_id)
+        alumno = get_object_or_404(Alumno, uuid=alumno_uuid)
         cantidad = int(request.POST.get('cantidad', 0))
         concepto = request.POST.get('concepto', '').strip()
 
@@ -177,10 +179,11 @@ def canjear_estrellas(request, alumno_id):
             )
             messages.success(request, f'Se han canjeado {cantidad} estrellas exitosamente.')
             
-    return redirect('detalle_alumno', alumno_id=alumno_id)
+    return redirect('detalle_alumno', alumno_uuid=alumno_uuid)
 
 
 @login_required
+@admin_required
 def crear_alumno(request):
     """Crear un nuevo alumno"""
     if request.method == 'POST':
@@ -188,7 +191,7 @@ def crear_alumno(request):
         if form.is_valid():
             alumno = form.save()
             messages.success(request, f'Alumno {alumno.nombre} {alumno.apellido} registrado exitosamente.')
-            return redirect('detalle_alumno', alumno_id=alumno.id)
+            return redirect('detalle_alumno', alumno_uuid=alumno.uuid)
     else:
         form = AlumnoForm()
 
@@ -200,15 +203,16 @@ def crear_alumno(request):
 
 
 @login_required
-def editar_alumno(request, alumno_id):
+@admin_required
+def editar_alumno(request, alumno_uuid):
     """Editar un alumno existente"""
-    alumno = get_object_or_404(Alumno, pk=alumno_id)
+    alumno = get_object_or_404(Alumno, uuid=alumno_uuid)
     if request.method == 'POST':
         form = AlumnoForm(request.POST, instance=alumno)
         if form.is_valid():
             form.save()
             messages.success(request, f'Alumno {alumno.nombre} {alumno.apellido} actualizado exitosamente.')
-            return redirect('detalle_alumno', alumno_id=alumno.id)
+            return redirect('detalle_alumno', alumno_uuid=alumno.uuid)
     else:
         form = AlumnoForm(instance=alumno)
 
@@ -283,9 +287,10 @@ def lista_pagos(request):
 
 
 @login_required
-def detalle_pago(request, id):
+@admin_required
+def detalle_pago(request, pago_uuid):
     """Vista para ver el detalle completo de un pago"""
-    pago = get_object_or_404(Pago.objects.select_related('alumno', 'sede', 'carrera'), id=id)
+    pago = get_object_or_404(Pago.objects.select_related('alumno', 'sede', 'carrera'), uuid=pago_uuid)
 
     context = {
         'pago': pago,
@@ -295,6 +300,7 @@ def detalle_pago(request, id):
 
 
 @login_required
+@admin_required
 def registrar_pago(request):
     """Vista para registrar un nuevo pago"""
     if request.method == 'POST':
@@ -317,12 +323,13 @@ def registrar_pago(request):
             pago.curso = form.cleaned_data.get('curso')
             pago.monto_unitario = form.cleaned_data.get('monto_unitario')
             pago.cantidad_cuotas = form.cleaned_data.get('cantidad_cuotas') or 1
+            pago.estrellas = form.cleaned_data.get('estrellas') or 0
             pago.save()
             if pago.numero_recibo:
                 messages.success(request, f'Pago registrado exitosamente. Recibo No. {pago.numero_recibo}')
             else:
                 messages.success(request, 'Pago registrado exitosamente.')
-            return redirect('detalle_pago', id=pago.id)
+            return redirect('detalle_pago', pago_uuid=pago.uuid)
     else:
         form = PagoForm()
 
@@ -340,9 +347,10 @@ def registrar_pago(request):
 
 
 @login_required
-def editar_pago(request, id):
+@admin_required
+def editar_pago(request, pago_uuid):
     """Vista para editar un pago existente"""
-    pago = get_object_or_404(Pago, id=id)
+    pago = get_object_or_404(Pago, uuid=pago_uuid)
 
     if request.method == 'POST':
         form = PagoForm(request.POST, request.FILES, instance=pago)
@@ -361,12 +369,13 @@ def editar_pago(request, id):
             pago.curso = form.cleaned_data.get('curso')
             pago.monto_unitario = form.cleaned_data.get('monto_unitario')
             pago.cantidad_cuotas = form.cleaned_data.get('cantidad_cuotas') or 1
+            pago.estrellas = form.cleaned_data.get('estrellas') or 0
             pago.save()
             if pago.numero_recibo:
                 messages.success(request, f'Pago actualizado exitosamente. Recibo No. {pago.numero_recibo}')
             else:
                 messages.success(request, 'Pago actualizado exitosamente.')
-            return redirect('detalle_pago', id=pago.id)
+            return redirect('detalle_pago', pago_uuid=pago.uuid)
     else:
         form = PagoForm(instance=pago)
 
@@ -385,9 +394,10 @@ def editar_pago(request, id):
 
 
 @login_required
-def eliminar_pago(request, id):
+@admin_required
+def eliminar_pago(request, pago_uuid):
     """Vista para eliminar un pago o solicitar su eliminación"""
-    pago = get_object_or_404(Pago, id=id)
+    pago = get_object_or_404(Pago, uuid=pago_uuid)
 
     if request.method == 'POST':
         if request.user.is_staff:
@@ -414,7 +424,7 @@ def eliminar_pago(request, id):
                 datos_objeto=datos
             )
             messages.info(request, 'Solicitud de eliminación enviada al administrador.')
-            return redirect('detalle_pago', id=pago.id)
+            return redirect('detalle_pago', pago_uuid=pago.uuid)
 
     # Si no es POST, redirigir a la lista
     return redirect('lista_pagos')
@@ -1066,7 +1076,7 @@ def registrar_egreso(request):
             egreso.usuario_registro = request.user
             egreso.save()
             messages.success(request, f'Egreso registrado exitosamente. Comprobante N° {egreso.numero_comprobante}')
-            return redirect('detalle_egreso', egreso_id=egreso.id)
+            return redirect('detalle_egreso', egreso_uuid=egreso.uuid)
     else:
         form = EgresoForm()
 
@@ -1080,9 +1090,9 @@ def registrar_egreso(request):
 
 
 @login_required
-def detalle_egreso(request, egreso_id):
+def detalle_egreso(request, egreso_uuid):
     """Vista para ver el detalle de un egreso"""
-    egreso = get_object_or_404(Egreso.objects.select_related('sede', 'usuario_registro'), id=egreso_id)
+    egreso = get_object_or_404(Egreso.objects.select_related('sede', 'usuario_registro'), uuid=egreso_uuid)
 
     context = {
         'egreso': egreso,
@@ -1092,16 +1102,16 @@ def detalle_egreso(request, egreso_id):
 
 
 @login_required
-def editar_egreso(request, egreso_id):
+def editar_egreso(request, egreso_uuid):
     """Vista para editar un egreso existente"""
-    egreso = get_object_or_404(Egreso, id=egreso_id)
+    egreso = get_object_or_404(Egreso, uuid=egreso_uuid)
 
     if request.method == 'POST':
         form = EgresoForm(request.POST, request.FILES, instance=egreso)
         if form.is_valid():
             form.save()
             messages.success(request, f'Egreso actualizado exitosamente. Comprobante N° {egreso.numero_comprobante}')
-            return redirect('detalle_egreso', egreso_id=egreso.id)
+            return redirect('detalle_egreso', egreso_uuid=egreso.uuid)
     else:
         form = EgresoForm(instance=egreso)
 
@@ -1116,9 +1126,9 @@ def editar_egreso(request, egreso_id):
 
 
 @login_required
-def eliminar_egreso(request, egreso_id):
+def eliminar_egreso(request, egreso_uuid):
     """Vista para eliminar un egreso o solicitar su eliminación"""
-    egreso = get_object_or_404(Egreso, id=egreso_id)
+    egreso = get_object_or_404(Egreso, uuid=egreso_uuid)
 
     if request.method == 'POST':
         if request.user.is_staff:
@@ -1142,10 +1152,9 @@ def eliminar_egreso(request, egreso_id):
                 datos_objeto=datos
             )
             messages.info(request, 'Solicitud de eliminación enviada al administrador.')
-            return redirect('detalle_egreso', egreso_id=egreso.id)
+            return redirect('detalle_egreso', egreso_uuid=egreso.uuid)
 
     return redirect('lista_egresos')
-
 
 @login_required
 @admin_required

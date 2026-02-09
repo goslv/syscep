@@ -90,6 +90,7 @@
         --sidebar-active: rgba(255, 255, 255, 0.15);
 
         --topbar-height: 70px;
+        --topbar-height-mobile: 56px;
         --border-radius-sm: 8px;
         --border-radius-md: 12px;
         --border-radius-lg: 16px;
@@ -101,7 +102,7 @@
         --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
-        /* Transitions */
+        /* Transiciones */
         --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
         --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
         --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -114,7 +115,7 @@
     }
 
     [data-theme="dark"] .dropdown-menu {
-        background: var(--card-bg);
+        background: #1e293b;
         border-color: var(--border-color);
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
     }
@@ -222,6 +223,7 @@
     }
 
     html {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         scroll-behavior: smooth;
     }
 
@@ -461,10 +463,11 @@
         transition: margin-left var(--transition-normal);
     }
 
+    /* Top Bar Mejorada */
     .top-bar {
         background: var(--card-bg) !important;
         height: var(--topbar-height);
-        padding: 0 2rem;
+        padding: 0 1.5rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -472,13 +475,18 @@
         position: sticky;
         top: 0;
         z-index: 1000;
-        gap: 25rem;
+        gap: 1rem;
     }
 
     .top-bar-left {
         display: flex;
         align-items: center;
         gap: 1rem;
+        flex: 1;
+    }
+
+    .search-box-mobile-toggle {
+        display: none;
     }
 
     .menu-toggle {
@@ -538,7 +546,7 @@
     .search-box {
         position: relative;
         flex: 1;
-        max-width: 400px;
+        max-width: 500px;
     }
 
     .search-box input {
@@ -622,14 +630,23 @@
 
     .top-bar-btn .notification-dot {
         position: absolute;
-        top: 8px;
-        right: 8px;
+        top: 6px;
+        right: 6px;
         width: 10px;
         height: 10px;
         background: var(--danger);
         border-radius: 50%;
         border: 2px solid var(--card-bg);
         animation: pulse-dot 2s infinite;
+    }
+
+    /* Animación Hover para iconos */
+    .top-bar-btn i {
+        transition: transform var(--transition-fast);
+    }
+
+    .top-bar-btn:hover i {
+        transform: scale(1.1);
     }
 
     @keyframes pulse-dot {
@@ -940,12 +957,49 @@
             margin-left: 0;
         }
 
+        .top-bar {
+            width: 100%;
+        }
+
         .menu-toggle {
-            display: flex;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            font-size: 1.05rem;
+            color: var(--gray-600);
+            background: rgba(255, 255, 255, 0);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+            backdrop-filter: blur(4px);
         }
 
         .search-box {
             display: none;
+        }
+
+        .search-box.show-mobile {
+            display: block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--card-bg);
+            z-index: 1010;
+            padding: 0.5rem 1rem;
+            max-width: none;
+        }
+
+        .search-box.show-mobile input {
+            height: 50px;
+        }
+
+        .search-box-mobile-toggle {
+            display: flex;
         }
 
         .user-dropdown-info {
@@ -954,20 +1008,216 @@
     }
 
     @media (max-width: 768px) {
+        /* Top bar más compacta en móviles */
         .top-bar {
-            padding: 0 1rem;
+            padding: 0 0.75rem;
+            height: var(--topbar-height-mobile);
+            gap: 0.5rem;
         }
 
         .content-wrapper {
             padding: 1rem;
+            margin-top: var(--topbar-height-mobile);
         }
 
         .page-title {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
         }
 
         .breadcrumb-nav {
             display: none;
+        }
+
+        /* Botones más pequeños y optimizados */
+        .top-bar-btn {
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
+        }
+
+        .menu-toggle {
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
+        }
+
+        /* Avatar de usuario más pequeño */
+        .user-dropdown-avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 0.8rem;
+        }
+
+        .user-dropdown-toggle {
+            padding: 0.25rem;
+        }
+
+        /* Divider vertical oculto en móviles */
+        .divider-vertical {
+            display: none;
+        }
+
+        /* Notificación dot más pequeña */
+        .top-bar-btn .notification-dot {
+            width: 8px;
+            height: 8px;
+            top: 4px;
+            right: 4px;
+            border-width: 1.5px;
+        }
+
+        /* Panel de notificaciones mejor posicionado */
+        .notification-panel {
+            width: calc(100vw - 1.5rem);
+            max-width: 360px;
+            right: 0.75rem;
+        }
+
+        /* Mejorar el espaciado del contenido */
+        .top-bar-left {
+            gap: 0.5rem;
+            min-width: 0;
+        }
+
+        .top-bar-right {
+            gap: 0.25rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .top-bar {
+            padding: 0 0.5rem;
+            height: var(--topbar-height-mobile);
+        }
+
+        .top-bar-btn {
+            width: 34px;
+            height: 34px;
+            font-size: 1rem;
+        }
+
+        .menu-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            font-size: 1.05rem;
+            color: var(--gray-600);
+            background: rgba(255, 255, 255, 0);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+            backdrop-filter: blur(4px);
+        }
+
+        .menu-toggle:hover {
+            transform: translateY(-2px) scale(1.02);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+            color: var(--text-main);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        }
+
+        .menu-toggle:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .menu-toggle:focus {
+            outline: none;
+            border-color: var(--primary-400);
+        }
+
+
+        .user-dropdown-avatar {
+            width: 30px;
+            height: 30px;
+            font-size: 0.75rem;
+        }
+
+        .page-title {
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        /* Hacer que solo se muestren los iconos esenciales */
+        .top-bar-right {
+            gap: 0.15rem;
+        }
+
+        /* Ajustar panel de notificaciones */
+        .notification-panel {
+            width: calc(100vw - 1rem);
+            right: 0.5rem;
+        }
+
+        .content-wrapper {
+            padding: 0.75rem;
+        }
+    }
+
+    /* Mejoras adicionales para móviles */
+    @media (max-width: 768px) {
+        /* Top bar sticky con sombra más pronunciada en scroll */
+        .top-bar.scrolled {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-toggle {
+            transition: transform 0.2s ease;
+        }
+
+        .menu-toggle:active {
+            transform: scale(0.95);
+        }
+
+        /* Animación para la barra lateral */
+        .sidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s ease !important;
+        }
+
+        /* Ajustes del modal de notificaciones en móvil */
+        .notification-panel {
+            position: fixed !important;
+            top: calc(var(--topbar-height-mobile) + 10px) !important;
+            left: 10px !important;
+            right: 10px !important;
+            width: auto !important;
+            max-width: none !important;
+            max-height: 80vh;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        /* Mejorar hover states en dispositivos táctiles */
+        .top-bar-btn:active {
+            background: var(--gray-200);
+            transform: scale(0.95);
+        }
+
+        /* Asegurar que el dropdown de usuario funcione bien en móviles */
+        .dropdown-menu {
+            min-width: 200px;
+            max-width: calc(100vw - 2rem);
+        }
+
+        /* Mejor visualización del search en móviles */
+        .search-box.show-mobile {
+            animation: slideInDown 0.2s ease;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     }
 
@@ -1243,7 +1493,7 @@
         }
 
         .search-box {
-            max-width: 200px;
+            max-width: 100px;
         }
 
         .user-dropdown-info {
@@ -1278,33 +1528,6 @@
         }
     }
 
-    /* Contenedor de notificaciones flotantes */
-    .notifications-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        width: 350px;
-        max-width: 90vw;
-    }
-
-    .notifications-container .alert {
-        box-shadow: var(--shadow-lg);
-        border: none;
-        margin-bottom: 10px;
-        animation: slideInRight 0.3s ease-out;
-    }
-
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
 
     .notification-item.fade-out {
         animation: slideOutRight 0.3s ease-out forwards;
@@ -1326,14 +1549,87 @@
             padding: 0.25rem;
         }
 
+        .user-dropdown-avatar {
+            width: 34px;
+            height: 34px;
+        }
+
         .top-bar-btn {
             width: 36px;
             height: 36px;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .divider-vertical {
             display: none;
+        }
+
+        .user-dropdown-toggle i {
+            display: none;
+        }
+
+        .user-dropdown-info {
+            display: none !important;
+        }
+
+        .user-dropdown .dropdown-menu {
+            position: fixed !important;
+            top: 60px !important;
+            left: 50% !important;
+            right: auto !important;
+            transform: translateX(-50%) !important;
+            width: 90% !important;
+            max-width: 300px !important;
+            margin: 0 auto !important;
+            border-radius: var(--border-radius-lg) !important;
+            padding: 0.75rem !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+        }
+
+        .user-dropdown .dropdown-item {
+            padding: 0.85rem 1rem !important;
+            border-radius: var(--border-radius-md) !important;
+            margin-bottom: 0.25rem !important;
+            font-weight: 500 !important;
+        }
+
+        .user-mobile-header {
+            display: flex !important;
+            align-items: center !important;
+            gap: 1rem !important;
+            padding: 1rem !important;
+            margin-bottom: 0.5rem !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            background: var(--gray-50) !important;
+            border-radius: var(--border-radius-md) var(--border-radius-md) 0 0 !important;
+        }
+
+        .user-mobile-header .user-avatar-sm {
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 50% !important;
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-700)) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: white !important;
+            font-weight: 600 !important;
+        }
+
+        .user-mobile-info-text {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .user-mobile-name {
+            font-weight: 700 !important;
+            color: var(--text-main) !important;
+            font-size: 1rem !important;
+        }
+
+        .user-mobile-role {
+            font-size: 0.75rem !important;
+            color: var(--text-muted) !important;
         }
     }
     /* Estilos adicionales para componentes mejorados */
@@ -1430,10 +1726,6 @@
             <h1 class="brand-name">ITS CEP</h1>
             <div class="brand-tagline">Sistema de Gestión</div>
         </div>
-        <!-- Botón cerrar para móvil -->
-        <button class="btn-close-sidebar d-lg-none" id="closeSidebar" aria-label="Cerrar menú" type="button">
-            <i class="bi bi-x-lg"></i>
-        </button>
     </div>
 
     <nav class="sidebar-nav" aria-label="Menú lateral">
@@ -1504,24 +1796,24 @@
         </div>
 
 
-            {% if user.is_staff %}
-            <div class="nav-section">
-                <div class="nav-section-title">Sistema</div>
-                <div class="nav-item">
-                    <a href="{% url 'lista_usuarios' %}"
-                       class="nav-link {% if 'usuario' in request.resolver_match.url_name %}active{% endif %}">
-                        <i class="bi bi-person-lock" aria-hidden="true"></i>
-                        <span>Usuarios</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/admin" class="nav-link" target="_blank">
-                        <i class="bi bi-gear-fill" aria-hidden="true"></i>
-                        <span>Django Admin</span>
-                    </a>
-                </div>
+        {% if user.is_staff %}
+        <div class="nav-section">
+            <div class="nav-section-title">Sistema</div>
+            <div class="nav-item">
+                <a href="{% url 'lista_usuarios' %}"
+                   class="nav-link {% if 'usuario' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-person-lock" aria-hidden="true"></i>
+                    <span>Usuarios</span>
+                </a>
             </div>
-            {% endif %}
+            <div class="nav-item">
+                <a href="/admin" class="nav-link" target="_blank">
+                    <i class="bi bi-gear-fill" aria-hidden="true"></i>
+                    <span>Django Admin</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
     </nav>
 </aside>
 
@@ -1529,13 +1821,16 @@
 <main class="main-content" id="main-content" role="main">
     <!-- Top Bar -->
     <header class="top-bar" role="banner">
-        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" type="button">
-            <i class="bi bi-list"></i>
-        </button>
+        <div class="top-bar-left">
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" type="button">
+                <i class="bi bi-list"></i>
+            </button>
 
-        <div class="search-box">
-            <i class="bi bi-search" aria-hidden="true"></i>
-            <input type="text" placeholder="Buscar alumnos, pagos, carreras..." id="globalSearch" aria-label="Buscar en el sistema">
+            <div class="search-box" id="globalSearchContainer">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input type="text" id="globalSearch" aria-label="Buscar en el sistema">
+                <button class="btn-close d-lg-none position-absolute end-0 top-50 translate-middle-y me-5" id="closeSearchMobile" type="button"></button>
+            </div>
         </div>
 
         <div class="top-bar-right">
@@ -1623,20 +1918,31 @@
                     <i class="bi bi-chevron-down" style="color: var(--gray-400);" aria-hidden="true"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" id="userDropdownMenu" aria-labelledby="userDropdownToggle">
+                    <li class="d-md-none">
+                        <div class="user-mobile-header">
+                            <div class="user-avatar-sm">
+                                {{ user.username|first|upper }}
+                            </div>
+                            <div class="user-mobile-info-text">
+                                <span class="user-mobile-name">{{ user.username }}</span>
+                                <span class="user-mobile-role">{% if user.is_staff %}Administrador{% else %}Usuario{% endif %}</span>
+                            </div>
+                        </div>
+                    </li>
                     <li>
                         <button type="button" class="dropdown-item py-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#perfilModal">
-                            <i class="bi bi-person me-2"></i> Mi Perfil
+                            <i class="bi bi-person fs-5 me-2"></i> Mi Perfil
                         </button>
                     </li>
                     <li>
                         <button type="button" class="dropdown-item py-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#configuracionModal">
-                            <i class="bi bi-gear me-2"></i> Configuración
+                            <i class="bi bi-gear fs-5 me-2"></i> Configuración
                         </button>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <a href="{% url 'logout' %}" class="dropdown-item py-2 d-flex align-items-center text-danger">
-                            <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+                            <i class="bi bi-box-arrow-right fs-5 me-2"></i> Cerrar Sesión
                         </a>
                     </li>
                 </ul>
@@ -1646,26 +1952,6 @@
 
     <!-- Content -->
     <div class="content-wrapper animate-fadeIn">
-        <!-- Sistema de notificaciones mejorado -->
-        <div id="notifications-container" class="notifications-container">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {% if message.tags == 'success' %}
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                        {% elif message.tags == 'error' %}
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        {% elif message.tags == 'warning' %}
-                            <i class="bi bi-exclamation-circle-fill me-2"></i>
-                        {% else %}
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                        {% endif %}
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
 
         <!-- Loading overlay -->
         <div class="loading-overlay" id="loadingOverlay" style="display: none;">
@@ -1835,26 +2121,41 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const btnToggle = document.getElementById('modalBtnTogglePassword');
-    const btnCancel = document.getElementById('modalBtnCancelPassword');
-    const container = document.getElementById('modalPasswordFormContainer');
-    const header = document.getElementById('modalPasswordSectionHeader');
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnToggle = document.getElementById('modalBtnTogglePassword');
+        const btnCancel = document.getElementById('modalBtnCancelPassword');
+        const container = document.getElementById('modalPasswordFormContainer');
+        const header = document.getElementById('modalPasswordSectionHeader');
 
-    if (btnToggle && btnCancel && container && header) {
-        btnToggle.addEventListener('click', () => {
-            container.classList.remove('d-none');
-            header.classList.add('d-none');
-        });
-        btnCancel.addEventListener('click', () => {
-            container.classList.add('d-none');
-            header.classList.remove('d-none');
-        });
-    }
-});
+        if (btnToggle && btnCancel && container && header) {
+            btnToggle.addEventListener('click', () => {
+                container.classList.remove('d-none');
+                header.classList.add('d-none');
+            });
+            btnCancel.addEventListener('click', () => {
+                container.classList.add('d-none');
+                header.classList.remove('d-none');
+            });
+        }
+
+        // Mobile sidebar toggle: animación smooth y control de overlay/scroll
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const navLinks = sidebar ? sidebar.querySelectorAll('.nav-link') : [];
+
+        function openSidebar() {
+            if (!sidebar || !overlay) return;
+            sidebar.classList.add('show');
+            overlay.classList.add('show');
+            menuToggle && menuToggle.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+    })
 </script>
 
 <style>
+
     .text-main { color: var(--text-main) !important; }
     [data-theme="dark"] .modal-content {
         background-color: var(--card-bg);
@@ -1863,6 +2164,8 @@ document.addEventListener('DOMContentLoaded', function() {
     [data-theme="dark"] .modal-header, [data-theme="dark"] .modal-footer {
         border-color: var(--border-color);
     }
+
+
     [data-theme="dark"] .btn-close {
         filter: invert(1) grayscale(100%) brightness(200%);
     }

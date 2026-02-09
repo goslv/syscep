@@ -46,7 +46,6 @@
         margin-bottom: 2.25rem;
         padding: 1.5rem;
         border-radius: 16px;
-        background: var(--body-bg);
         border: 1px solid var(--border-color);
     }
 
@@ -275,7 +274,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <div class="{% if form.importe_total.field.required %}required-field{% endif %}">
                                 {{ form.importe_total.label_tag }}
                                 {{ form.importe_total }}
@@ -288,12 +287,20 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
+                            {{ form.estrellas.label_tag }}
+                            {{ form.estrellas }}
+                            {% if form.estrellas.errors %}
+                                <div class="text-danger small mt-1">{{ form.estrellas.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-3 mb-3">
                             {{ form.fecha_vencimiento.label_tag }}
                             {{ form.fecha_vencimiento }}
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             {{ form.validez_pago.label_tag }}
                             {{ form.validez_pago }}
                         </div>
@@ -513,6 +520,37 @@
 
         document.getElementById('id_monto_unitario').addEventListener('input', calcularImporteTotal);
         document.getElementById('id_cantidad_cuotas').addEventListener('input', calcularImporteTotal);
+
+        // Auto-completar desde URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const alumnoId = urlParams.get('alumno');
+        const sedeId = urlParams.get('sede');
+        const carreraId = urlParams.get('carrera');
+        const nombreAlumno = urlParams.get('nombre');
+
+        if (alumnoId) {
+            const alumnoSelect = document.getElementById('id_alumno');
+            if (alumnoSelect) {
+                alumnoSelect.value = alumnoId;
+            }
+            if (nombreAlumno) {
+                const alumnoSearch = document.getElementById('alumnoSearch');
+                if (alumnoSearch) {
+                    alumnoSearch.value = decodeURIComponent(nombreAlumno);
+                }
+            }
+        }
+        if (sedeId) {
+            const sedeSelect = document.getElementById('id_sede');
+            if (sedeSelect) sedeSelect.value = sedeId;
+        }
+        if (carreraId) {
+            const carreraSelect = document.getElementById('id_carrera');
+            if (carreraSelect) {
+                carreraSelect.value = carreraId;
+                aplicarCarrera(carreraId);
+            }
+        }
     });
 
     // Vista previa de imagen

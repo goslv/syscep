@@ -142,7 +142,7 @@ class PagoForm(forms.ModelForm):
             'class': 'form-control',
             'min': '1',
             'value': '1',
-            'placeholder': 'N?mero de cuotas a pagar'
+            'placeholder': 'Número de cuotas a pagar'
         })
     )
 
@@ -157,6 +157,7 @@ class PagoForm(forms.ModelForm):
             'numero_cuota',
             'concepto',
             'importe_total',
+            'estrellas',
             'foto_comprobante',
             'observaciones'
         ]
@@ -181,7 +182,11 @@ class PagoForm(forms.ModelForm):
             }),
             'numero_cuota': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ej: 3,4,5'
+                'placeholder': 'Opcional'
+            }),
+            'estrellas': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0'
             }),
             'concepto': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -321,8 +326,6 @@ class PagoForm(forms.ModelForm):
 
         return ','.join(numeros)
 
-
-# NUEVO FORMULARIO: EGRESO
 class EgresoForm(forms.ModelForm):
     class Meta:
         model = Egreso

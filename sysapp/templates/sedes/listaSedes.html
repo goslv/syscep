@@ -1,6 +1,7 @@
 <!-- ARCHIVO 1: sysapp/templates/sedes/listaCarreras.html -->
 <!-- ============================================ -->
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block title %}Sedes - ITS CEP{% endblock %}
 {% block page_title %}Rendiciones por Sede{% endblock %}
@@ -260,7 +261,7 @@
                         <span class="ingresos-label">Recaudación del Día</span>
                         <div class="ingresos-value-wrapper">
                             <span class="ingresos-currency">Gs.</span>
-                            <span class="ingresos-value">{{ item.ingresos_hoy|floatformat:0 }}</span>
+                            <span class="ingresos-value">{{ item.ingresos_hoy|formato_guaranies }}</span>
                         </div>
                     </div>
                 </div>
@@ -278,12 +279,7 @@
 {% else %}
     <div class="stat-card">
         <div class="empty-state">
-            <i class="bi bi-building"></i>
             <h5>No hay sedes registradas</h5>
-            <p>Las sedes se gestionan desde el panel de administración</p>
-            <a href="admin/sysapp/sede/" class="btn btn-primary mt-3">
-                <i class="bi bi-plus-circle"></i> Ir al Admin
-            </a>
         </div>
     </div>
 {% endif %}

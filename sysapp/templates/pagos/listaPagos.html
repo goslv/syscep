@@ -125,22 +125,161 @@
     [data-theme="dark"] .badge.bg-info.text-dark {
         color: #0f172a !important;
     }
+    @media (max-width: 720px) {
+        /* Estilos para filtros compactos en móvil */
+        .stat-card form.row {
+            --bs-gutter-y: 0.5rem;
+        }
+        
+        .stat-card .form-label {
+            margin-bottom: 0.2rem;
+            font-size: 0.85rem;
+        }
+
+        /* Diseño de filtros colapsables para móvil */
+        .filter-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            margin-top: 1rem;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 0;
+        }
+
+        .filter-header h6 {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .filter-body {
+            display: none;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 0.5rem;
+        }
+
+        .filter-body.show {
+            display: block;
+        }
+
+        .filter-toggle-icon {
+            transition: transform 0.3s ease;
+            color: var(--text-muted);
+        }
+
+        .filter-container.active .filter-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Tabla estilo tarjeta interactiva */
+        .table-responsive-stack tr {
+            display: block;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            padding: 0.5rem;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .table-responsive-stack tr:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: rgba(14, 165, 233, 0.05);
+        }
+
+        .table-responsive-stack td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: none !important;
+            padding: 0.4rem 0.75rem !important;
+        }
+
+        .table-responsive-stack td:before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .table-responsive-stack thead {
+            display: none;
+        }
+
+        /* Ocultar campos solicitados en móvil */
+        [data-label="Sede"],
+        [data-label="Cuotas"],
+        [data-label="Concepto"],
+        .td-actions {
+            display: none !important;
+        }
+    }
 </style>
 
 <!-- Filtros -->
-<div class="row mb-4">
-    <div class="col-md-12 mt-5">
-        <div class="stat-card">
+<div class="row mb-3 mt-3">
+    <div class="col-md-12">
+        <!-- Vista Móvil: Filtros Colapsables -->
+        <div class="d-md-none filter-container" id="filterContainer">
+            <div class="filter-header" onclick="toggleFilters()">
+                <h6><i class="bi bi-funnel"></i> Filtros de búsqueda</h6>
+                <i class="bi bi-chevron-down filter-toggle-icon"></i>
+            </div>
+            <div class="filter-body" id="filterBody">
+                <form method="get" class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Sede</label>
+                        <select name="sede" class="form-select">
+                            <option value="">Todas las sedes</option>
+                            {% for sede in sedes %}
+                            <option value="{{ sede.id }}" {% if request.GET.sede == sede.id|slugify %}selected{% endif %}>{{ sede.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Fecha Desde</label>
+                        <input type="date" name="fecha_desde" class="form-control" value="{{ request.GET.fecha_desde }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Fecha Hasta</label>
+                        <input type="date" name="fecha_hasta" class="form-control" value="{{ request.GET.fecha_hasta }}">
+                    </div>
+                    <div class="col-12 d-flex gap-2 mt-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                        <a href="{% url 'lista_pagos' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Vista Escritorio: Filtros Siempre Visibles -->
+        <div class="stat-card d-none d-md-block mt-5">
             <form method="get" class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Sede</label>
                     <select name="sede" class="form-select">
                         <option value="">Todas las sedes</option>
                         {% for sede in sedes %}
-                        <option value="{{ sede.id }}" 
-                                {% if request.GET.sede == sede.id|stringformat:"s" %}selected{% endif %}>
-                            {{ sede.nombre }}
-                        </option>
+                        <option value="{{ sede.id }}" {% if request.GET.sede == sede.id|slugify %}selected{% endif %}>{{ sede.nombre }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -185,7 +324,7 @@
                     </thead>
                     <tbody>
                     {% for pago in pagos %}
-                    <tr>
+                    <tr class="pago-row" data-url="{% url 'detalle_pago' pago.uuid %}">
                         <td data-label="N° Recibo"><strong>{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</strong></td>
                         <td data-label="Fecha">{{ pago.fecha|date:"d/m/Y" }}</td>
                         <td data-label="Alumno">
@@ -194,18 +333,16 @@
                                     <i class="bi bi-person-badge"></i> Cliente
                                 </span>
                             {% else %}
-                            <a href="{% url 'detalle_alumno' pago.alumno.id %}" class="text-decoration-none">
-                                {{ pago.alumno.nombre_completo }}
-                            </a>
+                            {{ pago.alumno.nombre_completo }}
                             {% endif %}
                         </td>
                         <td data-label="Sede">{{ pago.sede.nombre }}</td>
                         <td data-label="Cuotas">{{ pago.numero_cuota|default:"-" }}</td>
                         <td data-label="Concepto">{{ pago.concepto|truncatewords:5 }}</td>
                         <td data-label="Importe"><strong class="text-success">Gs. {{ pago.importe_total|formato_guaranies }}</strong></td>
-                        <td data-label="Detalles">
+                        <td data-label="Detalles" class="td-actions">
                             <div class="d-flex justify-content-center">
-                                <a href="{% url 'detalle_pago' pago.id %}"
+                                <a href="{% url 'detalle_pago' pago.uuid %}"
                                    class="btn-action btn-view"
                                    data-bs-toggle="tooltip"
                                    title="Ver detalle">
@@ -267,6 +404,22 @@
 </div>
 
 <script>
+    function toggleFilters() {
+        const body = document.getElementById('filterBody');
+        const container = document.getElementById('filterContainer');
+        body.classList.toggle('show');
+        container.classList.toggle('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.pago-row');
+        rows.forEach(row => {
+            row.addEventListener('click', function() {
+                window.location.href = this.dataset.url;
+            });
+        });
+    });
+
     function confirmarEliminacion(pagoId, numeroRecibo) {
         document.getElementById('numeroRecibo').textContent = numeroRecibo;
         const form = document.getElementById('formEliminar');

@@ -42,6 +42,43 @@
             --sidebar-bg: linear-gradient(180deg, #0b1220 0%, #1f2937 50%, #0b1220 100%);
         }
 
+        /* Mejora de contraste en modo oscuro (especialmente en móviles) */
+        [data-theme="dark"] .form-label { color: var(--text-main); }
+        [data-theme="dark"] .form-control {
+            color: #e5f0ff;
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+        }
+        [data-theme="dark"] .form-control::placeholder { color: #b6c2d9; opacity: 1; }
+        [data-theme="dark"] .input-group-text {
+            background: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--primary-500);
+        }
+        [data-theme="dark"] .password-toggle { color: #cbd5e1; }
+        [data-theme="dark"] .form-check-label { color: #cbd5e1 !important; }
+        [data-theme="dark"] .text-muted { color: #cbd5e1 !important; }
+
+        /* Evitar bajo contraste con autocompletado del navegador en modo oscuro */
+        [data-theme="dark"] input:-webkit-autofill,
+        [data-theme="dark"] input:-webkit-autofill:hover,
+        [data-theme="dark"] input:-webkit-autofill:focus,
+        [data-theme="dark"] textarea:-webkit-autofill,
+        [data-theme="dark"] select:-webkit-autofill {
+            -webkit-text-fill-color: #e5f0ff;
+            -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset;
+            caret-color: #e5f0ff;
+            transition: background-color 9999s ease-in-out 0s;
+        }
+
+        /* Ajustes extra de contraste en móviles */
+        @media (max-width: 850px) {
+            [data-theme="dark"] .form-control { color: #f8fbff; }
+            [data-theme="dark"] .form-control::placeholder { color: #c7d2fe; }
+            [data-theme="dark"] .form-check-label,
+            [data-theme="dark"] .text-muted { color: #e2e8f0 !important; }
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -56,8 +93,10 @@
             justify-content: center;
             font-family: 'Inter', sans-serif;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             transition: background 0.3s ease;
+            padding: 20px 0;
         }
 
         [data-theme="dark"] body {
@@ -417,33 +456,77 @@
             .login-container {
                 flex-direction: column;
                 max-width: 450px;
+                width: 90%;
+                margin: 20px auto;
             }
 
             .login-left {
-                padding: 3rem 2rem;
+                padding: 1.5rem 1rem;
             }
 
             .logo-img {
-                max-width: 120px;
-                margin-bottom: 1.5rem;
+                max-width: 80px;
+                margin-bottom: 0.5rem;
             }
 
             .login-left .brand-name {
-                font-size: 2rem;
+                font-size: 1.6rem;
+                margin-bottom: 0;
+            }
+
+            .login-left p,
+            .icon-group {
+                display: none;
             }
 
             .login-right {
-                padding: 3rem 2rem;
+                padding: 1.5rem 1.5rem;
             }
 
             .login-title {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
                 text-align: center;
             }
 
             .login-subtitle {
                 text-align: center;
-                margin-bottom: 2rem;
+                margin-bottom: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .mb-3 {
+                margin-bottom: 0.75rem !important;
+            }
+
+            .mb-4 {
+                margin-bottom: 1rem !important;
+            }
+
+            .remember-forgot {
+                margin-bottom: 1.2rem;
+            }
+
+            .footer-text {
+                margin-top: 1.2rem;
+            }
+        }
+
+        /* Ajustes específicos para pantallas muy pequeñas o de poca altura */
+        @media (max-height: 700px) and (max-width: 850px) {
+            .login-container {
+                margin: 10px auto;
+            }
+            .login-left {
+                padding: 1rem;
+            }
+            .logo-img {
+                max-width: 60px;
+            }
+            .login-right {
+                padding: 1rem 1.5rem;
+            }
+            .login-subtitle {
+                margin-bottom: 0.5rem;
             }
         }
     </style>
