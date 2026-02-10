@@ -422,6 +422,19 @@ class AlumnoForm(forms.ModelForm):
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hacer opcionales todos los campos excepto: sede, carrera, nombre, apellido
+        # (curso_actual ahora también es opcional)
+        self.fields['cedula'].required = False
+        self.fields['fecha_nacimiento'].required = False
+        self.fields['telefono'].required = False
+        self.fields['fecha_inicio'].required = False
+        self.fields['curso_actual'].required = False
+        self.fields['contacto_emergencia_nombre'].required = False
+        self.fields['contacto_emergencia_telefono'].required = False
+        self.fields['contacto_emergencia_relacion'].required = False
+        self.fields['activo'].required = False
 
 class FuncionarioForm(forms.ModelForm):
     class Meta:
@@ -442,7 +455,6 @@ class FuncionarioForm(forms.ModelForm):
             'cargo': forms.Select(attrs={'class': 'form-select'}),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
-
 
 class AsistenciaForm(forms.ModelForm):
     class Meta:

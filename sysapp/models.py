@@ -198,22 +198,26 @@ class AsistenciaFuncionario(models.Model):
 
 class Alumno(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    sede = models.ForeignKey(Sede, on_delete=models.CASCADE, related_name='alumnos', verbose_name="Sede")
-    carrera = models.ForeignKey(Carrera, on_delete=models.PROTECT, related_name='alumnos', verbose_name="Carrera")
-    nombre = models.CharField(max_length=100, verbose_name="Nombre")
-    apellido = models.CharField(max_length=100, verbose_name="Apellido")
-    cedula = models.CharField(max_length=20, unique=True, verbose_name="Cédula")
-    fecha_nacimiento = models.DateField(verbose_name="Fecha de Nacimiento")
-    telefono = models.CharField(max_length=20, verbose_name="Teléfono")
-    fecha_inicio = models.DateField(verbose_name="Fecha de Inicio")
-    curso_actual = models.IntegerField(default=1, validators=[MinValueValidator(1)], verbose_name="Curso Actual")
+    # CAMPOS OBLIGATORIOS
+    sede = models.ForeignKey(Sede, on_delete=models.CASCADE)
+    carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE)
+    nombre = models.CharField(max_length=100)
+    apellido = models.CharField(max_length=100)
 
-    # Contacto de emergencia
-    contacto_emergencia_nombre = models.CharField(max_length=200, verbose_name="Contacto de Emergencia")
-    contacto_emergencia_telefono = models.CharField(max_length=20, verbose_name="Teléfono de Emergencia")
-    contacto_emergencia_relacion = models.CharField(max_length=100, verbose_name="Relación")
+    # CAMPOS OPCIONALES - Información personal
+    cedula = models.CharField(max_length=20, blank=True, null=True)
+    fecha_nacimiento = models.DateField(blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    fecha_inicio = models.DateField(blank=True, null=True)
+    curso_actual = models.IntegerField(blank=True, null=True)
 
-    activo = models.BooleanField(default=True, verbose_name="Activo")
+    # CAMPOS OPCIONALES - Contacto de emergencia
+    contacto_emergencia_nombre = models.CharField(max_length=100, blank=True, null=True)
+    contacto_emergencia_telefono = models.CharField(max_length=20, blank=True, null=True)
+    contacto_emergencia_relacion = models.CharField(max_length=50, blank=True, null=True)
+
+    # CAMPOS DE ESTADO
+    activo = models.BooleanField(default=True)
     fecha_registro = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Registro")
 
     class Meta:
@@ -230,7 +234,6 @@ class Alumno(models.Model):
 
     @property
     def estado_pagos(self):
-        """Determina el estado de pagos del alumno"""
         ultimo_pago = self.pagos.order_by('-fecha_vencimiento').first()
 
         if not ultimo_pago:
@@ -248,12 +251,10 @@ class Alumno(models.Model):
 
     @property
     def puede_rendir_examen(self):
-        """Verifica si el alumno puede rendir examen (debe estar al día)"""
         return self.estado_pagos in ['AL_DIA', 'CERCANO_VENCIMIENTO']
 
     @property
     def total_estrellas(self):
-        """Calcula el total de estrellas acumuladas (acumuladas - canjeadas)"""
         acumuladas = self.pagos.aggregate(models.Sum('estrellas'))['estrellas__sum'] or 0
         canjeadas = self.canjes.aggregate(models.Sum('cantidad'))['cantidad__sum'] or 0
         return acumuladas - canjeadas
@@ -269,7 +270,8 @@ class Pago(models.Model):
 
     numero_recibo = models.CharField(max_length=50, unique=True, null=True, blank=True,
                                      verbose_name="N? de Recibo")
-    foto_recibo = models.ImageField(upload_to=path_comprobante_pago, blank=True, null=True, verbose_name="Foto del Recibo")
+    foto_recibo = models.ImageField(upload_to=path_comprobante_pago, blank=True, null=True,
+                                    verbose_name="Foto del Recibo")
 
     fecha = models.DateField(default=timezone.now, verbose_name="Fecha")
     recibido_de = models.CharField(max_length=200, verbose_name="Recibido de", blank=True, null=True)
@@ -319,7 +321,6 @@ class Pago(models.Model):
         return f"Pago {numero} - {self.nombre_pagador}"
 
     def calcular_estrellas(self):
-        """Calcula las estrellas según la fecha de pago vs vencimiento"""
         # Si no hay fecha de vencimiento, retornar 0
         if not self.fecha_vencimiento:
             return 0
@@ -445,6 +446,7 @@ class Egreso(models.Model):
     def __str__(self):
         return f"Egreso {self.numero_comprobante} - {self.concepto[:30]} - Gs. {self.monto:,.0f}"
 
+
 class SolicitudEliminacion(models.Model):
     MODELO_CHOICES = [
         ('PAGO', 'Pago'),
@@ -468,10 +470,12 @@ class SolicitudEliminacion(models.Model):
     motivo = models.TextField(verbose_name="Motivo de la eliminación")
     fecha_solicitud = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='PENDIENTE')
-    usuario_decide = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='decisiones_eliminacion')
+    usuario_decide = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True,
+                                       related_name='decisiones_eliminacion')
     fecha_decision = models.DateTimeField(null=True, blank=True)
     observaciones_decision = models.TextField(blank=True, null=True)
-    datos_objeto = models.JSONField(help_text="Copia de los datos del objeto para mostrar en la notificación", null=True, blank=True)
+    datos_objeto = models.JSONField(help_text="Copia de los datos del objeto para mostrar en la notificación",
+                                    null=True, blank=True)
 
     class Meta:
         ordering = ['-fecha_solicitud']

@@ -27,6 +27,9 @@
     .form-check-label {
         color: var(--text-main);
     }
+    .optional-section {
+        opacity: 0.85;
+    }
 </style>
 <div class="row">
     <div class="col-md-10 mx-auto mt-5">
@@ -34,98 +37,108 @@
             <form method="post">
                 {% csrf_token %}
 
-                <!-- Información Personal -->
+                <!-- Información Básica (OBLIGATORIA) -->
+                <h5 class="mb-3">Información Básica</h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
-                        <label class="form-label">Nombre *</label>
+                        <label class="form-label">Nombre*</label>
                         {{ form.nombre }}
                         {% if form.nombre.errors %}
                             <div class="text-danger">{{ form.nombre.errors }}</div>
                         {% endif %}
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Apellido *</label>
+                        <label class="form-label">Apellido*</label>
                         {{ form.apellido }}
                         {% if form.apellido.errors %}
                             <div class="text-danger">{{ form.apellido.errors }}</div>
                         {% endif %}
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Cédula *</label>
-                        {{ form.cedula }}
-                        {% if form.cedula.errors %}
-                            <div class="text-danger">{{ form.cedula.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Fecha de Nacimiento *</label>
-                        {{ form.fecha_nacimiento }}
-                        {% if form.fecha_nacimiento.errors %}
-                            <div class="text-danger">{{ form.fecha_nacimiento.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Teléfono *</label>
-                        {{ form.telefono }}
-                        {% if form.telefono.errors %}
-                            <div class="text-danger">{{ form.telefono.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="row g-3 mb-4">
                     <div class="col-md-6">
-                        <label class="form-label">Sede *</label>
+                        <label class="form-label">Sede*</label>
                         {{ form.sede }}
                         {% if form.sede.errors %}
                             <div class="text-danger">{{ form.sede.errors }}</div>
                         {% endif %}
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Carrera *</label>
+                        <label class="form-label">Carrera*</label>
                         {{ form.carrera }}
                         {% if form.carrera.errors %}
                             <div class="text-danger">{{ form.carrera.errors }}</div>
                         {% endif %}
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Curso Actual *</label>
-                        {{ form.curso_actual }}
-                        {% if form.curso_actual.errors %}
-                            <div class="text-danger">{{ form.curso_actual.errors }}</div>
-                        {% endif %}
+                </div>
+
+                <!-- Información Adicional (OPCIONAL) -->
+                <div class="section-divider optional-section">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label">Cédula</label>
+                            {{ form.cedula }}
+                            {% if form.cedula.errors %}
+                                <div class="text-danger">{{ form.cedula.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Fecha de Nacimiento</label>
+                            {{ form.fecha_nacimiento }}
+                            {% if form.fecha_nacimiento.errors %}
+                                <div class="text-danger">{{ form.fecha_nacimiento.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Teléfono</label>
+                            {{ form.telefono }}
+                            {% if form.telefono.errors %}
+                                <div class="text-danger">{{ form.telefono.errors }}</div>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Fecha de Inicio *</label>
-                        {{ form.fecha_inicio }}
-                        {% if form.fecha_inicio.errors %}
-                            <div class="text-danger">{{ form.fecha_inicio.errors }}</div>
-                        {% endif %}
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Curso Actual</label>
+                            {{ form.curso_actual }}
+                            {% if form.curso_actual.errors %}
+                                <div class="text-danger">{{ form.curso_actual.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de Inicio</label>
+                            {{ form.fecha_inicio }}
+                            {% if form.fecha_inicio.errors %}
+                                <div class="text-danger">{{ form.fecha_inicio.errors }}</div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
 
-                <!-- Contacto de Emergencia -->
-                <h5 class="mb-3">Contacto de Emergencia</h5>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <label class="form-label">Nombre del Contacto</label>
-                        {{form.contacto_emergencia_nombre}}
-                        {% if form.contacto_emergencia_nombre.errors %}
-                            <div class="text-danger">{{ form.contacto_emergencia_nombre.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Teléfono de Emergencia *</label>
-                        {{form.contacto_emergencia_telefono}}
-                        {% if form.contacto_emergencia_telefono.errors %}
-                            <div class="text-danger">{{ form.contacto_emergencia_telefono.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Relación</label>
-                        {{form.contacto_emergencia_relacion}}
-                        {% if form.contacto_emergencia_relacion.errors %}
-                            <div class="text-danger">{{ form.contacto_emergencia_relacion.errors }}</div>
-                        {% endif %}
+                <!-- Contacto de Emergencia (OPCIONAL) -->
+                <div class="section-divider optional-section">
+                    <h5 class="mb-3">Contacto de Emergencia</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label">Nombre del Contacto</label>
+                            {{form.contacto_emergencia_nombre}}
+                            {% if form.contacto_emergencia_nombre.errors %}
+                                <div class="text-danger">{{ form.contacto_emergencia_nombre.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Teléfono de Emergencia</label>
+                            {{form.contacto_emergencia_telefono}}
+                            {% if form.contacto_emergencia_telefono.errors %}
+                                <div class="text-danger">{{ form.contacto_emergencia_telefono.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Relación</label>
+                            {{form.contacto_emergencia_relacion}}
+                            {% if form.contacto_emergencia_relacion.errors %}
+                                <div class="text-danger">{{ form.contacto_emergencia_relacion.errors }}</div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
 
