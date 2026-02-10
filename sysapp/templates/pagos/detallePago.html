@@ -455,7 +455,7 @@
                     <div class="d-flex justify-content-end gap-2">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn {% if user.is_staff %}btn-danger{% else %}btn-warning{% endif %}">
-                            <i class="bi bi-trash"></i> {% if user.is_staff %}Eliminar Permanentemente{% else %}Enviar Solicitud{% endif %}
+                            <i class="bi bi-trash"></i> {% if user.is_staff %}Eliminar{% else %}Enviar Solicitud{% endif %}
                         </button>
                     </div>
                 </form>
