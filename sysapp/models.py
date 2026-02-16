@@ -43,7 +43,6 @@ class Sede(models.Model):
         return self.nombre
 
     def rendicion_dia(self, fecha=None):
-        """Retorna la rendición del día para esta sede"""
         if fecha is None:
             fecha = timezone.now().date()
 
@@ -170,7 +169,6 @@ class Funcionario(models.Model):
         return f"{self.nombre} {self.apellido}"
 
     def asistencias_mes(self, mes=None, anio=None):
-        """Retorna las asistencias del mes especificado"""
         if mes is None:
             mes = timezone.now().month
         if anio is None:
@@ -199,8 +197,8 @@ class AsistenciaFuncionario(models.Model):
 class Alumno(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     # CAMPOS OBLIGATORIOS
-    sede = models.ForeignKey(Sede, on_delete=models.CASCADE)
-    carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE)
+    sede = models.ForeignKey(Sede, on_delete=models.CASCADE, related_name='alumnos')
+    carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE, related_name='alumnos')
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
 
@@ -234,14 +232,26 @@ class Alumno(models.Model):
 
     @property
     def estado_pagos(self):
+        # Obtener el último pago registrado
         ultimo_pago = self.pagos.order_by('-fecha_vencimiento').first()
 
+        # Si no hay pagos registrados
         if not ultimo_pago:
             return 'SIN_PAGOS'
 
-        hoy = timezone.now().date()
-        diferencia = (ultimo_pago.fecha_vencimiento - hoy).days
+        # Si el pago no tiene fecha de vencimiento, se considera sin información suficiente
+        if not ultimo_pago.fecha_vencimiento:
+            return 'SIN_FECHA_VENCIMIENTO'
 
+        # Calcular la diferencia de días
+        hoy = timezone.now().date()
+        try:
+            diferencia = (ultimo_pago.fecha_vencimiento - hoy).days
+        except (TypeError, AttributeError):
+            # Por seguridad adicional, en caso de cualquier error en la resta
+            return 'ERROR_FECHA'
+
+        # Determinar el estado según los días de diferencia
         if diferencia >= 0:
             return 'AL_DIA'
         elif diferencia >= -3:
@@ -250,14 +260,54 @@ class Alumno(models.Model):
             return 'ATRASADO'
 
     @property
+    def dias_hasta_vencimiento(self):
+        ultimo_pago = self.pagos.order_by('-fecha_vencimiento').first()
+
+        if not ultimo_pago or not ultimo_pago.fecha_vencimiento:
+            return None
+
+        hoy = timezone.now().date()
+        try:
+            return (ultimo_pago.fecha_vencimiento - hoy).days
+        except (TypeError, AttributeError):
+            return None
+
+    @property
     def puede_rendir_examen(self):
-        return self.estado_pagos in ['AL_DIA', 'CERCANO_VENCIMIENTO']
+        estado = self.estado_pagos
+        return estado in ['AL_DIA', 'CERCANO_VENCIMIENTO']
 
     @property
     def total_estrellas(self):
         acumuladas = self.pagos.aggregate(models.Sum('estrellas'))['estrellas__sum'] or 0
         canjeadas = self.canjes.aggregate(models.Sum('cantidad'))['cantidad__sum'] or 0
         return acumuladas - canjeadas
+
+    def obtener_detalle_estado_pagos(self):
+        ultimo_pago = self.pagos.order_by('-fecha_vencimiento').first()
+
+        detalle = {
+            'estado': self.estado_pagos,
+            'tiene_pagos': ultimo_pago is not None,
+            'ultimo_pago': ultimo_pago,
+            'dias_hasta_vencimiento': self.dias_hasta_vencimiento,
+            'puede_rendir': self.puede_rendir_examen,
+        }
+
+        if detalle['estado'] == 'SIN_PAGOS':
+            detalle['mensaje'] = 'El alumno no tiene pagos registrados'
+        elif detalle['estado'] == 'SIN_FECHA_VENCIMIENTO':
+            detalle['mensaje'] = 'El último pago no tiene fecha de vencimiento'
+        elif detalle['estado'] == 'AL_DIA':
+            detalle['mensaje'] = 'Pagos al día'
+        elif detalle['estado'] == 'CERCANO_VENCIMIENTO':
+            detalle['mensaje'] = f'Vence en {abs(detalle["dias_hasta_vencimiento"])} días'
+        elif detalle['estado'] == 'ATRASADO':
+            detalle['mensaje'] = f'Atrasado por {abs(detalle["dias_hasta_vencimiento"])} días'
+        else:
+            detalle['mensaje'] = 'Estado desconocido'
+
+        return detalle
 
 
 class Pago(models.Model):
@@ -269,7 +319,7 @@ class Pago(models.Model):
                                 verbose_name="Carrera", null=True, blank=True)
 
     numero_recibo = models.CharField(max_length=50, unique=True, null=True, blank=True,
-                                     verbose_name="N? de Recibo")
+                                     verbose_name="Nº de Recibo")
     foto_recibo = models.ImageField(upload_to=path_comprobante_pago, blank=True, null=True,
                                     verbose_name="Foto del Recibo")
 
@@ -282,7 +332,7 @@ class Pago(models.Model):
 
     valido_hasta = models.DateField(null=True, blank=True, verbose_name="Válido hasta")
     fecha_vencimiento = models.DateField(verbose_name="Fecha de Vencimiento", null=True, blank=True)
-    numero_cuota = models.CharField(max_length=50, verbose_name="N? de Cuota",
+    numero_cuota = models.CharField(max_length=50, verbose_name="Nº de Cuota",
                                     null=True, blank=True,
                                     help_text="Ej: 1 o 3,4,5")
 
@@ -290,7 +340,7 @@ class Pago(models.Model):
 
     recibido_por = models.CharField(max_length=200, verbose_name="Recibido por", blank=True, null=True)
 
-    # Sistema de estrellas (se calcula automáticamente)
+    # Sistema de puntos (se calcula automáticamente)
     estrellas = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name="Estrellas")
 
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
@@ -325,9 +375,18 @@ class Pago(models.Model):
         if not self.fecha_vencimiento:
             return 0
 
-        diferencia = (self.fecha_vencimiento - self.fecha).days
+        # Si no hay fecha de pago, usar la fecha actual
+        fecha_pago = self.fecha if self.fecha else timezone.now().date()
+
+        try:
+            diferencia = (self.fecha_vencimiento - fecha_pago).days
+        except (TypeError, AttributeError):
+            # En caso de error en el cálculo, retornar 0
+            return 0
+
+        # Asignar estrellas según la anticipación del pago
         if diferencia >= 30:
-            return 3  # Pago 1 mes antes
+            return 3  # Pago 1 mes antes o más
         elif diferencia >= 3:
             return 2  # Pago 3 días antes o más
         elif diferencia >= -3:
@@ -336,8 +395,8 @@ class Pago(models.Model):
             return 0  # Más de 3 días atrasado
 
     def save(self, *args, **kwargs):
-        """Calcula automáticamente las estrellas al guardar si no se especificaron"""
-        if not self.pk and self.estrellas == 0:  # Solo para pagos nuevos y si no se definieron estrellas
+        # Calcular estrellas solo para pagos nuevos o si las estrellas están en 0
+        if not self.pk or self.estrellas == 0:
             self.estrellas = self.calcular_estrellas()
         super().save(*args, **kwargs)
 
@@ -355,8 +414,27 @@ class Pago(models.Model):
             return self.alumno.nombre_completo
         return 'Sin especificar'
 
+    @property
+    def dias_para_vencimiento(self):
+        """
+        NUEVO: Retorna los días que faltan para el vencimiento
+        Valores negativos indican días de atraso
+        """
+        if not self.fecha_vencimiento:
+            return None
 
-# NUEVO MODELO: EGRESOS
+        try:
+            hoy = timezone.now().date()
+            return (self.fecha_vencimiento - hoy).days
+        except (TypeError, AttributeError):
+            return None
+
+    @property
+    def esta_vencido(self):
+        """NUEVO: Indica si el pago está vencido"""
+        dias = self.dias_para_vencimiento
+        return dias is not None and dias < 0
+
 class CanjeEstrellas(models.Model):
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name='canjes', verbose_name="Alumno")
     cantidad = models.IntegerField(validators=[MinValueValidator(1)], verbose_name="Cantidad de Estrellas")
@@ -371,6 +449,20 @@ class CanjeEstrellas(models.Model):
 
     def __str__(self):
         return f"{self.alumno.nombre_completo} - {self.cantidad} ⭐ - {self.concepto}"
+
+    def save(self, *args, **kwargs):
+        """
+        MEJORADO: Valida que el alumno tenga suficientes estrellas antes de canjear
+        """
+        if not self.pk:  # Solo para canjes nuevos
+            estrellas_disponibles = self.alumno.total_estrellas
+            if estrellas_disponibles < self.cantidad:
+                from django.core.exceptions import ValidationError
+                raise ValidationError(
+                    f"El alumno solo tiene {estrellas_disponibles} estrellas disponibles. "
+                    f"No puede canjear {self.cantidad} estrellas."
+                )
+        super().save(*args, **kwargs)
 
 
 class Egreso(models.Model):
@@ -446,6 +538,18 @@ class Egreso(models.Model):
     def __str__(self):
         return f"Egreso {self.numero_comprobante} - {self.concepto[:30]} - Gs. {self.monto:,.0f}"
 
+    def clean(self):
+        """
+        NUEVO: Validación adicional para asegurar datos correctos
+        """
+        from django.core.exceptions import ValidationError
+
+        if self.monto and self.monto < 0:
+            raise ValidationError({'monto': 'El monto no puede ser negativo'})
+
+        if not self.numero_comprobante or not self.numero_comprobante.strip():
+            raise ValidationError({'numero_comprobante': 'El número de comprobante es obligatorio'})
+
 
 class SolicitudEliminacion(models.Model):
     MODELO_CHOICES = [
@@ -484,3 +588,17 @@ class SolicitudEliminacion(models.Model):
 
     def __str__(self):
         return f"Solicitud de {self.usuario_solicita.username} - {self.get_modelo_display()} (ID: {self.objeto_id})"
+
+    def aprobar(self, usuario, observaciones=''):
+        self.estado = 'APROBADO'
+        self.usuario_decide = usuario
+        self.fecha_decision = timezone.now()
+        self.observaciones_decision = observaciones
+        self.save()
+
+    def rechazar(self, usuario, observaciones=''):
+        self.estado = 'RECHAZADO'
+        self.usuario_decide = usuario
+        self.fecha_decision = timezone.now()
+        self.observaciones_decision = observaciones
+        self.save()
