@@ -147,7 +147,7 @@ def detalle_alumno(request, alumno_uuid):
         'pagos': pagos,
         'total_pagado': pagos.aggregate(Sum('importe_total'))['importe_total__sum'] or 0,
         'puede_rendir': alumno.puede_rendir_examen,
-        'total_estrellas': alumno.total_estrellas,
+        'total_estrellas': alumno.total_puntos,
         'canjes': alumno.canjes.all().order_by('-fecha'),
     }
 

@@ -1,5 +1,3 @@
-# sysapp/admin.py
-
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Sede, Carrera, Materia, Funcionario, AsistenciaFuncionario, Alumno, Pago, CanjeEstrellas, Egreso
@@ -26,12 +24,10 @@ class SedeAdmin(admin.ModelAdmin):
 
     def total_alumnos(self, obj):
         return obj.alumnos.filter(activo=True).count()
-
     total_alumnos.short_description = 'Alumnos Activos'
 
     def total_funcionarios(self, obj):
         return obj.funcionarios.filter(activo=True).count()
-
     total_funcionarios.short_description = 'Funcionarios'
 
 
@@ -43,7 +39,6 @@ class CarreraAdmin(admin.ModelAdmin):
 
     def total_materias(self, obj):
         return obj.materias.count()
-
     total_materias.short_description = 'Materias'
 
 
@@ -56,7 +51,6 @@ class MateriaAdmin(admin.ModelAdmin):
 
     def tiene_classroom(self, obj):
         return "✓" if obj.link_classroom else "✗"
-
     tiene_classroom.short_description = 'Classroom'
 
 
@@ -81,7 +75,6 @@ class FuncionarioAdmin(admin.ModelAdmin):
 
     def nombre_completo(self, obj):
         return f"{obj.nombre} {obj.apellido}"
-
     nombre_completo.short_description = 'Nombre Completo'
     nombre_completo.admin_order_field = 'apellido'
 
@@ -97,19 +90,18 @@ class AsistenciaFuncionarioAdmin(admin.ModelAdmin):
     def presente_badge(self, obj):
         if obj.presente:
             return format_html(
-                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">✓ Presente</span>'
+                '<span style="background-color:#28a745;color:white;padding:3px 10px;border-radius:3px;">✓ Presente</span>'
             )
         return format_html(
-            '<span style="background-color: #dc3545; color: white; padding: 3px 10px; border-radius: 3px;">✗ Ausente</span>'
+            '<span style="background-color:#dc3545;color:white;padding:3px 10px;border-radius:3px;">✗ Ausente</span>'
         )
-
     presente_badge.short_description = 'Estado'
 
 
 @admin.register(Alumno)
 class AlumnoAdmin(admin.ModelAdmin):
     list_display = ['nombre_completo', 'cedula', 'carrera', 'sede', 'curso_actual',
-                    'estado_pagos_display', 'total_estrellas_display', 'activo']
+                    'estado_pagos_display', 'total_puntos_display', 'activo']
     list_filter = ['carrera', 'sede', 'activo', 'curso_actual']
     search_fields = ['nombre', 'apellido', 'cedula']
     ordering = ['apellido', 'nombre']
@@ -132,7 +124,6 @@ class AlumnoAdmin(admin.ModelAdmin):
 
     def nombre_completo(self, obj):
         return f"{obj.nombre} {obj.apellido}"
-
     nombre_completo.short_description = 'Nombre Completo'
     nombre_completo.admin_order_field = 'apellido'
 
@@ -142,45 +133,48 @@ class AlumnoAdmin(admin.ModelAdmin):
             'AL_DIA': '#28a745',
             'CERCANO_VENCIMIENTO': '#ffc107',
             'ATRASADO': '#dc3545',
-            'SIN_PAGOS': '#6c757d'
+            'SIN_PAGOS': '#6c757d',
         }
         textos = {
             'AL_DIA': '✓ Al día',
             'CERCANO_VENCIMIENTO': '⚠ Por vencer',
             'ATRASADO': '✗ Atrasado',
-            'SIN_PAGOS': '○ Sin pagos'
+            'SIN_PAGOS': '○ Sin pagos',
         }
         return format_html(
-            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px; font-weight: bold;">{}</span>',
+            '<span style="background-color:{};color:white;padding:3px 10px;border-radius:3px;font-weight:bold;">{}</span>',
             colores.get(estado, '#6c757d'),
             textos.get(estado, estado)
         )
-
     estado_pagos_display.short_description = 'Estado de Pagos'
 
-    def total_estrellas_display(self, obj):
-        estrellas = obj.total_estrellas
-        return format_html(
-            '<span style="font-size: 16px;">⭐ {}</span>',
-            estrellas
-        )
-
-    total_estrellas_display.short_description = 'Estrellas'
+    def total_puntos_display(self, obj):
+        # Renombrado de total_estrellas → total_puntos
+        puntos = obj.total_puntos
+        return format_html('<span style="font-size:16px;">★ {}</span>', puntos)
+    total_puntos_display.short_description = 'Puntos'
 
 
 @admin.register(Pago)
 class PagoAdmin(admin.ModelAdmin):
     list_display = ['numero_recibo', 'alumno_display', 'fecha', 'numero_cuota',
-                    'importe_total_display', 'estrellas_display', 'sede']
-    list_filter = ['fecha', 'sede', 'estrellas']
+                    'importe_total_display', 'puntos_display', 'metodo_pago', 'es_matricula', 'sede']
+    # ✅ Cambiado: 'estrellas' → 'puntos', agregado 'metodo_pago' y 'es_matricula'
+    list_filter = ['fecha', 'sede', 'puntos', 'metodo_pago', 'es_matricula']
     search_fields = ['numero_recibo', 'alumno__nombre', 'alumno__apellido', 'recibido_de', 'nombre_cliente']
     date_hierarchy = 'fecha'
-    readonly_fields = ['estrellas', 'fecha_creacion', 'preview_foto', 'preview_comprobante']
+    # ✅ Cambiado: 'estrellas' → 'puntos'
+    readonly_fields = ['puntos', 'fecha_creacion', 'preview_foto', 'preview_comprobante']
     ordering = ['-fecha', '-fecha_creacion']
 
     fieldsets = (
         ('Información del Recibo', {
-            'fields': ('numero_recibo', 'foto_recibo', 'preview_foto', 'foto_comprobante', 'preview_comprobante', 'sede', 'alumno', 'carrera')
+            'fields': ('numero_recibo', 'foto_recibo', 'preview_foto',
+                       'foto_comprobante', 'preview_comprobante', 'sede', 'alumno', 'carrera')
+        }),
+        ('Tipo y Método de Pago', {
+            # ✅ Nuevo fieldset con los campos nuevos
+            'fields': (('es_matricula', 'metodo_pago'),)
         }),
         ('Datos del Pago', {
             'fields': (('fecha', 'recibido_de'), 'suma_de', 'concepto', 'curso', 'nombre_cliente')
@@ -190,7 +184,8 @@ class PagoAdmin(admin.ModelAdmin):
                        'valido_hasta', 'importe_total', 'monto_unitario', 'cantidad_cuotas')
         }),
         ('Información Adicional', {
-            'fields': ('recibido_por', 'usuario_registro', 'observaciones', ('estrellas', 'fecha_creacion'))
+            # ✅ Cambiado: 'estrellas' → 'puntos'
+            'fields': ('recibido_por', 'usuario_registro', 'observaciones', ('puntos', 'fecha_creacion'))
         }),
     )
 
@@ -200,58 +195,44 @@ class PagoAdmin(admin.ModelAdmin):
         if obj.nombre_cliente:
             return obj.nombre_cliente
         return "Sin especificar"
-
     alumno_display.short_description = 'Alumno'
     alumno_display.admin_order_field = 'alumno__apellido'
 
     def importe_total_display(self, obj):
         return format_html(
-            '<strong>Gs. {:,.0f}</strong>',
-            obj.importe_total
+            '<strong>Gs. {:,.0f}</strong>', obj.importe_total
         ).replace(',', '.')
-
     importe_total_display.short_description = 'Importe Total'
     importe_total_display.admin_order_field = 'importe_total'
 
-    def estrellas_display(self, obj):
-        if obj.estrellas == 0:
-            return format_html('<span style="color: #999;">—</span>')
-
-        colores = {
-            3: '#FFD700',  # Oro
-            2: '#C0C0C0',  # Plata
-            1: '#CD7F32',  # Bronce
-        }
-        color = colores.get(obj.estrellas, '#999')
-
+    def puntos_display(self, obj):
+        # ✅ Renombrado de estrellas_display → puntos_display
+        if obj.puntos == 0:
+            return format_html('<span style="color:#999;">—</span>')
+        colores = {3: '#FFD700', 2: '#C0C0C0', 1: '#CD7F32'}
+        color = colores.get(obj.puntos, '#999')
         return format_html(
-            '<span style="font-size: 18px; color: {};">{}</span>',
-            color,
-            '⭐' * obj.estrellas
+            '<span style="font-size:18px;color:{};">★ {}</span>',
+            color, obj.puntos
         )
-
-    estrellas_display.short_description = 'Estrellas'
+    puntos_display.short_description = 'Puntos'
 
     def preview_foto(self, obj):
         if obj.foto_recibo:
             return format_html(
-                '<a href="{}" target="_blank"><img src="{}" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;"/></a>',
-                obj.foto_recibo.url,
-                obj.foto_recibo.url
+                '<a href="{}" target="_blank"><img src="{}" style="max-width:200px;max-height:200px;border:1px solid #ddd;border-radius:4px;padding:5px;"/></a>',
+                obj.foto_recibo.url, obj.foto_recibo.url
             )
         return "No hay foto"
-
     preview_foto.short_description = 'Vista Previa Recibo'
 
     def preview_comprobante(self, obj):
         if obj.foto_comprobante:
             return format_html(
-                '<a href="{}" target="_blank"><img src="{}" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;"/></a>',
-                obj.foto_comprobante.url,
-                obj.foto_comprobante.url
+                '<a href="{}" target="_blank"><img src="{}" style="max-width:200px;max-height:200px;border:1px solid #ddd;border-radius:4px;padding:5px;"/></a>',
+                obj.foto_comprobante.url, obj.foto_comprobante.url
             )
         return "No hay comprobante"
-
     preview_comprobante.short_description = 'Vista Previa Comprobante'
 
 
@@ -262,11 +243,10 @@ class EgresoAdmin(admin.ModelAdmin):
     search_fields = ['numero_comprobante', 'concepto', 'observaciones']
     date_hierarchy = 'fecha'
     readonly_fields = ['fecha_creacion', 'preview_comprobante']
-    
+
     def monto_display(self, obj):
         return format_html(
-            '<strong>Gs. {:,.0f}</strong>',
-            obj.monto
+            '<strong>Gs. {:,.0f}</strong>', obj.monto
         ).replace(',', '.')
     monto_display.short_description = 'Monto'
     monto_display.admin_order_field = 'monto'
@@ -274,15 +254,15 @@ class EgresoAdmin(admin.ModelAdmin):
     def preview_comprobante(self, obj):
         if obj.comprobante:
             return format_html(
-                '<a href="{}" target="_blank"><img src="{}" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;"/></a>',
-                obj.comprobante.url,
-                obj.comprobante.url
+                '<a href="{}" target="_blank"><img src="{}" style="max-width:200px;max-height:200px;border:1px solid #ddd;border-radius:4px;padding:5px;"/></a>',
+                obj.comprobante.url, obj.comprobante.url
             )
         return "No hay comprobante"
     preview_comprobante.short_description = 'Vista Previa'
 
     fieldsets = (
         ('Información Básica', {
+            # ✅ numero_comprobante ahora es opcional, sin asterisco implícito
             'fields': ('sede', 'numero_comprobante', 'fecha', 'categoria')
         }),
         ('Detalles del Gasto', {
@@ -296,7 +276,8 @@ class EgresoAdmin(admin.ModelAdmin):
         }),
     )
 
+
 # Personalización del sitio admin
-admin.site.site_header = "SysCEP - Sistema Administrativo CEP"
-admin.site.site_title = "SysCEP Admin"
+admin.site.site_header = "CEP Admin - Sistema Administrativo CEP"
+admin.site.site_title = "CEP Admin"
 admin.site.index_title = "Panel de Administración"
