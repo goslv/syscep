@@ -1,6 +1,9 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 from django.utils.html import format_html
-from .models import Sede, Carrera, Materia, Funcionario, AsistenciaFuncionario, Alumno, Pago, CanjeEstrellas, Egreso
+from .models import Sede, Carrera, Materia, Funcionario, AsistenciaFuncionario, Alumno, Pago, CanjeEstrellas, Egreso, \
+    CuentaBancaria, PerfilUsuario
 
 
 @admin.register(CanjeEstrellas)
@@ -276,8 +279,32 @@ class EgresoAdmin(admin.ModelAdmin):
         }),
     )
 
+@admin.register(CuentaBancaria)
+class CuentaBancariaAdmin(admin.ModelAdmin):
+    list_display = ['entidad', 'titular', 'activa', 'fecha_creacion']
+    list_filter  = ['activa']
+    search_fields = ['entidad', 'titular']
+
+@admin.register(PerfilUsuario)
+class PerfilUsuarioAdmin(admin.ModelAdmin):
+    list_display  = ['user', 'sede']
+    list_filter   = ['sede']
+    search_fields = ['user__username', 'user__email']
+    raw_id_fields = ['user']
+    autocomplete_fields = ['sede']
+
+class PerfilInline(admin.StackedInline):
+    model = PerfilUsuario
+    can_delete = False
+    verbose_name_plural = 'Perfil'
+class UserAdminExtendido(UserAdmin):
+    inlines = [PerfilInline]
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdminExtendido)
 
 # Personalización del sitio admin
 admin.site.site_header = "CEP Admin - Sistema Administrativo CEP"
 admin.site.site_title = "CEP Admin"
 admin.site.index_title = "Panel de Administración"
+

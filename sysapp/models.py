@@ -2,8 +2,11 @@ import os
 import uuid
 from typing import Any
 
+from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 
 
@@ -327,73 +330,39 @@ class Alumno(models.Model):
 
 
 class Pago(models.Model):
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     sede = models.ForeignKey(Sede, on_delete=models.CASCADE, related_name='pagos', verbose_name="Sede")
-    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name='pagos',
-                               verbose_name="Alumno", null=True, blank=True)
-    carrera = models.ForeignKey(Carrera, on_delete=models.SET_NULL, related_name='pagos',
-                                verbose_name="Carrera", null=True, blank=True)
-
-    numero_recibo = models.CharField(max_length=50, unique=True, null=True, blank=True,
-                                     verbose_name="Nº de Recibo")
-    foto_recibo = models.ImageField(upload_to=path_comprobante_pago, blank=True, null=True,
-                                    verbose_name="Foto del Recibo")
-
+    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name='pagos',verbose_name="Alumno", null=True, blank=True)
+    carrera = models.ForeignKey(Carrera, on_delete=models.SET_NULL, related_name='pagos',verbose_name="Carrera", null=True, blank=True)
+    numero_recibo = models.CharField(max_length=50, unique=True, null=True, blank=True,verbose_name="Nº de Recibo")
+    foto_recibo = models.ImageField(upload_to=path_comprobante_pago, blank=True, null=True,verbose_name="Foto del Recibo")
     fecha = models.DateField(default=timezone.now, verbose_name="Fecha")
     recibido_de = models.CharField(max_length=200, verbose_name="Recibido de", blank=True, null=True)
-    suma_de = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="La suma de",
-                                  blank=True, null=True)
+    suma_de = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="La suma de",blank=True, null=True)
     concepto = models.TextField(verbose_name="En concepto de")
     curso = models.CharField(max_length=100, verbose_name="Curso", blank=True, null=True)
-
     valido_hasta = models.DateField(null=True, blank=True, verbose_name="Válido hasta")
     fecha_vencimiento = models.DateField(verbose_name="Fecha de Vencimiento", null=True, blank=True)
-    numero_cuota = models.CharField(max_length=50, verbose_name="Nº de Cuota",
-                                    null=True, blank=True,
-                                    help_text="Ej: 1 o 3,4,5")
-
+    numero_cuota = models.CharField(max_length=50, verbose_name="Nº de Cuota",null=True, blank=True,help_text="Ej: 1 o 3,4,5")
     importe_total = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="Importe Total")
-
     recibido_por = models.CharField(max_length=200, verbose_name="Recibido por", blank=True, null=True)
 
     # Tipo de pago: matrícula o cuota
-    es_matricula = models.BooleanField(
-        default=False,
-        verbose_name="Es Matrícula",
-        help_text="Si es matrícula, no se aplican puntos ni fechas de vencimiento"
-    )
-
-    METODO_PAGO_CHOICES = [
-        ('EFECTIVO', 'Efectivo'),
-        ('TRANSFERENCIA', 'Transferencia'),
-    ]
-    metodo_pago = models.CharField(
-        max_length=20,
-        choices=METODO_PAGO_CHOICES,
-        default='EFECTIVO',
-        verbose_name="Método de Pago"
-    )
-
-    # Sistema de puntos (antes: estrellas)
+    es_matricula = models.BooleanField(default=False,verbose_name="Es Matrícula",help_text="Si es matrícula, no se aplican puntos ni fechas de vencimiento")
+    METODO_PAGO_CHOICES = [('EFECTIVO', 'Efectivo'),('TRANSFERENCIA', 'Transferencia'),]
+    metodo_pago = models.CharField(max_length=20,choices=METODO_PAGO_CHOICES,default='EFECTIVO',verbose_name="Método de Pago")
+    # Sistema de puntos
     puntos = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name="Puntos")
-
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
-
     foto_comprobante = models.ImageField(upload_to=path_comprobante_pago, blank=True, null=True)
-
     observaciones = models.TextField(blank=True, null=True)
-
-    nombre_cliente = models.CharField(max_length=200, null=True, blank=True,
-                                      help_text='Nombre del cliente si no es alumno regular')
-    validez_pago = models.DateField(null=True, blank=True,
-                                    help_text='Fecha de validez del pago')
-    monto_unitario = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True,
-                                         help_text='Monto por cada cuota')
-    cantidad_cuotas = models.IntegerField(null=True, blank=True, default=1,
-                                          help_text='Cantidad de cuotas pagadas')
-    usuario_registro = models.ForeignKey('auth.User', on_delete=models.SET_NULL,
-                                         null=True, blank=True,
-                                         help_text='Usuario que registró el pago')
+    nombre_cliente = models.CharField(max_length=200, null=True, blank=True,help_text='Nombre del cliente si no es alumno regular')
+    validez_pago = models.DateField(null=True, blank=True,help_text='Fecha de validez del pago')
+    monto_unitario = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True,help_text='Monto por cada cuota')
+    cantidad_cuotas = models.IntegerField(null=True, blank=True, default=1,help_text='Cantidad de cuotas pagadas')
+    usuario_registro = models.ForeignKey('auth.User', on_delete=models.SET_NULL,null=True, blank=True,help_text='Usuario que registró el pago')
+    cuenta_bancaria = models.ForeignKey('CuentaBancaria',on_delete=models.SET_NULL,null=True, blank=True,related_name='pagos',verbose_name="Cuenta bancaria destino")
 
     class Meta:
         ordering = ['-fecha', '-id']
@@ -479,6 +448,8 @@ class Pago(models.Model):
         """NUEVO: Indica si el pago está vencido"""
         dias = self.dias_para_vencimiento
         return dias is not None and dias < 0
+
+
 
 
 # NUEVO MODELO: EGRESOS
@@ -653,3 +624,57 @@ class SolicitudEliminacion(models.Model):
         self.fecha_decision = timezone.now()
         self.observaciones_decision = observaciones
         self.save()
+
+class CuentaBancaria(models.Model):
+    entidad = models.CharField(max_length=100, verbose_name="Entidad bancaria")
+    titular = models.CharField(max_length=150, verbose_name="Titular de la cuenta")
+    activa = models.BooleanField(default=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Cuenta Bancaria"
+        verbose_name_plural = "Cuentas Bancarias"
+        ordering = ['-fecha_creacion']
+
+    def __str__(self):
+        return f"{self.entidad} — {self.titular}"
+
+class PerfilUsuario(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='perfil',
+        verbose_name='Usuario',
+    )
+    sede = models.ForeignKey(
+        'Sede',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='usuarios',
+        verbose_name='Sede asignada',
+        help_text='Dejar vacío para administradores con acceso global.',
+    )
+
+    class Meta:
+        verbose_name = 'Perfil de Usuario'
+        verbose_name_plural = 'Perfiles de Usuarios'
+
+    def __str__(self):
+        sede_nombre = self.sede.nombre if self.sede else 'Global'
+        return f'{self.user.username} — {sede_nombre}'
+
+    @property
+    def tiene_sede_restringida(self):
+        return self.sede is not None and not self.user.is_staff
+
+@receiver(post_save, sender=User)
+def crear_perfil_usuario(sender, instance, created, **kwargs):
+    if created:
+        PerfilUsuario.objects.get_or_create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def guardar_perfil_usuario(sender, instance, **kwargs):
+    if hasattr(instance, 'perfil'):
+        instance.perfil.save()

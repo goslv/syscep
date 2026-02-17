@@ -37,6 +37,7 @@ urlpatterns = [
     path('pagos/<uuid:pago_uuid>/', views.detalle_pago, name='detalle_pago'),
     path('pagos/<uuid:pago_uuid>/editar/', views.editar_pago, name='editar_pago'),
     path('pagos/<uuid:pago_uuid>/eliminar/', views.eliminar_pago, name='eliminar_pago'),
+    path('cuentas-bancarias/', views.cuentas_bancarias, name='cuentas_bancarias'),
 
     # Funcionarios
     path('funcionarios/', views.lista_funcionarios, name='lista_funcionarios'),
@@ -67,4 +68,5 @@ urlpatterns = [
     path('usuarios/configuracion/', views.configuracion, name='configuracion'),
     path('usuarios/<int:usuario_id>/editar/', views.editar_usuario, name='editar_usuario'),
     path('usuarios/<int:usuario_id>/cambiar-estado/', views.cambiar_estado_usuario, name='cambiar_estado_usuario'),
+
 ]
