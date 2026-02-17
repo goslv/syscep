@@ -371,7 +371,7 @@
                     </thead>
                     <tbody>
                         {% for pago in pagos %}
-                        <tr>
+                        <tr onclick="window.location='{% url 'detalle_pago' pago.uuid %}'">
                             <td data-label="Recibo"><span class="badge border" style="background-color: var(--gray-100); color: var(--text-main);">{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</span></td>
                             <td data-label="Fecha">{{ pago.fecha|date:"d/m/Y" }}</td>
                             <td data-label="Cuota">{{ pago.numero_cuota }}</td>
