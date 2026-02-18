@@ -67,10 +67,7 @@ def register(request):
         return redirect('login')
     return render(request, 'registrar.html')
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  DASHBOARD
-# ══════════════════════════════════════════════════════════════════════════
 
 @login_required
 def dashboard(request):
@@ -103,10 +100,7 @@ def dashboard(request):
         'pagos_recientes':     pagos_recientes,
     })
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  ALUMNOS
-# ══════════════════════════════════════════════════════════════════════════
 
 @login_required
 def lista_alumnos(request):
@@ -251,10 +245,7 @@ def buscar_alumno(request):
         return JsonResponse({'resultados': resultados})
     return JsonResponse({'resultados': []})
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  CUENTAS BANCARIAS  (endpoint AJAX)
-# ══════════════════════════════════════════════════════════════════════════
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -290,10 +281,7 @@ def cuentas_bancarias(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  PAGOS
-# ══════════════════════════════════════════════════════════════════════════
 
 def _carreras_data_json():
     """JSON con id, monto_mensualidad y monto_matricula para el template."""
@@ -342,22 +330,39 @@ def _guardar_cuenta_bancaria_si_nueva(request, pago):
 
 
 @login_required
-@admin_required
 def lista_pagos(request):
-    pagos   = Pago.objects.all().select_related('alumno', 'sede', 'carrera').order_by('-fecha', '-id')
-    sede_id      = request.GET.get('sede')
-    fecha_desde  = request.GET.get('fecha_desde')
-    fecha_hasta  = request.GET.get('fecha_hasta')
+    pagos = Pago.objects.all().select_related('alumno', 'sede', 'carrera').order_by('-fecha', '-id')
 
-    if sede_id:     pagos = pagos.filter(sede_id=sede_id)
-    if fecha_desde: pagos = pagos.filter(fecha__gte=fecha_desde)
-    if fecha_hasta: pagos = pagos.filter(fecha__lte=fecha_hasta)
+    # Filtros
+    sede_id = request.GET.get('sede')
+    fecha_desde = request.GET.get('fecha_desde')
+    fecha_hasta = request.GET.get('fecha_hasta')
 
-    return render(request, 'pagos/listaPagos.html', {
-        'pagos': pagos[:100],
-        'sedes': Sede.objects.all().order_by('nombre'),
-    })
+    if sede_id:
+        pagos = pagos.filter(sede_id=sede_id)
 
+    if fecha_desde:
+        pagos = pagos.filter(fecha__gte=fecha_desde)
+
+    if fecha_hasta:
+        pagos = pagos.filter(fecha__lte=fecha_hasta)
+
+    # Calcular el total de pagos (antes de limitar a 100)
+    total_pagos = pagos.aggregate(total=Sum('importe_total'))['total'] or 0
+
+    # Limitar a 100 registros
+    pagos = pagos[:100]
+
+    # Obtener todas las sedes para el filtro
+    sedes = Sede.objects.all().order_by('nombre')
+
+    context = {
+        'pagos': pagos,
+        'sedes': sedes,
+        'total_pagos': total_pagos,  # ← Esta línea es la que faltaba
+    }
+
+    return render(request, 'pagos/listaPagos.html', context)
 
 @login_required
 def detalle_pago(request, pago_uuid):
@@ -518,10 +523,7 @@ def eliminar_pago(request, pago_uuid):
             return redirect('detalle_pago', pago_uuid=pago.uuid)
     return redirect('lista_pagos')
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  FUNCIONARIOS
-# ══════════════════════════════════════════════════════════════════════════
 
 @login_required
 @admin_required
@@ -626,10 +628,7 @@ def crear_sede(request):
         'form': form, 'titulo': 'Crear Nueva Sede', 'boton': 'Crear Sede',
     })
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  CONTEXT PROCESSOR — notificaciones
-# ══════════════════════════════════════════════════════════════════════════
 
 def notifications_processor(request):
     if not request.user.is_authenticated:
@@ -681,10 +680,7 @@ def notifications_processor(request):
         'solicitudes_pendientes_count': solicitudes_pendientes_count,
     }
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  CARRERAS
-# ══════════════════════════════════════════════════════════════════════════
 
 @login_required
 def lista_carreras(request):
@@ -886,50 +882,96 @@ def configuracion(request):
         form = PasswordChangeForm(request.user)
     return render(request, 'usuarios/configuracion.html', {'form': form, 'titulo': 'Configuración'})
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  CAJA
-# ══════════════════════════════════════════════════════════════════════════
 
 @login_required
 def lista_caja(request):
-    sede_id     = request.GET.get('sede')
+    """Vista principal del módulo de Caja con ingresos y egresos"""
+    hoy = timezone.now().date()
+
+    # Filtros
+    sede_id = request.GET.get('sede')
     fecha_desde = request.GET.get('fecha_desde')
     fecha_hasta = request.GET.get('fecha_hasta')
-    recibo      = request.GET.get('recibo')
-    cliente     = request.GET.get('cliente')
+    recibo = request.GET.get('recibo')
+    cliente = request.GET.get('cliente')
 
+    # Base querysets
     ingresos = Pago.objects.all().select_related('alumno', 'sede', 'carrera').order_by('-fecha', '-id')
-    egresos  = Egreso.objects.all().select_related('sede').order_by('-fecha', '-id')
+    egresos = Egreso.objects.all().select_related('sede').order_by('-fecha', '-id')
 
-    if sede_id:     ingresos = ingresos.filter(sede_id=sede_id);   egresos = egresos.filter(sede_id=sede_id)
-    if fecha_desde: ingresos = ingresos.filter(fecha__gte=fecha_desde); egresos = egresos.filter(fecha__gte=fecha_desde)
-    if fecha_hasta: ingresos = ingresos.filter(fecha__lte=fecha_hasta); egresos = egresos.filter(fecha__lte=fecha_hasta)
+    # Calcular totales del DÍA DE HOY
+    ingresos_hoy = ingresos.filter(fecha=hoy)
+    egresos_hoy = egresos.filter(fecha=hoy)
+
+    total_ingresos_hoy = ingresos_hoy.aggregate(Sum('importe_total'))['importe_total__sum'] or 0
+    total_egresos_hoy = egresos_hoy.aggregate(Sum('monto'))['monto__sum'] or 0
+    balance_hoy = total_ingresos_hoy - total_egresos_hoy
+
+    # Aplicar filtros (para las tablas)
+    if sede_id:
+        ingresos = ingresos.filter(sede_id=sede_id)
+        egresos = egresos.filter(sede_id=sede_id)
+
+    if fecha_desde:
+        ingresos = ingresos.filter(fecha__gte=fecha_desde)
+        egresos = egresos.filter(fecha__gte=fecha_desde)
+
+    if fecha_hasta:
+        ingresos = ingresos.filter(fecha__lte=fecha_hasta)
+        egresos = egresos.filter(fecha__lte=fecha_hasta)
+
     if recibo:
         ingresos = ingresos.filter(numero_recibo__icontains=recibo)
-        egresos  = egresos.filter(numero_comprobante__icontains=recibo)
+        egresos = egresos.filter(numero_comprobante__icontains=recibo)
+
     if cliente:
         ingresos = ingresos.filter(
-            Q(alumno__nombre__icontains=cliente) | Q(alumno__apellido__icontains=cliente) | Q(nombre_cliente__icontains=cliente)
+            Q(alumno__nombre__icontains=cliente) |
+            Q(alumno__apellido__icontains=cliente) |
+            Q(nombre_cliente__icontains=cliente)
         )
         egresos = egresos.filter(concepto__icontains=cliente)
 
+    # Calcular totales generales (con filtros aplicados)
     total_ingresos = ingresos.aggregate(Sum('importe_total'))['importe_total__sum'] or 0
-    total_egresos  = egresos.aggregate(Sum('monto'))['monto__sum'] or 0
+    total_egresos = egresos.aggregate(Sum('monto'))['monto__sum'] or 0
+    balance = total_ingresos - total_egresos
 
-    return render(request, 'caja/listaCaja.html', {
-        'ingresos':       ingresos[:50],
-        'egresos':        egresos[:50],
+    # Limitar resultados
+    ingresos = ingresos[:50]
+    egresos = egresos[:50]
+
+    sedes = Sede.objects.all().order_by('nombre')
+
+    # Formatear fecha para mostrar
+    fecha_hoy_formateada = hoy.strftime("%d/%m/%Y")
+    fecha_hoy_param = hoy.strftime("%Y-%m-%d")
+
+    context = {
+        'ingresos': ingresos,
+        'egresos': egresos,
         'total_ingresos': total_ingresos,
-        'total_egresos':  total_egresos,
-        'balance':        total_ingresos - total_egresos,
-        'sedes':          Sede.objects.all().order_by('nombre'),
-        'filtros': {'sede': sede_id, 'fecha_desde': fecha_desde, 'fecha_hasta': fecha_hasta, 'recibo': recibo, 'cliente': cliente},
-    })
+        'total_egresos': total_egresos,
+        'balance': balance,
+        'total_ingresos_hoy': total_ingresos_hoy,
+        'total_egresos_hoy': total_egresos_hoy,
+        'balance_hoy': balance_hoy,
+        'fecha_hoy': fecha_hoy_formateada,
+        'fecha_hoy_param': fecha_hoy_param,
+        'sedes': sedes,
+        'filtros': {
+            'sede': sede_id,
+            'fecha_desde': fecha_desde,
+            'fecha_hasta': fecha_hasta,
+            'recibo': recibo,
+            'cliente': cliente,
+        }
+    }
 
+    return render(request, 'caja/listaCaja.html', context)
 
 @login_required
-@admin_required
 def lista_egresos(request):
     egresos    = Egreso.objects.all().select_related('sede', 'usuario_registro').order_by('-fecha', '-id')
     sede_id    = request.GET.get('sede')

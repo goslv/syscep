@@ -1,170 +1,500 @@
 {% extends 'base.html' %}
-
 {% block title %}{{ titulo }} - ITS CEP{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
 
 {% block content %}
 <style>
-    .stat-card {
-        border-radius: 18px;
-        border: 1px solid var(--border-color);
-        background: var(--card-bg);
-        box-shadow: var(--shadow-md);
-        padding: 2.5rem;
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Lato:wght@300;400;700&display=swap');
+
+  /* ─── Tokens ─────────────────────────────────────────── */
+  :root {
+    --fa-bg:       #f2f5f3;
+    --fa-surface:  #ffffff;
+    --fa-ink: #121620;
+    --fa-muted: #5c6570;
+    --fa-border:   #dce6e0;
+    --fa-green: rgba(26, 60, 122, 0.76);
+    --fa-green-lt: #e8f5ee;
+    --fa-green-dk: #145c38;
+    --fa-amber:    #d97706;
+    --fa-amber-lt: #fef3c7;
+    --fa-red:      #dc2626;
+    --fa-r:        12px;
+    --fa-display:  'Bricolage Grotesque', sans-serif;
+    --fa-body:     'Lato', sans-serif;
+    --fa-sh:       0 1px 3px rgba(0,0,0,.05), 0 6px 20px rgba(0,0,0,.06);
+    --fa-sh-lg:    0 12px 40px rgba(0,0,0,.1);
+  }
+  [data-theme="dark"] {
+    --fa-bg: #0d1015;
+    --fa-surface: #14171f;
+    --fa-ink:      #e8f0ea;
+    --fa-muted: #7a8098;
+    --fa-border: #212430;
+    --fa-green-lt: #0d1922;
+    --fa-sh:       0 1px 3px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.5);
+    --fa-sh-lg:    0 12px 40px rgba(0,0,0,.6);
+  }
+
+  /* ─── Scope ──────────────────────────────────────────── */
+  .fa * { box-sizing: border-box; }
+  .fa { font-family: var(--fa-body); color: var(--fa-ink); }
+
+  /* ─── Shell ──────────────────────────────────────────── */
+  .fa-shell {
+    max-width: 820px;
+    margin: 2.5rem auto 5rem;
+  }
+
+
+  .fa-body-wrap {
+    background: var(--fa-surface);
+    border: 1px solid var(--fa-border);
+    border-top: none;
+    border-radius: 100 0 var(--fa-r) var(--fa-r);
+    box-shadow: var(--fa-sh-lg);
+    overflow: hidden;
+  }
+
+  .fa-sec {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--fa-border);
+    animation: fa-in .3s ease both;
+    border-radius: 100px;
+  }
+  .fa-sec:last-of-type { border-bottom: none; }
+  .fa-sec:nth-child(2) { animation-delay: .06s; }
+  .fa-sec:nth-child(3) { animation-delay: .12s; }
+  .fa-sec:nth-child(4) { animation-delay: .18s; }
+  .fa-sec:nth-child(5) { animation-delay: .22s; }
+
+  @keyframes fa-in {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* Banda lateral izquierda */
+  .fa-sec-stripe {
+    width: 6px;
+    flex-shrink: 0;
+    opacity: .25;
+    transition: opacity .2s;
+  }
+  .fa-sec:hover .fa-sec-stripe { opacity: .5; }
+
+
+  /* Contenido de la sección */
+  .fa-sec-inner {
+    flex: 1;
+    padding: 1.75rem 2rem 1.75rem 1.75rem;
+  }
+
+  /* Encabezado de sección */
+  .fa-sec-head {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1.4rem;
+  }
+  .fa-sec-badge {
+    font-family: var(--fa-display);
+    font-size: .65rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--fa-green);
+    background: var(--fa-green-lt);
+    padding: .2rem .65rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  .fa-sec-title {
+    font-family: var(--fa-display);
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--fa-ink);
+    margin: 0;
+  }
+  .fa-sec-tag {
+    margin-left: auto;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--fa-muted);
+    opacity: .7;
+  }
+
+  /* ─── Grid ───────────────────────────────────────────── */
+  .fa-grid {
+    display: grid;
+    gap: 1.1rem;
+  }
+  .fa-g2 { grid-template-columns: 1fr 1fr; }
+  .fa-g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .fa-g12 { grid-template-columns: 1fr 2fr; }
+
+  @media(max-width:640px) {
+    .fa-g2, .fa-g3, .fa-g12 { grid-template-columns: 1fr; }
+  }
+
+  .fa-field { display: flex; flex-direction: column; gap: .35rem; }
+
+  .fa-lbl {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--fa-muted);
+  }
+  .fa-lbl.req::after { content: " *"; color: var(--fa-green); }
+
+  .fa .form-control,
+  .fa .form-select {
+    background: var(--fa-bg) !important;
+    border: 1.5px solid var(--fa-border) !important;
+    border-radius: 9px !important;
+    color: var(--fa-ink) !important;
+    font-family: var(--fa-body) !important;
+    font-size: .92rem !important;
+    padding: .6rem .9rem !important;
+    transition: border-color .15s, box-shadow .15s;
+    width: 100%;
+  }
+  [data-theme="dark"] .fa .form-control,
+  [data-theme="dark"] .fa .form-select { background: #090b10 !important; }
+  .fa .form-control:focus,
+  .fa .form-select:focus {
+    outline: none !important;
+    border-color: var(--fa-green) !important;
+    box-shadow: 0 0 0 3px rgba(26, 71, 122, 0.13) !important;
+    background: var(--fa-surface) !important;
+  }
+
+  .fa-err { font-size: .73rem; color: var(--fa-red); margin-top: .15rem; display: flex; align-items: center; gap: .25rem; }
+  .fa-hint { font-size: .72rem; color: var(--fa-muted); margin-top: .1rem; }
+
+  /* ─── Toggle activo ──────────────────────────────────── */
+  .fa-toggle-row {
+    display: flex; align-items: center; gap: .85rem;
+    padding: .85rem 1.1rem;
+    border-radius: 10px;
+    border: 1.5px solid var(--fa-border);
+    background: var(--fa-bg);
+    cursor: pointer;
+    transition: border-color .15s;
+    user-select: none;
+  }
+  [data-theme="dark"] .fa-toggle-row { background: #0d0f15; }
+  .fa-toggle-row:has(input:checked) { border-color: var(--fa-green); background: var(--fa-green-lt); }
+  .fa-toggle-row input { display: none; }
+
+  .fa-track {
+    width: 38px; height: 22px;
+    border-radius: 999px;
+    background: var(--fa-border);
+    position: relative;
+    flex-shrink: 0;
+    transition: background .18s;
+  }
+  .fa-toggle-row:has(input:checked) .fa-track { background: var(--fa-green); }
+  .fa-thumb {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+  }
+  .fa-toggle-row:has(input:checked) .fa-thumb { transform: translateX(16px); }
+  .fa-toggle-txt { display: flex; flex-direction: column; gap: .1rem; }
+  .fa-toggle-main { font-size: .88rem; font-weight: 700; color: var(--fa-ink); }
+  .fa-toggle-sub  { font-size: .72rem; color: var(--fa-muted); }
+
+  /* ─── Acciones ───────────────────────────────────────── */
+  .fa-actions {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.4rem 2rem;
+    background: var(--fa-bg);
+    border-top: 1px solid var(--fa-border);
+    gap: .75rem;
+    flex-wrap: wrap;
+  }
+  [data-theme="dark"] .fa-actions { background: #0d1015; }
+
+  .fa-actions-right { display: flex; gap: .75rem; align-items: center; }
+
+  /* Btn base */
+  .fa-btn {
+    display: inline-flex; align-items: center; gap: .45rem;
+    padding: .65rem 1.5rem;
+    border-radius: 999px;
+    border: none;
+    font-size: .875rem;
+    font-weight: 700;
+    font-family: var(--fa-body);
+    cursor: pointer;
+    transition: all .18s;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .fa-btn-primary {
+    background: var(--fa-green);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(26, 42, 122, 0.3);
+  }
+  .fa-btn-primary:hover {
+    background: var(--fa-green-dk);
+    box-shadow: 0 6px 18px rgba(26,122,74,.4);
+    transform: translateY(-1px);
+    color: #fff;
+  }
+
+  /* Secundario — "Añadir otro" */
+  .fa-btn-outline {
+    background: var(--fa-surface);
+    color: var(--fa-green);
+    border: 1.5px solid var(--fa-green);
+  }
+  .fa-btn-outline:hover {
+    background: var(--fa-green-lt);
+    transform: translateY(-1px);
+    color: #91d5ff;
+  }
+
+  /* Cancelar */
+  .fa-btn-cancel {
+    background: var(--fa-surface);
+    color: var(--fa-muted);
+    border: 1.5px solid var(--fa-border);
+  }
+  .fa-btn-cancel:hover { border-color: var(--fa-ink); color: var(--fa-ink); }
+
+  /* ─── Separador decorativo entre secciones opcionales ── */
+  .fa-optional-note {
+    font-size: .72rem;
+    color: var(--fa-muted);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: 1.25rem;
+    padding: .4rem .75rem;
+    border-radius: 6px;
+    background: var(--fa-amber-lt);
+    border-left: 3px solid var(--fa-amber);
+    color: #92400e;
+  }
+  [data-theme="dark"] .fa-optional-note { background: #1f1500; color: #d97706; }
+
+  [data-theme="dark"] .fa-optional-note { background: #1f1500; color: #d97706; }
+
+  /* ─── Responsive acciones móviles ─────────────────────── */
+  @media(max-width:640px) {
+    .fa-actions {
+      flex-direction: column;
     }
-    .form-control, .form-select {
-        background-color: var(--body-bg) !important;
-        border-color: var(--border-color) !important;
-        color: var(--text-main) !important;
+
+    .fa-actions-right {
+      width: 100%;
+      flex-direction: column;
     }
-    .form-control:focus, .form-select:focus {
-        background-color: var(--card-bg) !important;
-        border-color: var(--primary-400) !important;
+
+    .fa-btn {
+      width: 100%;
+      justify-content: center;
     }
-    .form-label, h5 {
-        color: var(--text-main);
+
+    .fa-actions > a {
+      width: 100%;
+      justify-content: center;
+      order: 2;
     }
-    .form-check-label {
-        color: var(--text-main);
+    .fa-actions-right {
+      order: 1;margin-bottom: .75rem;
     }
-    .optional-section {
-        opacity: 0.85;
-    }
+  }
 </style>
-<div class="row">
-    <div class="col-md-10 mx-auto mt-5">
-        <div class="stat-card">
-            <form method="post">
-                {% csrf_token %}
 
-                <!-- Información Básica (OBLIGATORIA) -->
-                <h5 class="mb-3">Información Básica</h5>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label">Nombre*</label>
-                        {{ form.nombre }}
-                        {% if form.nombre.errors %}
-                            <div class="text-danger">{{ form.nombre.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Apellido*</label>
-                        {{ form.apellido }}
-                        {% if form.apellido.errors %}
-                            <div class="text-danger">{{ form.apellido.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Sede*</label>
-                        {{ form.sede }}
-                        {% if form.sede.errors %}
-                            <div class="text-danger">{{ form.sede.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Carrera*</label>
-                        {{ form.carrera }}
-                        {% if form.carrera.errors %}
-                            <div class="text-danger">{{ form.carrera.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
+<div class="fa">
+  <div class="fa-shell mt-5">
+    <form method="post" id="faForm">
+      {% csrf_token %}
 
-                <!-- Información Adicional (OPCIONAL) -->
-                <div class="section-divider optional-section">
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label">Cédula</label>
-                            {{ form.cedula }}
-                            {% if form.cedula.errors %}
-                                <div class="text-danger">{{ form.cedula.errors }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Fecha de Nacimiento</label>
-                            {{ form.fecha_nacimiento }}
-                            {% if form.fecha_nacimiento.errors %}
-                                <div class="text-danger">{{ form.fecha_nacimiento.errors }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Teléfono</label>
-                            {{ form.telefono }}
-                            {% if form.telefono.errors %}
-                                <div class="text-danger">{{ form.telefono.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
+      <!-- Campo hidden para saber qué acción tomó el submit -->
+      <input type="hidden" name="add_another" id="addAnotherFlag" value="0">
 
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Curso Actual</label>
-                            {{ form.curso_actual }}
-                            {% if form.curso_actual.errors %}
-                                <div class="text-danger">{{ form.curso_actual.errors }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Fecha de Inicio</label>
-                            {{ form.fecha_inicio }}
-                            {% if form.fecha_inicio.errors %}
-                                <div class="text-danger">{{ form.fecha_inicio.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
+      <div class="fa-body-wrap">
 
-                <!-- Contacto de Emergencia (OPCIONAL) -->
-                <div class="section-divider optional-section">
-                    <h5 class="mb-3">Contacto de Emergencia</h5>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label">Nombre del Contacto</label>
-                            {{form.contacto_emergencia_nombre}}
-                            {% if form.contacto_emergencia_nombre.errors %}
-                                <div class="text-danger">{{ form.contacto_emergencia_nombre.errors }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Teléfono de Emergencia</label>
-                            {{form.contacto_emergencia_telefono}}
-                            {% if form.contacto_emergencia_telefono.errors %}
-                                <div class="text-danger">{{ form.contacto_emergencia_telefono.errors }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Relación</label>
-                            {{form.contacto_emergencia_relacion}}
-                            {% if form.contacto_emergencia_relacion.errors %}
-                                <div class="text-danger">{{ form.contacto_emergencia_relacion.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
+        <!-- ══ § 1 DATOS PRINCIPALES ══════════════════════════ -->
+        <div class="fa-sec rounded-3">
+          <div class="fa-sec-stripe"></div>
+          <div class="fa-sec-inner">
+            <div class="fa-sec-head">
+              <span class="fa-sec-badge">01</span>
+              <h2 class="fa-sec-title">Datos principales</h2>
+              <span class="fa-sec-tag">Requerido</span>
+            </div>
 
-                <!-- Estado -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-12">
-                        <div class="form-check">
-                            {{ form.activo }}
-                            <label class="form-check-label" for="{{ form.activo.id_for_label }}">
-                                Alumno activo
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Botones -->
-                <div class="d-flex justify-content-between form-actions">
-                    <a href="{% url 'lista_alumnos' %}" class="btn btn-secondary">
-                        Cancelar
-                    </a>
-                    <button type="submit" class="btn btn-success">
-                        {{ boton }}
-                    </button>
-                </div>
-            </form>
+            <div class="fa-grid fa-g2">
+              <div class="fa-field">
+                <label class="fa-lbl req">Nombre</label>
+                {{ form.nombre }}
+                {% if form.nombre.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.nombre.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="fa-field">
+                <label class="fa-lbl req">Apellido</label>
+                {{ form.apellido }}
+                {% if form.apellido.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.apellido.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="fa-field">
+                <label class="fa-lbl req">Sede</label>
+                {{ form.sede }}
+                {% if form.sede.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.sede.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="fa-field">
+                <label class="fa-lbl req">Carrera</label>
+                {{ form.carrera }}
+                {% if form.carrera.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.carrera.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
+
+        <!-- ══ § 2 DATOS PERSONALES ═══════════════════════════ -->
+        <div class="fa-sec">
+          <div class="fa-sec-stripe"></div>
+          <div class="fa-sec-inner">
+            <div class="fa-sec-head">
+              <span class="fa-sec-badge">02</span>
+              <h2 class="fa-sec-title">Información personal</h2>
+              <span class="fa-sec-tag">Opcional</span>
+            </div>
+
+            <div class="fa-grid fa-g3">
+              <div class="fa-field">
+                <label class="fa-lbl">Cédula</label>
+                {{ form.cedula }}
+                {% if form.cedula.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.cedula.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="fa-field">
+                <label class="fa-lbl">Fecha de Nacimiento</label>
+                {{ form.fecha_nacimiento }}
+                {% if form.fecha_nacimiento.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.fecha_nacimiento.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="fa-field">
+                <label class="fa-lbl">Teléfono</label>
+                {{ form.telefono }}
+                {% if form.telefono.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.telefono.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+
+            <div class="fa-grid fa-g2" style="margin-top:1.1rem;">
+              <div class="fa-field">
+                <label class="fa-lbl">Fecha de Inicio</label>
+                {{ form.fecha_inicio }}
+                {% if form.fecha_inicio.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.fecha_inicio.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="fa-field">
+                <label class="fa-lbl">Curso Actual</label>
+                {{ form.curso_actual }}
+                <div class="fa-hint">Número de año o curso en el que se encuentra</div>
+                {% if form.curso_actual.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.curso_actual.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ § 3 CONTACTO DE EMERGENCIA ═════════════════════ -->
+        <div class="fa-sec">
+          <div class="fa-sec-stripe"></div>
+          <div class="fa-sec-inner">
+            <div class="fa-sec-head">
+              <span class="fa-sec-badge">03</span>
+              <h2 class="fa-sec-title">Contacto de emergencia</h2>
+              <span class="fa-sec-tag">Opcional</span>
+            </div>
+
+            <div class="fa-grid fa-g3">
+              <div class="fa-field">
+                <label class="fa-lbl">Nombre del Contacto</label>
+                {{ form.contacto_emergencia_nombre }}
+                {% if form.contacto_emergencia_nombre.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.contacto_emergencia_nombre.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="fa-field">
+                <label class="fa-lbl">Teléfono</label>
+                {{ form.contacto_emergencia_telefono }}
+                {% if form.contacto_emergencia_telefono.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.contacto_emergencia_telefono.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="fa-field">
+                <label class="fa-lbl">Relación</label>
+                {{ form.contacto_emergencia_relacion }}
+                <div class="fa-hint">Ej: Madre, Padre, Tutor…</div>
+                {% if form.contacto_emergencia_relacion.errors %}<div class="fa-err"><i class="bi bi-x-circle"></i>{{ form.contacto_emergencia_relacion.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ § 4 ESTADO ══════════════════════════════════════ -->
+        <div class="fa-sec">
+          <div class="fa-sec-stripe"></div>
+          <div class="fa-sec-inner">
+            <label class="fa-toggle-row">
+              {{ form.activo }}
+              <div class="fa-track"><div class="fa-thumb"></div></div>
+              <div class="fa-toggle-txt">
+                <span class="fa-toggle-main">Alumno activo</span>
+                <span class="fa-toggle-sub">Desmarcá si el alumno está dado de baja o en pausa</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- ══ ACCIONES ════════════════════════════════════════ -->
+        <div class="fa-actions">
+
+          <!-- Cancelar (izquierda) -->
+          <a href="{% url 'lista_alumnos' %}" class="fa-btn fa-btn-cancel">
+            <i class="bi bi-x-lg"></i> Cancelar
+          </a>
+
+          <div class="fa-actions-right">
+            <!--
+              "Añadir otro": guarda el alumno actual y redirige
+              al mismo formulario vacío para registrar uno nuevo.
+              Solo se muestra en modo CREAR (no edición).
+            -->
+            {% if not alumno %}
+            <button type="button" class="fa-btn fa-btn-outline" id="btnAddAnother">
+              <i class="bi bi-person-plus"></i> Guardar y añadir otro
+            </button>
+            {% endif %}
+
+            <!-- Guardar / Actualizar -->
+            <button type="submit" class="fa-btn fa-btn-primary" id="btnSubmit">
+              <i class="bi bi-check-lg"></i> {{ boton }}
+            </button>
+          </div>
+
+        </div>
+
+      </div><!-- /fa-body-wrap -->
+    </form>
+  </div>
 </div>
+
+<script>
+  document.getElementById('btnAddAnother')?.addEventListener('click', function () {
+    document.getElementById('addAnotherFlag').value = '1';
+    document.getElementById('faForm').submit();
+  });
+
+  /* Asegurarse de que el botón principal NO lleve el flag */
+  document.getElementById('btnSubmit')?.addEventListener('click', function () {
+    document.getElementById('addAnotherFlag').value = '0';
+  });
+</script>
 {% endblock %}
