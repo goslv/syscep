@@ -136,7 +136,7 @@
         .stat-card form.row {
             --bs-gutter-y: 0.5rem;
         }
-        
+
         .stat-card .form-label {
             margin-bottom: 0.2rem;
             font-size: 0.85rem;
@@ -253,7 +253,7 @@
                             <option value="">Todas las sedes</option>
                             {% for sede in sedes %}
                             <option value="{{ sede.id }}" {% if request.GET.sede == sede.id|stringformat:"s" %}selected{% endif %}>
-                                {{ sede.nombre }}
+                            {{ sede.nombre }}
                             </option>
                             {% endfor %}
                         </select>
@@ -264,7 +264,7 @@
                             <option value="">Todas las carreras</option>
                             {% for carrera in carreras %}
                             <option value="{{ carrera.id }}" {% if request.GET.carrera == carrera.id|stringformat:"s" %}selected{% endif %}>
-                                {{ carrera.nombre }}
+                            {{ carrera.nombre }}
                             </option>
                             {% endfor %}
                         </select>
@@ -304,7 +304,7 @@
                         <option value="">Todas las sedes</option>
                         {% for sede in sedes %}
                         <option value="{{ sede.id }}" {% if request.GET.sede == sede.id|stringformat:"s" %}selected{% endif %}>
-                            {{ sede.nombre }}
+                        {{ sede.nombre }}
                         </option>
                         {% endfor %}
                     </select>
@@ -315,7 +315,7 @@
                         <option value="">Todas las carreras</option>
                         {% for carrera in carreras %}
                         <option value="{{ carrera.id }}" {% if request.GET.carrera == carrera.id|stringformat:"s" %}selected{% endif %}>
-                            {{ carrera.nombre }}
+                        {{ carrera.nombre }}
                         </option>
                         {% endfor %}
                     </select>
