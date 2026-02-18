@@ -1,314 +1,535 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
-
-{% block title %}Caja - Movimientos{% endblock %}
+{% block title %}Caja — Movimientos{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <style>
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color) !important;
-        }
-        .card-header {
-            background-color: var(--card-bg) !important;
-            border-bottom: 1px solid var(--border-color) !important;
-        }
-        .table thead th {
-            background-color: rgba(0,0,0,0.05) !important;
-            border-bottom: 2px solid var(--border-color);
-        }
-        [data-theme="dark"] .table thead th {
-            background-color: rgba(255,255,255,0.05) !important;
-        }
-        .table tbody td {
-            border-bottom: 1px solid var(--border-color);
-        }
-        .nav-tabs .nav-link {
-            color: var(--text-muted);
-            border: none;
-        }
-        .nav-tabs .nav-link.active {
-            background-color: transparent !important;
-            color: var(--primary-500) !important;
-            border-bottom: 3px solid var(--primary-500) !important;
-        }
-        .form-control, .form-select {
-            background-color: var(--body-bg) !important;
-            border-color: var(--border-color) !important;
-            color: var(--text-main) !important;
-        }
-        .text-muted {
-            color: var(--text-muted) !important;
-        }
-        h2, h6 {
-            color: var(--text-main) !important;
-        }
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
-        .nav-tabs .nav-link {
-            color: #6c757d;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        .nav-tabs .nav-link.active {
-            background-color: transparent !important;
-            color: #0a58ca;
-            border-color: rgba(10, 88, 202, 0.64) !important;
-        }
-        .table thead th {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 700;
-            color: #495057;
-            border-top: none;
-        }
-        .card {
-            transition: transform 0.2s;
-        }
-        @media print {
-            .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
-            .bg-success, .bg-danger, .bg-primary, .bg-warning { -webkit-print-color-adjust: exact; print-color-adjust: exact; color: white !important; }
-        }
+    /* ─── Tokens ─────────────────────────────────────────── */
+    :root {
+        --lc-bg:       #f8faf9;
+        --lc-surface:  #ffffff;
+        --lc-ink:      #0f1419;
+        --lc-muted:    #64748b;
+        --lc-border:   #e2e8f0;
+        --lc-green:    #059669;
+        --lc-green-lt: #d1fae5;
+        --lc-red:      #dc2626;
+        --lc-red-lt:   #fee2e2;
+        --lc-blue:     #2563eb;
+        --lc-blue-lt:  #dbeafe;
+        --lc-amber:    #f59e0b;
+        --lc-r:        14px;
+        --lc-sh:       0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.06);
+        --lc-display:  'Space Grotesk', sans-serif;
+        --lc-body:     'Inter', sans-serif;
+    }
+    [data-theme="dark"] {
+        --lc-bg:       #0a0e12;
+        --lc-surface:  #13171d;
+        --lc-ink:      #e8eef3;
+        --lc-muted:    #8b9daf;
+        --lc-border:   #1f2937;
+        --lc-green-lt: #064e3b;
+        --lc-red-lt:   #7f1d1d;
+        --lc-blue-lt:  #1e3a8a;
+        --lc-sh:       0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.5);
+    }
 
-        [data-theme="dark"] .card-header {
-            background-color: #1e293b !important;
-            border-bottom-color: #334155 !important;
-        }
-    
-        [data-theme="dark"] .nav-tabs .nav-link.active {
-            color: var(--primary-400) !important;
-            border-bottom-color: var(--primary-400) !important;
-        }
+    .lc { font-family: var(--lc-body); color: var(--lc-ink); }
+    .lc * { box-sizing: border-box; }
 
-        [data-theme="dark"] .table thead th {
-            color: var(--gray-400) !important;
-        }
+    /* ─── Header ─────────────────────────────────────────── */
+    .lc-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
 
-        @media (max-width: 768px) {
-            .container-fluid {
-                padding-left: 0.75rem;
-                padding-right: 0.75rem;
-            }
+    .lc-head-title {
+        font-family: var(--lc-display);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--lc-ink);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+    }
+    .lc-head-title i { color: var(--lc-blue); font-size: 1.6rem; }
 
-            /* Botones de acción en la cabecera */
-            .header-actions {
-                flex-direction: column !important;
-                gap: 0.5rem !important;
-            }
+    .lc-head-actions {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        flex-wrap: wrap;
+    }
 
-            .header-actions .d-flex {
-                width: 100%;
-                justify-content: space-between;
-                gap: 0.5rem !important;
-            }
+    /* Botones */
+    .lc-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .6rem 1.2rem;
+        border-radius: 999px;
+        font-size: .85rem;
+        font-weight: 600;
+        font-family: var(--lc-body);
+        border: none;
+        cursor: pointer;
+        transition: all .2s;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+    .lc-btn-primary { background: var(--lc-blue); color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.25); }
+    .lc-btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); color: #fff; }
+    .lc-btn-success { background: var(--lc-green); color: #fff; box-shadow: 0 4px 12px rgba(5,150,105,.25); }
+    .lc-btn-success:hover { background: #047857; transform: translateY(-1px); color: #fff; }
+    .lc-btn-danger { background: var(--lc-red); color: #fff; box-shadow: 0 4px 12px rgba(220,38,38,.25); }
+    .lc-btn-danger:hover { background: #b91c1c; transform: translateY(-1px); color: #fff; }
+    .lc-btn i { font-size: 1rem; }
 
-            .header-actions .btn {
-                flex: 1;
-                justify-content: center;
-                padding: 0.6rem 0.5rem;
-                font-size: 0.85rem;
-            }
+    /* ─── Stats cards ────────────────────────────────────── */
+    .lc-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
 
-            /* Enlaces de "Ver todos" */
-            .view-all-links {
-                justify-content: center !important;
-                gap: 1rem !important;
-                margin-top: 0.5rem !important;
-                margin-bottom: 1rem !important;
-            }
-            .view-all-links a {
-                font-size: 0.75rem !important;
-                white-space: nowrap;
-            }
+    .lc-stat-card {
+        background: var(--lc-surface);
+        border: 1px solid var(--lc-border);
+        border-radius: var(--lc-r);
+        padding: 1.3rem 1.5rem;
+        box-shadow: var(--lc-sh);
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        transition: transform .2s;
+    }
+    .lc-stat-card:hover { transform: translateY(-2px); }
 
-            /* Tabs lado a lado */
-            .nav-tabs {
-                flex-wrap: nowrap !important;
-                background: var(--gray-50);
-                border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
-                overflow: hidden;
-            }
-            .nav-tabs .nav-item {
-                flex: 1;
-            }
-            .nav-tabs .nav-link {
-                padding: 0.75rem 0.1rem !important;
-                font-size: 0.75rem !important;
-                white-space: nowrap;
-                text-align: center;
-                border-bottom: 2px solid transparent !important;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-            .nav-tabs .nav-link.active {
-                background: transparent !important;
-                border-bottom: 3px solid var(--primary-500) !important;
-            }
-            .nav-tabs .nav-link i {
-                display: block;
-                margin-bottom: 2px;
-                margin-right: 0 !important;
-                font-size: 1rem;
-            }
-        }
-    </style>
-    <div class="row">
-        <div class="col-12 mb-3">
-            <div class="header-actions d-flex justify-content-between align-items-center mb-3 mt-4">
-                <div class="no-print d-flex gap-2">
-                    {% if user.is_staff %}
-                    <a href="{% url 'informe_caja' %}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-file-invoice-dollar me-1"></i> <span class="d-none d-sm-inline">Informe</span><span class="d-inline d-sm-none">Informe</span>
-                    </a>
-                    {% endif %}
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="{% url 'registrar_pago' %}" class="btn btn-success">
-                        <i class="fas fa-plus-circle me-1"></i><span class="d-none d-sm-inline">Registrar Ingreso</span><span class="d-inline d-sm-none">Ingreso</span>
-                    </a>
-                    <a href="{% url 'registrar_egreso' %}" class="btn btn-danger">
-                        <i class="fas fa-minus-circle me-1"></i><span class="d-none d-sm-inline">Registrar Egreso</span><span class="d-inline d-sm-none">Egreso</span>
-                    </a>
-                </div>
-            </div>
+    .lc-stat-label {
+        font-size: .73rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--lc-muted);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+    }
+    .lc-stat-label i { font-size: .95rem; }
+
+    .lc-stat-value {
+        font-family: var(--lc-display);
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .lc-stat-value small { font-size: 1.1rem; font-weight: 500; opacity: .8; margin-right: .25rem; }
+
+    .lc-stat-card.green .lc-stat-value { color: var(--lc-green); }
+    .lc-stat-card.red   .lc-stat-value { color: var(--lc-red); }
+    .lc-stat-card.blue  .lc-stat-value { color: var(--lc-blue); }
+
+    /* ─── Sede badge (usuarios normales) ────────────────── */
+    .lc-sede-notice {
+        background: var(--lc-blue-lt);
+        border: 1px solid var(--lc-blue);
+        border-radius: var(--lc-r);
+        padding: .8rem 1.2rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        font-size: .86rem;
+        color: #1e3a8a;
+    }
+    [data-theme="dark"] .lc-sede-notice { background: #1e3a8a; color: #dbeafe; }
+    .lc-sede-notice i { font-size: 1.3rem; }
+    .lc-sede-notice strong { font-weight: 700; }
+
+    /* ─── Tabs ───────────────────────────────────────────── */
+    .lc-card {
+        background: var(--lc-surface);
+        border: 1px solid var(--lc-border);
+        border-radius: var(--lc-r);
+        box-shadow: var(--lc-sh);
+        overflow: hidden;
+        animation: lc-fade .3s ease both;
+    }
+    @keyframes lc-fade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .lc-tabs {
+        display: flex;
+        border-bottom: 2px solid var(--lc-border);
+        background: var(--lc-bg);
+    }
+    .lc-tab {
+        flex: 1;
+        padding: 1.1rem 1rem;
+        border: none;
+        background: transparent;
+        font-family: var(--lc-display);
+        font-size: .9rem;
+        font-weight: 600;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+        color: var(--lc-muted);
+        cursor: pointer;
+        transition: all .2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        border-bottom: 3px solid transparent;
+    }
+    .lc-tab:hover { color: var(--lc-ink); background: rgba(0,0,0,.02); }
+    [data-theme="dark"] .lc-tab:hover { background: rgba(255,255,255,.04); }
+    .lc-tab.active {
+        color: var(--lc-blue);
+        border-bottom-color: var(--lc-blue);
+        background: var(--lc-surface);
+    }
+    .lc-tab i { font-size: 1.15rem; }
+    .lc-tab.ingresos.active { color: var(--lc-green); border-bottom-color: var(--lc-green); }
+    .lc-tab.egresos.active { color: var(--lc-red); border-bottom-color: var(--lc-red); }
+
+    /* ─── Contenido tabs ─────────────────────────────────── */
+    .lc-tab-content {
+        display: none;
+        padding: 0;
+    }
+    .lc-tab-content.active { display: block; }
+
+    /* ─── Tabla ──────────────────────────────────────────── */
+    .lc-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .lc-table thead th {
+        padding: 1rem 1.2rem;
+        text-align: left;
+        font-size: .72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--lc-muted);
+        background: var(--lc-bg);
+        border-bottom: 2px solid var(--lc-border);
+    }
+    .lc-table tbody tr {
+        border-bottom: 1px solid var(--lc-border);
+        transition: background .15s;
+        cursor: pointer;
+    }
+    .lc-table tbody tr:hover { background: var(--lc-bg); }
+    .lc-table tbody td {
+        padding: 1rem 1.2rem;
+        font-size: .88rem;
+        color: var(--lc-ink);
+    }
+
+    /* Columnas específicas */
+    .lc-table .col-date { color: var(--lc-muted); font-size: .84rem; }
+    .lc-table .col-badge {
+        display: inline-block;
+        padding: .3rem .7rem;
+        border-radius: 999px;
+        font-size: .75rem;
+        font-weight: 600;
+        border: 1px solid;
+        background: var(--lc-surface);
+    }
+    .lc-table .badge-recibo { border-color: var(--lc-blue); color: var(--lc-blue); }
+    .lc-table .badge-comp   { border-color: var(--lc-muted); color: var(--lc-muted); }
+    .lc-table .badge-none   { border-color: var(--lc-border); color: var(--lc-muted); opacity: .6; }
+
+    .lc-table .col-nombre { font-weight: 600; }
+    .lc-table .col-sub { font-size: .82rem; color: var(--lc-muted); margin-top: .15rem; }
+
+    .lc-table .col-monto {
+        text-align: right;
+        font-family: var(--lc-display);
+        font-size: .95rem;
+        font-weight: 700;
+    }
+    .lc-table .monto-ingreso { color: var(--lc-green); }
+    .lc-table .monto-egreso  { color: var(--lc-red); }
+
+    .lc-table .col-actions {
+        text-align: center;
+        opacity: 0;
+        transition: opacity .2s;
+    }
+    .lc-table tbody tr:hover .col-actions { opacity: 1; }
+
+    .lc-table .btn-group { display: inline-flex; gap: .35rem; }
+    .lc-table .btn-action {
+        padding: .4rem .8rem;
+        font-size: .78rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: 1px solid var(--lc-border);
+        background: var(--lc-surface);
+        color: var(--lc-ink);
+        text-decoration: none;
+        transition: all .15s;
+    }
+    .lc-table .btn-action:hover { background: var(--lc-bg); border-color: var(--lc-ink); color: var(--lc-ink); }
+
+    /* Empty state */
+    .lc-empty {
+        padding: 4rem 2rem;
+        text-align: center;
+        color: var(--lc-muted);
+    }
+    .lc-empty i { font-size: 3.5rem; opacity: .2; margin-bottom: 1rem; display: block; }
+    .lc-empty p { margin: 0; font-size: .92rem; }
+
+    /* ─── Links adicionales ──────────────────────────────── */
+    .lc-links {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 1.5rem 0;
+        flex-wrap: wrap;
+    }
+    .lc-link {
+        font-size: .85rem;
+        font-weight: 600;
+        color: var(--lc-blue);
+        text-decoration: none;
+        transition: color .2s;
+    }
+    .lc-link:hover { color: #1d4ed8; text-decoration: underline; }
+    .lc-link.danger { color: var(--lc-red); }
+    .lc-link.danger:hover { color: #b91c1c; }
+
+    /* ─── Responsive ─────────────────────────────────────── */
+    @media(max-width:768px) {
+        .lc-head { flex-direction: column; align-items: stretch; }
+        .lc-head-actions { justify-content: center; }
+        .lc-stats { grid-template-columns: 1fr; }
+        .lc-tab { font-size: .8rem; padding: .9rem .5rem; }
+        .lc-table thead th { padding: .8rem .8rem; font-size: .68rem; }
+        .lc-table tbody td { padding: .8rem .8rem; font-size: .82rem; }
+        /* Ocultar columna concepto y acciones */
+        .lc-table .col-concepto,
+        .lc-table .col-actions,
+        .lc-table th:nth-child(4),
+        .lc-table th:last-child { display: none; }
+    }
+</style>
+
+<div class="lc container-fluid mt-5">
+
+    <!-- Header -->
+    <div class="lc-head">
+        <div class="lc-head-actions">
+            <a href="{% url 'informe_caja' %}" class="lc-btn lc-btn-primary">
+                <i class="bi bi-file-earmark-bar-graph"></i>
+                Informe
+            </a>
+            <a href="{% url 'registrar_pago' %}" class="lc-btn lc-btn-success">
+                <i class="bi bi-plus-circle"></i>
+                Ingreso
+            </a>
+            <a href="{% url 'registrar_egreso' %}" class="lc-btn lc-btn-danger">
+                <i class="bi bi-dash-circle"></i>
+                Egreso
+            </a>
         </div>
-        {% if user.is_staff %}
-        <div class="view-all-links d-flex justify-content-center align-items-center mb-4 mt-2">
-            <a href="{% url 'lista_pagos' %}" class="btn btn-link btn-sm text-decoration-none">Ver todos los ingresos</a>
-            <div class="divider-vertical d-none d-md-block" style="height: 15px;"></div>
-            <a href="{% url 'lista_egresos' %}" class="btn btn-link btn-sm text-decoration-none text-danger">Ver todos los egresos</a>
-        </div>
-        {% endif %}
     </div>
 
-    <!-- Pestañas de Movimientos -->
-    <div class="card border-0 shadow-sm overflow-hidden mb-4">
-        <div class="card-header p-0">
-            <ul class="nav nav-tabs nav-fill border-0" id="cajaTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active py-3 border-0" id="ingresos-tab" data-bs-toggle="tab" data-bs-target="#ingresos" type="button">
-                        <i class="fas fa-arrow-up text-success me-2"></i>INGRESOS
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link py-3 border-0" id="egresos-tab" data-bs-toggle="tab" data-bs-target="#egresos" type="button">
-                        <i class="fas fa-arrow-down text-danger me-2"></i>EGRESOS
-                    </button>
-                </li>
-            </ul>
-        </div>
-        <div class="card-body p-0">
-            <div class="tab-content" id="cajaTabsContent">
-                <!-- Tab Ingresos -->
-                <div class="tab-pane fade show active" id="ingresos" role="tabpanel">
-                    <div class="table-responsive table-responsive-stack">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead>
-                            <tr>
-                                <th class="ps-4">Fecha</th>
-                                <th>Recibo</th>
-                                <th>Alumno/Cliente</th>
-                                <th>Concepto</th>
-                                <th class="text-end">Monto</th>
-                                <th class="text-center no-print">Acciones</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for pago in ingresos %}
-                            <tr>
-                                <td data-label="Fecha" class="ps-4 text-muted small">{{ pago.fecha|date:"d/m/Y" }}</td>
-                                <td data-label="Recibo"><span class="badge bg-light text-primary border">{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</span></td>
-                                <td data-label="Alumno/Cliente">
-                                    <div class="fw-bold">
-                                        {% if pago.alumno %}
-                                        {{ pago.alumno.nombre_completo }}
-                                        {% else %}
-                                        {{ pago.nombre_cliente }}
-                                        {% endif %}
-                                    </div>
-                                    <div class="small text-muted">{{ pago.sede.nombre }}</div>
-                                </td>
-                                <td data-label="Concepto">{{ pago.concepto|truncatewords:8 }}</td>
-                                <td data-label="Monto" class="text-end text-success fw-bold">Gs. {{ pago.importe_total|formato_guaranies }}</td>
-                                <td data-label="Acciones" class="text-center no-print">
-                                    <div class="btn-group">
-                                        <a href="{% url 'detalle_pago' pago.uuid %}" class="btn btn-sm btn-light border" title="Ver">
-                                            <i class="bi bi-eye"></i> Detalle
-                                        </a>
-                                        <a href="{% url 'editar_pago' pago.uuid %}" class="btn btn-sm btn-dark border" title="Editar">
-                                            <i class="bi bi-pencil"></i> Editar
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center py-5">
-                                    <div class="text-muted">
-                                        <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
-                                        <p>No se encontraron registros de ingresos.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    <!-- Stats cards con links -->
+    <div class="lc-stats">
+        <!-- Ingresos hoy - link a lista_pagos con filtro fecha=hoy -->
+        <a href="{% url 'lista_pagos' %}?fecha_desde={{ fecha_hoy_param }}&fecha_hasta={{ fecha_hoy_param }}"
+           class="lc-stat-card green"
+           style="text-decoration: none; cursor: pointer;">
+            <div class="lc-stat-label">
+                <i class="bi bi-arrow-up-circle-fill"></i>
+                Ingresos hoy
+            </div>
+            <div class="lc-stat-value">
+                <small>Gs.</small>{{ total_ingresos_hoy|formato_guaranies }}
+            </div>
+            <div class="lc-stat-sub" style="font-size:0.75rem; color:var(--lc-muted); margin-top:0.25rem;">
+                <i class="bi bi-calendar-day"></i> {{ fecha_hoy }}
+            </div>
+        </a>
 
-                <!-- Tab Egresos -->
-                <div class="tab-pane fade" id="egresos" role="tabpanel">
-                    <div class="table-responsive table-responsive-stack">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead>
-                            <tr>
-                                <th class="ps-4">Fecha</th>
-                                <th>Comprobante</th>
-                                <th>Concepto</th>
-                                <th class="text-end">Monto</th>
-                                <th class="text-center no-print">Acciones</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for egreso in egresos %}
-                            <tr>
-                                <td data-label="Fecha" class="ps-4 text-muted small">{{ egreso.fecha|date:"d/m/Y" }}</td>
-                                <td data-label="Comprobante"><span class="badge bg-light text-secondary border">{{ egreso.numero_comprobante }}</span></td>
-                                <td data-label="Categoría / Concepto">
-                                    <div class="fw-bold">{{ egreso.get_categoria_display }}</div>
-                                    <div class="small text-muted">{{ egreso.concepto|truncatewords:8 }}</div>
-                                    <div class="small text-muted fst-italic">{{ egreso.sede.nombre }}</div>
-                                </td>
-                                <td data-label="Monto" class="text-end text-danger fw-bold">Gs. {{ egreso.monto|formato_guaranies }}</td>
-                                <td data-label="Acciones" class="text-center no-print">
-                                    <div class="btn-group">
-                                        <a href="{% url 'detalle_egreso' egreso.uuid %}" class="btn btn-sm btn-light border" title="Ver">
-                                            <i class="bi bi-eye text-info"></i> Detalle
-                                        </a>
-                                        <a href="{% url 'editar_egreso' egreso.uuid %}" class="btn btn-sm btn-dark border" title="Editar">
-                                            <i class="bi bi-pencil text-warning"></i> Editar
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <div class="text-muted">
-                                        <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
-                                        <p>No se encontraron registros de egresos.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <!-- Egresos hoy - link a lista_egresos con filtro fecha=hoy -->
+        <a href="{% url 'lista_egresos' %}?fecha_desde={{ fecha_hoy_param }}&fecha_hasta={{ fecha_hoy_param }}"
+           class="lc-stat-card red"
+           style="text-decoration: none; cursor: pointer;">
+            <div class="lc-stat-label">
+                <i class="bi bi-arrow-down-circle-fill"></i>
+                Egresos hoy
+            </div>
+            <div class="lc-stat-value">
+                <small>Gs.</small>{{ total_egresos_hoy|formato_guaranies }}
+            </div>
+            <div class="lc-stat-sub" style="font-size:0.75rem; color:var(--lc-muted); margin-top:0.25rem;">
+                <i class="bi bi-calendar-day"></i> {{ fecha_hoy }}
+            </div>
+        </a>
+
+        <!-- Balance hoy - podría ir a lista_caja con filtro, o a una vista de resumen -->
+        <div class="lc-stat-card {% if balance_hoy >= 0 %}blue{% else %}red{% endif %}">
+            <div class="lc-stat-label">
+                <i class="bi bi-calculator-fill"></i>
+                Balance {{ fecha_hoy }}
+            </div>
+            <div class="lc-stat-value">
+                <small>Gs.</small>{{ balance_hoy|formato_guaranies }}
+            </div>
+            <div class="lc-stat-sub" style="font-size:0.75rem; color:var(--lc-muted); margin-top:0.25rem;">
+                {% if balance_hoy >= 0 %}
+                <span class="text-success"><i class="bi bi-arrow-up"></i> Positivo</span>
+                {% else %}
+                <span class="text-danger"><i class="bi bi-arrow-down"></i> Negativo</span>
+                {% endif %}
             </div>
         </div>
     </div>
-</div>
 
+    <div class="lc-links">
+        <a href="{% url 'lista_pagos' %}" class="lc-link">Ver todos los ingresos</a>
+        <a href="{% url 'lista_egresos' %}" class="lc-link danger">Ver todos los egresos</a>
+    </div>
+
+    <!-- Card con tabs -->
+    <div class="lc-card">
+        <!-- Tabs -->
+        <div class="lc-tabs">
+            <button class="lc-tab ingresos active" data-tab="ingresos">
+                <i class="bi bi-arrow-up-circle-fill"></i>
+                Ingresos
+            </button>
+            <button class="lc-tab egresos" data-tab="egresos">
+                <i class="bi bi-arrow-down-circle-fill"></i>
+                Egresos
+            </button>
+        </div>
+
+        <!-- Tab: Ingresos -->
+        <div class="lc-tab-content active" id="tab-ingresos">
+            <table class="lc-table">
+                <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Recibo</th>
+                    <th>Alumno/Cliente</th>
+                    <th class="col-concepto">Concepto</th>
+                    <th style="text-align:right;">Monto</th>
+                    <th style="text-align:center;">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for pago in ingresos %}
+                <tr onclick="window.location.href='{% url 'detalle_pago' pago.uuid %}'">
+                    <td class="col-date">{{ pago.fecha|date:"d/m/Y" }}</td>
+                    <td>
+            <span class="col-badge {% if pago.numero_recibo %}badge-recibo{% else %}badge-none{% endif %}">
+              {% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}
+            </span>
+                    </td>
+                    <td>
+                        <div class="col-nombre">
+                            {% if pago.alumno %}{{ pago.alumno.nombre_completo }}{% else %}{{ pago.nombre_cliente }}{% endif %}
+                        </div>
+                        <div class="col-sub">{{ pago.sede.nombre }}</div>
+                    </td>
+                    <td class="col-concepto">{{ pago.concepto|truncatewords:8 }}</td>
+                    <td class="col-monto monto-ingreso">Gs. {{ pago.importe_total|formato_guaranies }}</td>
+                    <td class="col-actions">
+                        <div class="btn-group">
+                            <a href="{% url 'detalle_pago' pago.uuid %}" class="btn-action">Detalle</a>
+                            <a href="{% url 'editar_pago' pago.uuid %}" class="btn-action">Editar</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="lc-empty">
+                            <i class="bi bi-inbox"></i>
+                            <p>No hay ingresos registrados con los filtros aplicados.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tab: Egresos -->
+        <div class="lc-tab-content" id="tab-egresos">
+            <table class="lc-table">
+                <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Comprobante</th>
+                    <th class="col-concepto">Categoría / Concepto</th>
+                    <th style="text-align:right;">Monto</th>
+                    <th style="text-align:center;">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for egreso in egresos %}
+                <tr onclick="window.location.href='{% url 'detalle_egreso' egreso.uuid %}'">
+                    <td class="col-date">{{ egreso.fecha|date:"d/m/Y" }}</td>
+                    <td>
+                        <span class="col-badge badge-comp">{{ egreso.numero_comprobante }}</span>
+                    </td>
+                    <td class="col-concepto">
+                        <div class="col-nombre">{{ egreso.get_categoria_display }}</div>
+                        <div class="col-sub">{{ egreso.concepto|truncatewords:8 }}</div>
+                        <div class="col-sub" style="font-style:italic;">{{ egreso.sede.nombre }}</div>
+                    </td>
+                    <td class="col-monto monto-egreso">Gs. {{ egreso.monto|formato_guaranies }}</td>
+                    <td class="col-actions">
+                        <div class="btn-group">
+                            <a href="{% url 'detalle_egreso' egreso.uuid %}" class="btn-action">Detalle</a>
+                            <a href="{% url 'editar_egreso' egreso.uuid %}" class="btn-action">Editar</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">
+                        <div class="lc-empty">
+                            <i class="bi bi-inbox"></i>
+                            <p>No hay egresos registrados con los filtros aplicados.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div><!-- /lc-card -->
+
+</div><!-- /lc -->
+
+<script>
+    /* ── Tabs interactivos ────────────────────────────── */
+    document.querySelectorAll('.lc-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.dataset.tab;
+            document.querySelectorAll('.lc-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.lc-tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('tab-' + target).classList.add('active');
+        });
+    });
+</script>
 {% endblock %}
