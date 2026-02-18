@@ -186,7 +186,7 @@
         .text-success { color: #2e7d32 !important; }
         .text-danger { color: #c62828 !important; }
         .text-primary { color: #1565c0 !important; }
-        
+
         .card-header {
             background-color: #f8f9fa !important;
             color: black !important;
@@ -228,17 +228,35 @@
     <div class="card mb-4 no-print shadow-sm">
         <div class="card-body">
             <form method="get" class="row g-3">
+                {% if es_admin %}
                 <div class="col-md-4">
-                    <label for="sede" class="form-label small fw-bold">Sede</label>
-                    <select name="sede" id="sede" class="form-select">
+                    <label class="form-label fw-semibold">Sede</label>
+                    <select name="sede" class="form-select">
                         <option value="">Todas las sedes</option>
                         {% for s in sedes %}
-                            <option value="{{ s.id }}" {% if sede and sede.id == s.id %}selected{% endif %}>
-                                {{ s.nombre }}
-                            </option>
+                        <option value="{{ s.id }}" {% if sede and sede.id == s.id %}selected{% endif %}>
+                            {{ s.nombre }}
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
+
+                {% else %}
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Sede</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="bi bi-geo-alt-fill text-success"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control bg-light"
+                               value="{{ sede_forzada.nombre }}"
+                               readonly
+                               title="Sede asignada">
+                        <input type="hidden" name="sede" value="{{ sede_forzada.id }}">
+                    </div>
+                </div>
+                {% endif %}
                 <div class="col-md-3">
                     <label for="fecha_desde" class="form-label small fw-bold">Fecha Desde</label>
                     <input type="date" name="fecha_desde" id="fecha_desde" class="form-control"
@@ -318,43 +336,43 @@
             <div class="table-responsive">
                 <table class="table table-sm table-hover mb-0 informe-compacto">
                     <thead class="table-light">
-                        <tr>
-                            <th class="ps-3">Fecha</th>
-                            <th>Recibo</th>
-                            <th>Sede</th>
-                            <th>Alumno/Cliente</th>
-                            <th>Concepto</th>
-                            <th class="text-end pe-3">Monto</th>
-                        </tr>
+                    <tr>
+                        <th class="ps-3">Fecha</th>
+                        <th>Recibo</th>
+                        <th>Sede</th>
+                        <th>Alumno/Cliente</th>
+                        <th>Concepto</th>
+                        <th class="text-end pe-3">Monto</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {% for ingreso in ingresos %}
-                        <tr>
-                            <td class="ps-3">{{ ingreso.fecha|date:"d/m/Y" }}</td>
-                            <td><span class="badge bg-light text-dark border">{{ ingreso.numero_recibo }}</span></td>
-                            <td>{{ ingreso.sede.nombre }}</td>
-                            <td>
-                                {% if ingreso.alumno %}
-                                    {{ ingreso.alumno.nombre_completo }}
-                                {% else %}
-                                    {{ ingreso.nombre_cliente }}
-                                {% endif %}
-                            </td>
-                            <td>{{ ingreso.concepto|truncatewords:8 }}</td>
-                            <td class="text-end pe-3 text-success fw-medium">Gs. {{ ingreso.importe_total|formato_guaranies }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">No hay ingresos registrados</td>
-                        </tr>
-                        {% endfor %}
+                    {% for ingreso in ingresos %}
+                    <tr>
+                        <td class="ps-3">{{ ingreso.fecha|date:"d/m/Y" }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ ingreso.numero_recibo }}</span></td>
+                        <td>{{ ingreso.sede.nombre }}</td>
+                        <td>
+                            {% if ingreso.alumno %}
+                            {{ ingreso.alumno.nombre_completo }}
+                            {% else %}
+                            {{ ingreso.nombre_cliente }}
+                            {% endif %}
+                        </td>
+                        <td>{{ ingreso.concepto|truncatewords:8 }}</td>
+                        <td class="text-end pe-3 text-success fw-medium">Gs. {{ ingreso.importe_total|formato_guaranies }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No hay ingresos registrados</td>
+                    </tr>
+                    {% endfor %}
                     </tbody>
                     {% if ingresos %}
                     <tfoot class="table-light fw-bold">
-                        <tr>
-                            <td colspan="5" class="text-end">SUBTOTAL INGRESOS:</td>
-                            <td class="text-end pe-3 text-success">Gs. {{ total_ingresos|formato_guaranies }}</td>
-                        </tr>
+                    <tr>
+                        <td colspan="5" class="text-end">SUBTOTAL INGRESOS:</td>
+                        <td class="text-end pe-3 text-success">Gs. {{ total_ingresos|formato_guaranies }}</td>
+                    </tr>
                     </tfoot>
                     {% endif %}
                 </table>
@@ -371,37 +389,37 @@
             <div class="table-responsive">
                 <table class="table table-sm table-hover mb-0 informe-compacto">
                     <thead class="table-light">
-                        <tr>
-                            <th class="ps-3">Fecha</th>
-                            <th>Comprobante</th>
-                            <th>Sede</th>
-                            <th>Categoría</th>
-                            <th>Concepto</th>
-                            <th class="text-end pe-3">Monto</th>
-                        </tr>
+                    <tr>
+                        <th class="ps-3">Fecha</th>
+                        <th>Comprobante</th>
+                        <th>Sede</th>
+                        <th>Categoría</th>
+                        <th>Concepto</th>
+                        <th class="text-end pe-3">Monto</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {% for egreso in egresos %}
-                        <tr>
-                            <td class="ps-3">{{ egreso.fecha|date:"d/m/Y" }}</td>
-                            <td><span class="badge bg-light text-dark border">{{ egreso.numero_comprobante }}</span></td>
-                            <td>{{ egreso.sede.nombre }}</td>
-                            <td><span class="small text-muted">{{ egreso.get_categoria_display }}</span></td>
-                            <td>{{ egreso.concepto|truncatewords:8 }}</td>
-                            <td class="text-end pe-3 text-danger fw-medium">Gs. {{ egreso.monto|formato_guaranies }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">No hay egresos registrados</td>
-                        </tr>
-                        {% endfor %}
+                    {% for egreso in egresos %}
+                    <tr>
+                        <td class="ps-3">{{ egreso.fecha|date:"d/m/Y" }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ egreso.numero_comprobante }}</span></td>
+                        <td>{{ egreso.sede.nombre }}</td>
+                        <td><span class="small text-muted">{{ egreso.get_categoria_display }}</span></td>
+                        <td>{{ egreso.concepto|truncatewords:8 }}</td>
+                        <td class="text-end pe-3 text-danger fw-medium">Gs. {{ egreso.monto|formato_guaranies }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No hay egresos registrados</td>
+                    </tr>
+                    {% endfor %}
                     </tbody>
                     {% if egresos %}
                     <tfoot class="table-light fw-bold">
-                        <tr>
-                            <td colspan="5" class="text-end">SUBTOTAL EGRESOS:</td>
-                            <td class="text-end pe-3 text-danger">Gs. {{ total_egresos|formato_guaranies }}</td>
-                        </tr>
+                    <tr>
+                        <td colspan="5" class="text-end">SUBTOTAL EGRESOS:</td>
+                        <td class="text-end pe-3 text-danger">Gs. {{ total_egresos|formato_guaranies }}</td>
+                    </tr>
                     </tfoot>
                     {% endif %}
                 </table>
@@ -416,20 +434,20 @@
                 <div class="card-body p-0">
                     <table class="table table-bordered mb-0">
                         <tbody>
-                            <tr>
-                                <td class="text-end fw-bold bg-light" style="width: 50%;">Total ingresos:</td>
-                                <td class="text-end text-success fw-bold">Gs. {{ total_ingresos|formato_guaranies }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-end fw-bold bg-light">Total egresos:</td>
-                                <td class="text-end text-danger fw-bold">Gs. {{ total_egresos|formato_guaranies }}</td>
-                            </tr>
-                            <tr class="table-primary">
-                                <td class="text-end fw-bold fs-5">BALANCE:</td>
-                                <td class="text-end fw-bold fs-5 {% if balance >= 0 %}text-primary{% else %}text-danger{% endif %}">
-                                    Gs. {{ balance|formato_guaranies }}
-                                </td>
-                            </tr>
+                        <tr>
+                            <td class="text-end fw-bold bg-light" style="width: 50%;">Total ingresos:</td>
+                            <td class="text-end text-success fw-bold">Gs. {{ total_ingresos|formato_guaranies }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-end fw-bold bg-light">Total egresos:</td>
+                            <td class="text-end text-danger fw-bold">Gs. {{ total_egresos|formato_guaranies }}</td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td class="text-end fw-bold fs-5">BALANCE:</td>
+                            <td class="text-end fw-bold fs-5 {% if balance >= 0 %}text-primary{% else %}text-danger{% endif %}">
+                                Gs. {{ balance|formato_guaranies }}
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
