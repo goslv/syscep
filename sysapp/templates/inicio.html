@@ -834,7 +834,7 @@
                 </thead>
                 <tbody>
                 {% for pago in pagos_recientes %}
-                <tr>
+                <tr onclick="window.location='{% url 'detalle_pago' pago.uuid %}'">
                     <td data-label="N° Recibo">
                         <span class="recibo-number">{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</span>
                     </td>
