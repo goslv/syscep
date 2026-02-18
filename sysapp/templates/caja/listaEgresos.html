@@ -1,204 +1,402 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
-
-{% block title %}Lista de Egresos - ITS CEP{% endblock %}
-{% block page_title %}Gestión de Egresos{% endblock %}
+{% block title %}Egresos — Todos los gastos{% endblock %}
 
 {% block content %}
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
     :root {
-        --ink: #0f172a;
-        --muted: #64748b;
-        --line: rgba(148, 163, 184, 0.25);
-        --danger: #ef4444;
-        --card-bg: #ffffff;
-        --border-color: rgba(148, 163, 184, 0.2);
+        --le-bg:       #f8faf9;
+        --le-surface:  #ffffff;
+        --le-ink:      #0f1419;
+        --le-muted:    #64748b;
+        --le-border:   #e2e8f0;
+        --le-red:      #dc2626;
+        --le-red-lt:   #fee2e2;
+        --le-blue:     #2563eb;
+        --le-blue-lt:  #dbeafe;
+        --le-r:        14px;
+        --le-sh:       0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.06);
+        --le-display:  'Space Grotesk', sans-serif;
+        --le-body:     'Inter', sans-serif;
     }
-
     [data-theme="dark"] {
-        --ink: #f8fafc;
-        --muted: #94a3b8;
-        --line: rgba(255, 255, 255, 0.1);
-        --card-bg: #0f172a;
-        --border-color: #1e293b;
-        --bg-light: #1e293b;
+        --le-bg:       #0a0e12;
+        --le-surface:  #13171d;
+        --le-ink:      #e8eef3;
+        --le-muted:    #8b9daf;
+        --le-border:   #1f2937;
+        --le-red-lt:   #7f1d1d;
+        --le-blue-lt:  #1e3a8a;
+        --le-sh:       0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.5);
     }
 
-    .stat-card {
-        border-radius: 18px;
-        border: 1px solid var(--border-color);
-        background: var(--card-bg);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        font-family: 'IBM Plex Sans', sans-serif;
-        padding: 1.5rem;
+    .le { font-family: var(--le-body); color: var(--le-ink); }
+    .le * { box-sizing: border-box; }
+
+    /* Header */
+    .le-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         margin-bottom: 1.5rem;
-        transition: all 0.3s ease;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .le-head-title {
+        font-family: var(--le-display);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--le-ink);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+    }
+    .le-head-title i { color: var(--le-red); font-size: 1.6rem; }
+    .le-head-actions {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        flex-wrap: wrap;
     }
 
-    .egreso-summary-card {
-        background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%) !important;
-        color: white !important;
-        border: none;
-    }
-
-    [data-theme="dark"] .egreso-summary-card {
-        background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%) !important;
-        color: white !important;
-    }
-
-    .table thead th {
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-size: 0.75rem;
-        font-family: 'Space Grotesk', sans-serif;
-        color: var(--muted);
-        border-bottom: 2px solid var(--border-color);
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-    }
-
-    .table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-    .table tbody tr:hover {
-        background: rgba(244, 63, 94, 0.03);
-    }
-
-    .btn-action {
+    /* Botones */
+    .le-btn {
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        transition: all 0.2s ease;
+        gap: .45rem;
+        padding: .6rem 1.2rem;
+        border-radius: 999px;
+        font-size: .85rem;
+        font-weight: 600;
+        font-family: var(--le-body);
+        border: none;
+        cursor: pointer;
+        transition: all .2s;
         text-decoration: none;
-        margin: 0 4px;
-        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+    .le-btn-primary { background: var(--le-blue); color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.25); }
+    .le-btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); color: #fff; }
+    .le-btn-danger { background: var(--le-red); color: #fff; box-shadow: 0 4px 12px rgba(220,38,38,.25); }
+    .le-btn-danger:hover { background: #b91c1c; transform: translateY(-1px); color: #fff; }
+    .le-btn-outline {
+        background: var(--le-surface);
+        color: var(--le-ink);
+        border: 1.5px solid var(--le-border);
+    }
+    .le-btn-outline:hover { background: var(--le-bg); border-color: var(--le-ink); color: var(--le-ink); }
+    .le-btn i { font-size: 1rem; }
+
+    /* Stats card */
+    .le-stat-card {
+        background: linear-gradient(135deg, var(--le-red) 0%, #b91c1c 100%);
+        border-radius: var(--le-r);
+        padding: 1.75rem 2rem;
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(220,38,38,.3);
+        margin-bottom: 1.5rem;
+        animation: le-fade .3s ease both;
+    }
+    @keyframes le-fade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .le-stat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .le-stat-label { font-size: .8rem; font-weight: 600; opacity: .85; letter-spacing: .05em; text-transform: uppercase; }
+    .le-stat-icon { font-size: 2.5rem; opacity: .3; }
+    .le-stat-value {
+        font-family: var(--le-display);
+        font-size: 2.25rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .le-stat-value small { font-size: 1.2rem; font-weight: 500; opacity: .8; margin-right: .3rem; }
+    .le-stat-sub { font-size: .82rem; opacity: .8; margin-top: .5rem; }
+
+    /* Sede notice */
+    .le-sede-notice {
+        background: var(--le-blue-lt);
+        border: 1px solid var(--le-blue);
+        border-radius: var(--le-r);
+        padding: .8rem 1.2rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        font-size: .86rem;
+        color: #1e3a8a;
+    }
+    [data-theme="dark"] .le-sede-notice { background: #1e3a8a; color: #dbeafe; }
+    .le-sede-notice i { font-size: 1.3rem; }
+    .le-sede-notice strong { font-weight: 700; }
+
+    /* Filtros */
+    .le-filters {
+        background: var(--le-surface);
+        border: 1px solid var(--le-border);
+        border-radius: var(--le-r);
+        padding: 1.5rem;
+        box-shadow: var(--le-sh);
+        margin-bottom: 1.5rem;
+    }
+    .le-filters-title {
+        font-family: var(--le-display);
+        font-size: .95rem;
+        font-weight: 700;
+        color: var(--le-ink);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+    .le-filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+    }
+    .le-filter-field { display: flex; flex-direction: column; gap: .4rem; }
+    .le-filter-label {
+        font-size: .75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--le-muted);
+    }
+    .le .form-control, .le .form-select {
+        padding: .65rem .9rem !important;
+        border: 1.5px solid var(--le-border) !important;
+        border-radius: 10px !important;
+        font-size: .88rem !important;
+        color: var(--le-ink) !important;
+        background: var(--le-bg) !important;
+        font-family: var(--le-body) !important;
+        transition: all .15s;
+    }
+    [data-theme="dark"] .le .form-control,
+    [data-theme="dark"] .le .form-select { background: #0a0e12 !important; }
+    .le .form-control:focus, .le .form-select:focus {
+        outline: none !important;
+        border-color: var(--le-red) !important;
+        box-shadow: 0 0 0 3px rgba(220,38,38,.13) !important;
     }
 
-    .btn-view { 
-        background-color: rgba(59, 130, 246, 0.1); 
-        color: #3b82f6;
-        border-color: rgba(59, 130, 246, 0.2);
-    }
-    .btn-edit { 
-        background-color: rgba(245, 158, 11, 0.1); 
-        color: #f59e0b;
-        border-color: rgba(245, 158, 11, 0.2);
-    }
-    .btn-delete { 
-        background-color: rgba(239, 68, 68, 0.1); 
-        color: #ef4444;
-        border-color: rgba(239, 68, 68, 0.2);
+    /* Card tabla */
+    .le-card {
+        background: var(--le-surface);
+        border: 1px solid var(--le-border);
+        border-radius: var(--le-r);
+        box-shadow: var(--le-sh);
+        overflow: hidden;
     }
 
-    .btn-action:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    /* Tabla */
+    .le-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .le-table thead th {
+        padding: 1rem 1.2rem;
+        text-align: left;
+        font-size: .72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--le-muted);
+        background: var(--le-bg);
+        border-bottom: 2px solid var(--le-border);
+    }
+    .le-table tbody tr {
+        border-bottom: 1px solid var(--le-border);
+        transition: background .15s;
+        cursor: pointer;
+    }
+    .le-table tbody tr:hover { background: var(--le-bg); }
+    .le-table tbody td {
+        padding: 1rem 1.2rem;
+        font-size: .88rem;
+        color: var(--le-ink);
     }
 
-    .btn-view:hover { background-color: #3b82f6; color: white; }
-    .btn-edit:hover { background-color: #f59e0b; color: white; }
-    .btn-delete:hover { background-color: #ef4444; color: white; }
+    /* Columnas */
+    .le-table .col-date { color: var(--le-muted); font-size: .84rem; }
+    .le-table .col-badge {
+        display: inline-block;
+        padding: .3rem .7rem;
+        border-radius: 999px;
+        font-size: .75rem;
+        font-weight: 600;
+        border: 1px solid;
+        background: var(--le-surface);
+    }
+    .le-table .badge-comp { border-color: var(--le-muted); color: var(--le-muted); }
+    .le-table .col-nombre { font-weight: 600; }
+    .le-table .col-sub { font-size: .82rem; color: var(--le-muted); margin-top: .15rem; }
+    .le-table .col-monto {
+        text-align: right;
+        font-family: var(--le-display);
+        font-size: .95rem;
+        font-weight: 700;
+        color: var(--le-red);
+    }
 
-    .fab-register {
+    .le-table .col-actions {
+        text-align: center;
+        opacity: 0;
+        transition: opacity .2s;
+    }
+    .le-table tbody tr:hover .col-actions { opacity: 1; }
+    .le-table .btn-group { display: inline-flex; gap: .35rem; }
+    .le-table .btn-action {
+        padding: .4rem .8rem;
+        font-size: .78rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: 1px solid var(--le-border);
+        background: var(--le-surface);
+        color: var(--le-ink);
+        text-decoration: none;
+        transition: all .15s;
+    }
+    .le-table .btn-action:hover { background: var(--le-bg); border-color: var(--le-ink); color: var(--le-ink); }
+
+    /* Empty state */
+    .le-empty {
+        padding: 4rem 2rem;
+        text-align: center;
+        color: var(--le-muted);
+    }
+    .le-empty i { font-size: 3.5rem; opacity: .2; margin-bottom: 1rem; display: block; }
+    .le-empty p { margin: 0; font-size: .92rem; }
+
+    /* Footer */
+    .le-footer {
+        padding: 1rem 1.2rem;
+        background: var(--le-bg);
+        border-top: 2px solid var(--le-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: .85rem;
+        color: var(--le-muted);
+    }
+    .le-footer-total {
+        font-family: var(--le-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--le-red);
+    }
+
+    /* FAB */
+    .le-fab {
         position: fixed;
-        right: 32px;
-        bottom: 32px;
-        z-index: 1000;
+        right: 2rem;
+        bottom: 2rem;
         width: 60px;
         height: 60px;
         border-radius: 16px;
-        background: #f43f5e;
-        color: white;
+        background: var(--le-red);
+        color: #fff;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
-        box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.4);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 25px rgba(220,38,38,.4);
+        transition: all .3s cubic-bezier(.4,0,.2,1);
+        text-decoration: none;
+        z-index: 1000;
+    }
+    .le-fab:hover {
+        background: #b91c1c;
+        transform: rotate(90deg) scale(1.1);
+        box-shadow: 0 15px 35px rgba(220,38,38,.5);
+        color: #fff;
     }
 
-    .fab-register:hover {
-        transform: rotate(90deg);
-        background: #e11d48;
-        color: white;
-        box-shadow: 0 20px 25px -5px rgba(244, 63, 94, 0.15);
-    }
-
-    [data-theme="dark"] .table tbody tr:hover {
-        background: rgba(244, 63, 94, 0.02);
-    }
-
-    [data-theme="dark"] .bg-light {
-        background-color: #1e293b !important;
-    }
-
-    [data-theme="dark"] .text-dark {
-        color: #f8fafc !important;
-    }
-
-    [data-theme="dark"] .badge.bg-light {
-        background-color: #1e293b !important;
-        border-color: #334155 !important;
-    }
-
-    .badge-categoria {
-        font-weight: 500;
-        padding: 0.5em 0.8em;
+    /* Responsive */
+    @media(max-width:768px) {
+        .le-head { flex-direction: column; align-items: stretch; }
+        .le-head-actions { justify-content: center; }
+        .le-filters-grid { grid-template-columns: 1fr; }
+        .le-table thead th { padding: .8rem .8rem; font-size: .68rem; }
+        .le-table tbody td { padding: .8rem .8rem; font-size: .82rem; }
+        .le-table .col-concepto,
+        .le-table .col-actions,
+        .le-table th:nth-child(3),
+        .le-table th:last-child { display: none; }
+        .le-fab { right: 1.5rem; bottom: 1.5rem; width: 52px; height: 52px; font-size: 1.3rem; }
     }
 </style>
 
-<div class="container-fluid">
-    <!-- Resumen -->
-    <div class="row mb-4 mt-5">
-        <div class="col-md-6">
-            <div class="stat-card egreso-summary-card">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="mb-1 opacity-75">Total Egresos</p>
-                        <h3 class="mb-0 fw-bold">Gs. {{ total_egresos|formato_guaranies }}</h3>
-                    </div>
-                    <div class="fs-1 opacity-50">
-                        <i class="bi bi-graph-down-arrow"></i>
-                    </div>
-                </div>
-                <div class="mt-3 small">
-                    <i class="bi bi-journal-text"></i> {{ egresos|length }} registros encontrados
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 d-flex align-items-center justify-content-end gap-2 no-print">
-            <a href="{% url 'lista_caja' %}" class="btn btn-outline-primary rounded-pill">
-                <i class="bi bi-cash-register"></i> Panel de Caja
+<div class="le container-fluid mt-5">
+
+    <!-- Header -->
+    <div class="le-head">
+        <h1 class="le-head-title no-print">
+            <i class="bi bi-arrow-down-circle-fill"></i>
+            Egresos
+        </h1>
+        <div class="le-head-actions">
+            <a href="{% url 'lista_caja' %}" class="le-btn le-btn-primary no-print">
+                <i class="bi bi-cash-coin"></i>
+                Panel de Caja
             </a>
-            <button onclick="window.print()" class="btn btn-outline-secondary rounded-pill">
-                <i class="bi bi-printer"></i> Imprimir
-            </button>
+            <a href="{% url 'registrar_egreso' %}" class="le-btn le-btn-danger no-print">
+                <i class="bi bi-plus-circle"></i>
+                Registrar Egreso
+            </a>
         </div>
     </div>
 
-    <div class="stat-card no-print shadow-sm">
-        <h6 class="mb-3 fw-bold"><i class="bi bi-filter-right"></i> Filtros de Búsqueda</h6>
-        <form method="get" class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label small fw-bold">Sede</label>
-                <select name="sede" class="form-select border-0 bg-light rounded-3">
+    <!-- Stats card -->
+    {% if user.is_staff %}
+    <div class="le-stat-card">
+        <div class="le-stat-top">
+            <div>
+                <div class="le-stat-label">Total Egresos Listados</div>
+                <div class="le-stat-value">
+                    <small>Gs.</small>{{ total_egresos|formato_guaranies }}
+                </div>
+            </div>
+            <div class="le-stat-icon">
+                <i class="bi bi-graph-down-arrow"></i>
+            </div>
+        </div>
+        <div class="le-stat-sub">
+            <i class="bi bi-journal-text"></i>
+            {{ egresos|length }} registro{{ egresos|length|pluralize }} encontrado{{ egresos|length|pluralize }} (máx. 100)
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Filtros -->
+    <div class="le-filters no-print">
+        <div class="le-filters-title">
+            <i class="bi bi-funnel"></i>
+            Filtros de búsqueda
+        </div>
+        <form method="get" class="le-filters-grid">
+            {% if es_admin %}
+            <div class="le-filter-field">
+                <label class="le-filter-label">Sede</label>
+                <select name="sede" class="form-select">
                     <option value="">Todas las sedes</option>
                     {% for s in sedes %}
-                    <option value="{{ s.id }}" {% if filtros.sede == s.id|slugify %}selected{% endif %}>
-                        {{ s.nombre }}
+                    <option value="{{ s.id }}" {% if filtros.sede == s.id|stringformat:"s" %}selected{% endif %}>
+                    {{ s.nombre }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Categoría</label>
-                <select name="categoria" class="form-select border-0 bg-light rounded-3">
+            {% else %}
+            <div class="le-filter-field">
+                <label class="le-filter-label">Sede</label>
+                <input type="text" class="form-control" value="{{ sede_forzada.nombre }}" readonly>
+            </div>
+            {% endif %}
+
+            <div class="le-filter-field">
+                <label class="le-filter-label">Categoría</label>
+                <select name="categoria" class="form-select">
                     <option value="">Todas</option>
                     {% for codigo, nombre in categorias %}
                     <option value="{{ codigo }}" {% if filtros.categoria == codigo %}selected{% endif %}>
@@ -207,19 +405,19 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Desde</label>
-                <input type="date" name="fecha_desde" class="form-control border-0 bg-light rounded-3" value="{{ filtros.fecha_desde }}">
+            <div class="le-filter-field">
+                <label class="le-filter-label">Desde</label>
+                <input type="date" name="fecha_desde" class="form-control" value="{{ filtros.fecha_desde }}">
             </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Hasta</label>
-                <input type="date" name="fecha_hasta" class="form-control border-0 bg-light rounded-3" value="{{ filtros.fecha_hasta }}">
+            <div class="le-filter-field">
+                <label class="le-filter-label">Hasta</label>
+                <input type="date" name="fecha_hasta" class="form-control" value="{{ filtros.fecha_hasta }}">
             </div>
-            <div class="col-md-3 d-flex align-items-end gap-2">
-                <button type="submit" class="btn btn-primary flex-grow-1 rounded-3">
-                    <i class="bi bi-search"></i> Filtrar
+            <div class="le-filter-field" style="display: grid; grid-template-columns: 1fr 1fr; align-items: center;">
+                <button type="submit" class="le-btn le-btn-danger" style="flex:1;">
+                    <i class="bi bi-search"></i>Filtrar
                 </button>
-                <a href="{% url 'lista_egresos' %}" class="btn btn-light rounded-3" title="Limpiar">
+                <a href="{% url 'lista_egresos' %}" class="le-btn le-btn-outline">
                     <i class="bi bi-arrow-counterclockwise"></i>
                 </a>
             </div>
@@ -227,115 +425,65 @@
     </div>
 
     <!-- Tabla -->
-    <div class="stat-card p-0 overflow-hidden w-100">
-        <div class="table-responsive w-100">
-            <table class="table table-hover align-middle mb-0 w-100" style="table-layout: fixed;">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="ps-4" style="width: 120px;">Fecha</th>
-                        <th style="width: 200px;">Sede</th>
-                        <th>Concepto</th>
-                        <th class="text-end pe-4" style="width: 180px;">Monto</th>
-                        <th class="text-center" style="width: 150px;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for egreso in egresos %}
-                    <tr>
-                        <td class="ps-4">
-                            <div class="fw-medium">{{ egreso.fecha|date:"d/m/Y" }}</div>
-                        </td>
-                        <td class="text-truncate">
-                            <span class="text-muted small"><i class="bi bi-geo-alt"></i></span> {{ egreso.sede.nombre }}
-                        </td>
-                        <td>
-                            <div class="text-truncate" title="{{ egreso.concepto }}">
-                                {{ egreso.concepto }}
-                            </div>
-                        </td>
-                        <td class="text-end pe-4">
-                            <span class="text-danger fw-bold">Gs. {{ egreso.monto|formato_guaranies }}</span>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-flex justify-content-center">
-                                <a href="{% url 'detalle_egreso' egreso.uuid %}" class="btn-action btn-view" title="Ver Detalle">
-                                    <i class="bi bi-eye-fill"></i>
-                                </a>
-                                <a href="{% url 'editar_egreso' egreso.uuid %}" class="btn-action btn-edit" title="Editar">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </a>
-                                <button type="button" class="btn-action btn-delete" title="Eliminar"
-                                        onclick="confirmarEliminacion('{{ egreso.uuid }}', '{{ egreso.numero_comprobante }}')">
-                                    <i class="bi bi-trash-fill"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center py-5">
-                            <div class="opacity-25 mb-3">
-                                <i class="bi bi-inbox" style="font-size: 4rem;"></i>
-                            </div>
-                            <h5 class="text-muted">No se encontraron egresos</h5>
-                            <p class="text-muted small">Intenta ajustar los filtros de búsqueda.</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                {% if egresos %}
-                <tfoot class="bg-light fw-bold border-top">
-                    <tr>
-                        <td colspan="3" class="text-end ps-4 py-3">TOTAL ACUMULADO</td>
-                        <td class="text-end pe-4 py-3">
-                            <span class="text-danger fs-5">Gs. {{ total_egresos|formato_guaranies }}</span>
-                        </td>
-                        <td></td>
-                    </tr>
-                </tfoot>
-                {% endif %}
-            </table>
+    <div class="le-card">
+        <table class="le-table">
+            <thead>
+            <tr>
+                <th>Fecha</th>
+                <th class="no-print">Comprobante</th>
+                <th class="col-concepto print-only">Categoría / Concepto</th>
+                <th style="text-align:right;">Monto</th>
+                <th class="no-print" style="text-align:center;">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for egreso in egresos %}
+            <tr onclick="window.location.href='{% url 'detalle_egreso' egreso.uuid %}'">
+                <td class="col-date">{{ egreso.fecha|date:"d/m/Y" }}</td>
+                <td class="no-print">
+                    <span class="col-badge badge-comp">{{ egreso.numero_comprobante }}</span>
+                </td>
+                <td class="col-concepto">
+                    <div class="col-nombre">{{ egreso.get_categoria_display }}</div>
+                    <div class="col-sub">{{ egreso.concepto|truncatewords:8 }}</div>
+                    <div class="col-sub" style="font-style:italic;">{{ egreso.sede.nombre }}</div>
+                </td>
+                <td class="col-monto">Gs. {{ egreso.monto|formato_guaranies }}</td>
+                <td class="col-actions">
+                    <div class="btn-group">
+                        <a href="{% url 'detalle_egreso' egreso.uuid %}" class="btn-action">Detalle</a>
+                        <a href="{% url 'editar_egreso' egreso.uuid %}" class="btn-action">Editar</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    <div class="le-empty">
+                        <i class="bi bi-inbox"></i>
+                        <p>No hay egresos registrados con los filtros aplicados.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% if egresos %}
+        <div class="le-footer">
+            <span>Mostrando {{ egresos|length }} de los primeros 100 registros</span>
+            <span class="le-footer-total">
+      Total acumulado: Gs. {{ total_egresos|formato_guaranies }}
+    </span>
         </div>
+        {% endif %}
     </div>
+
 </div>
 
-<!-- Botón flotante -->
-<a href="{% url 'registrar_egreso' %}" class="fab-register no-print" title="Registrar nuevo egreso">
+<!-- FAB -->
+<a href="{% url 'registrar_egreso' %}" class="le-fab" title="Registrar nuevo egreso">
     <i class="bi bi-plus-lg"></i>
 </a>
 
-<!-- Modal de confirmación -->
-<div class="modal fade" id="modalEliminar" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>¿Está seguro de que desea eliminar el egreso con comprobante <strong id="comprobanteEliminar"></strong>?</p>
-                <div class="alert alert-warning small mb-0">
-                    <i class="bi bi-info-circle"></i> Esta acción no se puede deshacer y afectará el balance de caja.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                <form id="formEliminar" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger px-4">
-                        <i class="bi bi-trash"></i> Eliminar Egreso
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-function confirmarEliminacion(egresoUuid, numeroComprobante) {
-    document.getElementById('comprobanteEliminar').textContent = numeroComprobante;
-    document.getElementById('formEliminar').action = `/egresos/${egresoUuid}/eliminar/`;
-    new bootstrap.Modal(document.getElementById('modalEliminar')).show();
-}
-</script>
 {% endblock %}
