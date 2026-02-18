@@ -5,372 +5,472 @@
 {% block page_title %}Detalle de Egreso{% endblock %}
 
 {% block content %}
+
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
     :root {
-        --ink: #0f172a;
-        --muted: #64748b;
-        --line: rgba(148, 163, 184, 0.25);
-        --danger: #ef4444;
-        --card-bg: #ffffff;
-        --border-color: rgba(148, 163, 184, 0.2);
+        --de-bg:       #f4f1ec;
+        --de-surface:  #ffffff;
+        --de-ink:      #0d0d0d;
+        --de-muted:    #6b7280;
+        --de-border:   rgba(0,0,0,0.07);
+        --de-danger:   #ef4444;
+        --de-danger-dark: #b91c1c;
+        --de-danger-soft: #fee2e2;
+        --de-mono:     'JetBrains Mono', monospace;
+        --de-sans:     'Sora', sans-serif;
+        --de-radius:   16px;
+        --de-shadow:   0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+        --de-shadow-lg:0 20px 40px rgba(0,0,0,0.1);
     }
 
     [data-theme="dark"] {
-        --ink: #f8fafc;
-        --muted: #94a3b8;
-        --line: rgba(255, 255, 255, 0.1);
-        --card-bg: #1e293b;
-        --border-color: #334155;
+        --de-bg:      #0d1117;
+        --de-surface: #161b22;
+        --de-ink:     #e6edf3;
+        --de-muted:   #8b949e;
+        --de-border:  rgba(255,255,255,0.07);
+        --de-shadow:  0 2px 12px rgba(0,0,0,0.4);
+        --de-shadow-lg:0 20px 40px rgba(0,0,0,0.5);
     }
 
-    .detail-card {
-        background: var(--card-bg);
-        border-radius: 18px;
-        padding: 2rem;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-        border: 1px solid var(--border-color);
-        font-family: 'IBM Plex Sans', sans-serif;
-        margin-bottom: 1.5rem;
+    .de-root * { box-sizing: border-box; }
+    .de-root { font-family: var(--de-sans); color: var(--de-ink); }
+
+    /* Back link */
+    .de-back {
+        display: inline-flex; align-items: center; gap: 0.45rem;
+        font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em;
+        text-transform: uppercase; color: var(--de-muted); text-decoration: none;
+        padding: 0.5rem 0; margin-bottom: 1.75rem; transition: color 0.2s, gap 0.2s;
+    }
+    .de-back:hover { color: var(--de-danger); gap: 0.7rem; }
+    .de-back i { font-size: 1rem; }
+
+    .de-grid {
+        display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; align-items: start;
+    }
+    @media (max-width: 900px) {
+        .de-grid { grid-template-columns: 1fr; }
+        .de-sidebar { order: -1; }
     }
 
-    .detail-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid var(--danger);
+    /* Card base */
+    .de-card {
+        background: var(--de-surface); border-radius: var(--de-radius);
+        border: 1px solid var(--de-border); box-shadow: var(--de-shadow); overflow: hidden;
     }
 
-    .detail-item {
-        margin-bottom: 1.25rem;
+    /* Hero header */
+    .de-hero {
+        position: relative; padding: 1.75rem 2rem 1.5rem;
+        background: var(--de-surface); border-bottom: 1px solid var(--de-border);
+        display: flex; align-items: flex-start; justify-content: space-between;
+        gap: 1rem; flex-wrap: wrap;
+    }
+    .de-hero-left { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    /* Tipo/categoría pill */
+    .de-type-pill {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.7rem;
+        font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+        width: fit-content; background: var(--de-danger-soft); color: var(--de-danger);
     }
 
-    .detail-label {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.25rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+    .de-recibo-num {
+        font-family: var(--de-mono); font-size: 1.55rem; font-weight: 600;
+        color: var(--de-ink); letter-spacing: -0.02em; line-height: 1.1;
+    }
+    .de-recibo-num span { color: var(--de-muted); font-weight: 400; font-size: 1rem; }
+
+    .de-hero-meta {
+        display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem;
     }
 
-    .detail-value {
-        color: var(--ink);
-        font-size: 1.1rem;
+    .de-chip {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        padding: 0.3rem 0.7rem; border-radius: 8px; font-size: 0.78rem;
+        font-weight: 500; background: var(--de-bg); color: var(--de-muted);
+        border: 1px solid var(--de-border);
+    }
+    .de-chip i { font-size: 0.8rem; }
+
+    /* Action buttons */
+    .de-actions { display: flex; gap: 0.5rem; align-items: flex-start; }
+
+    .de-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+        padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--de-border);
+        font-size: 0.82rem; font-weight: 600; cursor: pointer; text-decoration: none;
+        transition: all 0.18s ease; white-space: nowrap; background: var(--de-surface);
+        color: var(--de-ink);
+    }
+    .de-btn:hover { transform: translateY(-1px); box-shadow: var(--de-shadow-lg); }
+    .de-btn.edit { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+    .de-btn.edit:hover { background: #2563eb; color: white; }
+    .de-btn.del { background: var(--de-danger-soft); color: var(--de-danger); border-color: #fecaca; }
+    .de-btn.del:hover { background: var(--de-danger); color: white; }
+
+    [data-theme="dark"] .de-btn { background: #21262d; border-color: #30363d; color: var(--de-ink); }
+    [data-theme="dark"] .de-btn.edit { background: rgba(37,99,235,0.15); color: #60a5fa; border-color: rgba(37,99,235,0.3); }
+    [data-theme="dark"] .de-btn.edit:hover { background: #2563eb; color: white; }
+    [data-theme="dark"] .de-btn.del { background: rgba(239,68,68,0.15); color: #f87171; border-color: rgba(239,68,68,0.3); }
+    [data-theme="dark"] .de-btn.del:hover { background: var(--de-danger); color: white; }
+
+    /* Importe destacado */
+    .de-amount-band {
+        padding: 1.25rem 2rem; background: linear-gradient(135deg, var(--de-danger) 0%, var(--de-danger-dark) 100%);
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
+    }
+    .de-amount-label {
+        font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: rgba(255,255,255,0.75);
+    }
+    .de-amount-value {
+        font-family: var(--de-mono); font-size: 2rem; font-weight: 700;
+        color: #ffffff; letter-spacing: -0.03em; line-height: 1;
     }
 
-    .comprobante-container {
-        position: sticky;
-        top: 2rem;
+    /* Field grid */
+    .de-body { padding: 1.75rem 2rem; }
+    .de-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem 2rem; }
+    .de-field { display: flex; flex-direction: column; gap: 0.3rem; }
+    .de-field.full { grid-column: 1 / -1; }
+
+    .de-field-label {
+        font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--de-muted);
+        display: flex; align-items: center; gap: 0.35rem;
+    }
+    .de-field-label i { font-size: 0.75rem; }
+
+    .de-field-value {
+        font-size: 0.95rem; font-weight: 500; color: var(--de-ink); line-height: 1.4;
+    }
+    .de-field-value.mono { font-family: var(--de-mono); font-size: 0.9rem; }
+
+    /* Divider */
+    .de-divider { grid-column: 1 / -1; height: 1px; background: var(--de-border); margin: 0.25rem 0; }
+
+    /* Footer */
+    .de-footer {
+        padding: 1rem 2rem; border-top: 1px solid var(--de-border);
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 0.5rem; background: var(--de-bg);
+    }
+    .de-footer-meta {
+        font-size: 0.75rem; color: var(--de-muted);
+        display: flex; align-items: center; gap: 0.4rem;
+    }
+    .de-footer-meta strong { color: var(--de-ink); }
+
+    /* Sidebar */
+    .de-sidebar { display: flex; flex-direction: column; gap: 1rem; }
+    .de-comprobante-card {
+        background: var(--de-surface); border-radius: var(--de-radius);
+        border: 1px solid var(--de-border); box-shadow: var(--de-shadow); overflow: hidden;
+    }
+    .de-comprobante-header {
+        padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--de-border);
+        font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--de-muted);
+        display: flex; align-items: center; gap: 0.4rem;
+    }
+    .de-comprobante-img {
+        display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover;
+        cursor: zoom-in; transition: transform 0.4s ease, filter 0.3s ease;
+        filter: brightness(0.97);
+    }
+    .de-comprobante-img:hover { transform: scale(1.03); filter: brightness(1); }
+    .de-comprobante-footer {
+        padding: 0.75rem 1.25rem; font-size: 0.75rem; color: var(--de-muted);
+        display: flex; align-items: center; justify-content: center; gap: 0.4rem;
     }
 
-    .comprobante-img {
-        width: 100%;
-        border-radius: 12px;
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-        cursor: pointer;
-        transition: transform 0.3s ease;
+    /* Observaciones */
+    .de-obs {
+        background: var(--de-bg); border-radius: 10px; padding: 1rem 1.25rem;
+        border-left: 3px solid var(--de-danger); font-size: 0.88rem;
+        color: var(--de-muted); font-style: italic; line-height: 1.6;
     }
 
-    .comprobante-img:hover {
-        transform: scale(1.02);
+    /* Resumen card */
+    .de-resumen-card { padding: 1.25rem 1.5rem; }
+    .de-resumen-title {
+        font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--de-muted); margin-bottom: 1rem;
     }
 
-    .numero-badge {
-        background-color: var(--danger);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
+    /* Modal imagen */
+    .de-modal-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+        backdrop-filter: blur(12px); z-index: 9999; display: none;
+        align-items: center; justify-content: center; padding: 2rem;
+        flex-direction: column; gap: 1rem;
+    }
+    .de-modal-overlay.open { display: flex; }
+
+    .de-modal-img {
+        max-width: 90vw; max-height: 80vh; object-fit: contain;
+        border-radius: 12px; box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+        transition: transform 0.3s ease; cursor: zoom-in;
+    }
+    .de-modal-img.zoomed { transform: scale(1.6); cursor: zoom-out; }
+
+    .de-modal-actions { display: flex; gap: 0.75rem; align-items: center; }
+    .de-modal-btn {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.6rem 1.25rem; border-radius: 999px; font-size: 0.82rem;
+        font-weight: 600; cursor: pointer; text-decoration: none; border: none;
+        transition: all 0.2s;
+    }
+    .de-modal-btn.close { background: rgba(255,255,255,0.1); color: white; }
+    .de-modal-btn.close:hover { background: rgba(255,255,255,0.2); }
+    .de-modal-btn.download { background: var(--de-danger); color: white; }
+    .de-modal-btn.download:hover { background: var(--de-danger-dark); }
+
+    /* Modal eliminar */
+    #modalEliminar .modal-content {
+        border-radius: 16px; border: none; box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        font-family: var(--de-sans); background: var(--de-surface); color: var(--de-ink);
+    }
+    #modalEliminar .modal-header { border-radius: 16px 16px 0 0; }
+    #modalEliminar .form-control {
+        background: var(--de-bg); border-color: var(--de-border);
+        color: var(--de-ink); border-radius: 10px; font-family: var(--de-sans);
     }
 
-    .btn-action {
-        padding: 0.6rem 1.2rem;
-        border-radius: 10px;
-        border: none;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
+    /* Animaciones */
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
-
-    .btn-action:hover {
-        transform: translateY(-2px);
+    .de-card, .de-comprobante-card {
+        animation: fadeUp 0.4s ease both;
     }
-
-    .btn-back {
-        background-color: var(--line);
-        color: var(--ink);
-        margin-bottom: 1.5rem;
-    }
-
-    .btn-edit { background-color: #f59e0b; color: white; }
-    .btn-delete { background-color: #ef4444; color: white; }
-
-    [data-theme="dark"] .btn-back { background-color: #334155; }
-    /* Modal de Imagen Modernizado */
-    .modal-fullscreen-custom {
-        background: rgba(15, 23, 42, 0.95);
-        backdrop-filter: blur(8px);
-    }
-
-    .modal-image-container {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        padding: 2rem;
-    }
-
-    .modal-image-content {
-        max-width: 100%;
-        max-height: 90vh;
-        object-fit: contain;
-        border-radius: 12px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        transition: transform 0.3s ease;
-        cursor: zoom-in;
-    }
-
-    .modal-image-content.zoomed {
-        transform: scale(1.5);
-        cursor: zoom-out;
-    }
-
-    .modal-close-btn {
-        position: absolute;
-        top: 1.5rem;
-        right: 1.5rem;
-        z-index: 1060;
-        background: rgba(255, 255, 255, 0.1);
-        border: none;
-        color: white;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        transition: all 0.2s ease;
-    }
-
-    .modal-close-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: rotate(90deg);
-    }
-
-    .modal-download-btn {
-        position: absolute;
-        bottom: 1.5rem;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1060;
-        background: rgba(190, 18, 60, 0.84);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 999px;
-        text-decoration: none;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);
-    }
-
-    .modal-download-btn:hover {
-        background: rgba(190, 18, 60, 0.45);
-        color: white;
-        transform: translateX(-50%) translateY(-2px);
-    }
-
-    [data-theme="dark"] .detail-value.text-muted {
-        color: var(--muted) !important;
-    }
+    .de-card { animation-delay: 0.05s; }
+    .de-comprobante-card { animation-delay: 0.15s; }
 </style>
 
-<div class="container-fluid mt-5">
+<div class="de-root mt-5">
+    <!-- Back link -->
     {% if user.is_staff %}
-    <a href="{% url 'lista_egresos' %}" class="btn-action btn-back no-print">
-        <i class="bi bi-arrow-left"></i> Volver a Egresos
+    <a href="{% url 'lista_egresos' %}" class="de-back">
+        <i class="bi bi-arrow-left"></i> Historial de egresos
     </a>
     {% else %}
-    <a href="{% url 'lista_caja' %}" class="btn-action btn-back no-print">
-        <i class="bi bi-arrow-left"></i> Volver a Caja
+    <a href="{% url 'lista_caja' %}" class="de-back">
+        <i class="bi bi-arrow-left"></i> Volver a caja
     </a>
     {% endif %}
 
-    <div class="row">
-        {% if egreso.comprobante %}
-        <div class="col-md-5 mb-4">
-            <div class="comprobante-container">
-                <img src="{{ egreso.comprobante.url }}"
-                     alt="Comprobante de egreso"
-                     class="comprobante-img"
-                     onclick="abrirModalImagen('{{ egreso.comprobante.url }}')">
-                <div class="mt-3 text-center no-print">
-                    <a href="{{ egreso.comprobante.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-download"></i> Ver original
-                    </a>
-                </div>
-            </div>
-        </div>
-        {% endif %}
+    <div class="de-grid">
+        <!-- Columna principal -->
+        <div>
+            <div class="de-card">
+                <!-- Hero header -->
+                <div class="de-hero">
+                    <div class="de-hero-left">
+                        <!-- Categoría -->
+                        <div class="de-type-pill">
+                            <i class="bi bi-tag-fill"></i> {{ egreso.get_categoria_display }}
+                        </div>
 
-        <div class="{% if egreso.comprobante %}col-md-7{% else %}col-md-10 mx-auto{% endif %}">
-            <div class="detail-card">
-                <div class="detail-header">
-                    <div class="numero-badge">
-                        <i class="bi bi-file-earmark-text"></i>
+                        <!-- Número de comprobante -->
+                        <div class="de-recibo-num">
+                            {% if egreso.numero_comprobante %}
+                            <span>Comprobante</span> #{{ egreso.numero_comprobante }}
+                            {% else %}
+                            <span style="font-family:var(--de-sans); font-size:1.1rem; color:var(--de-muted);">
+                                    Sin número de comprobante
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Chips meta -->
+                        <div class="de-hero-meta">
+                            <div class="de-chip">
+                                <i class="bi bi-calendar3"></i>
+                                {{ egreso.fecha|date:"d \d\e F, Y" }}
+                            </div>
+                            <div class="de-chip">
+                                <i class="bi bi-building"></i>
+                                {{ egreso.sede.nombre }}
+                            </div>
+                        </div>
                     </div>
-                    <div class="action-buttons d-flex gap-2 no-print">
-                        <a href="{% url 'editar_egreso' egreso.id %}" class="btn-action btn-edit" title="Editar">
-                            <i class="bi bi-pencil-square"></i>
+
+                    <!-- Acciones -->
+                    <div class="de-actions">
+                        <a href="{% url 'editar_egreso' egreso.uuid %}" class="de-btn edit">
+                            <i class="bi bi-pencil-square"></i> Editar
                         </a>
-                        <button type="button" class="btn-action btn-delete" onclick="confirmarAccionEliminar()" title="{% if user.is_staff %}Eliminar{% else %}Solicitar Eliminación{% endif %}">
-                            <i class="bi bi-trash-fill"></i>
+                        <button type="button" class="de-btn del" onclick="abrirModalEliminar()">
+                            <i class="bi bi-trash3"></i>
+                            {% if user.is_staff %}Eliminar{% else %}Solicitar eliminación{% endif %}
                         </button>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="detail-item">
-                            <div class="detail-label"><i class="bi bi-calendar-event"></i> Fecha</div>
-                            <div class="detail-value">{{ egreso.fecha|date:"d/m/Y" }}</div>
-                        </div>
+                <!-- Banda de importe -->
+                <div class="de-amount-band">
+                    <div>
+                        <div class="de-amount-label">Monto del egreso</div>
+                        <div class="de-amount-value">Gs. {{ egreso.monto|formato_guaranies }}</div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="detail-item">
-                            <div class="detail-label"><i class="bi bi-building"></i> Sede</div>
-                            <div class="detail-value">{{ egreso.sede.nombre }}</div>
-                        </div>
-                    </div>
+                </div>
 
-                    <div class="col-md-12">
-                        <div class="detail-item">
-                            <div class="detail-label"><i class="bi bi-tag-fill"></i> Categoría</div>
-                            <div class="detail-value">
-                                <span class="badge bg-info text-dark">{{ egreso.get_categoria_display }}</span>
+                <!-- Cuerpo: campos -->
+                <div class="de-body">
+                    <div class="de-fields">
+                        <!-- Concepto -->
+                        <div class="de-field full">
+                            <div class="de-field-label">
+                                <i class="bi bi-card-text"></i> Concepto
                             </div>
+                            <div class="de-field-value">{{ egreso.concepto }}</div>
                         </div>
-                    </div>
 
-                    <div class="col-md-12">
-                        <div class="detail-item">
-                            <div class="detail-label"><i class="bi bi-card-text"></i> Concepto</div>
-                            <div class="detail-value">{{ egreso.concepto }}</div>
+                        <div class="de-divider"></div>
+
+                        <!-- Observaciones (si existen) -->
+                        {% if egreso.observaciones %}
+                        <div class="de-field full">
+                            <div class="de-field-label"><i class="bi bi-chat-quote"></i> Observaciones</div>
+                            <div class="de-obs">{{ egreso.observaciones }}</div>
                         </div>
-                    </div>
+                        {% endif %}
 
-                    <div class="col-md-12">
-                        <div class="detail-item">
-                            <div class="detail-label"><i class="bi bi-cash-stack"></i> Monto del Egreso</div>
-                            <div class="detail-value">
-                                <strong class="text-danger" style="font-size: 1.5rem;">Gs. {{ egreso.monto|formato_guaranies }}</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    {% if egreso.observaciones %}
-                    <div class="col-md-12">
-                        <div class="detail-item">
-                            <div class="detail-label"><i class="bi bi-chat-dots"></i> Observaciones</div>
-                            <div class="detail-value text-muted">{{ egreso.observaciones|linebreaks }}</div>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <div class="col-md-12 mt-3 pt-3 border-top">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="detail-item mb-0">
-                                    <div class="detail-label"><i class="bi bi-person-check"></i> Registrado por</div>
-                                    <div class="detail-value small">
-                                        {{ egreso.usuario_registro.get_full_name|default:egreso.usuario_registro.username }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="detail-item mb-0 text-md-end">
-                                    <div class="detail-label justify-content-md-end"><i class="bi bi-clock"></i> Fecha Registro</div>
-                                    <div class="detail-value small">{{ egreso.fecha_creacion|date:"d/m/Y H:i" }}</div>
-                                </div>
-                            </div>
+                        <!-- Categoría detallada -->
+                        <div class="de-field">
+                            <div class="de-field-label"><i class="bi bi-tag"></i> Categoría</div>
+                            <div class="de-field-value">{{ egreso.get_categoria_display }}</div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Footer meta -->
+                {% if egreso.usuario_registro %}
+                <div class="de-footer">
+                    <div class="de-footer-meta">
+                        <i class="bi bi-person-check"></i>
+                        Registrado por <strong>{{ egreso.usuario_registro.get_full_name|default:egreso.usuario_registro.username }}</strong>
+                    </div>
+                    <div class="de-footer-meta">
+                        <i class="bi bi-clock"></i>
+                        {{ egreso.fecha_creacion|date:"d/m/Y H:i" }}
+                    </div>
+                </div>
+                {% endif %}
+            </div><!-- /.de-card -->
+        </div><!-- /col principal -->
+
+        <!-- Sidebar -->
+        <div class="de-sidebar">
+            {% if egreso.comprobante %}
+            <div class="de-comprobante-card">
+                <div class="de-comprobante-header">
+                    <i class="bi bi-image"></i> Comprobante adjunto
+                </div>
+                <img src="{{ egreso.comprobante.url }}"
+                     alt="Comprobante de egreso"
+                     class="de-comprobante-img"
+                     onclick="abrirModalImagen('{{ egreso.comprobante.url }}')">
+                <div class="de-comprobante-footer">
+                    <i class="bi bi-zoom-in"></i> Clic para ampliar
+                </div>
             </div>
-        </div>
+            {% endif %}
+
+            <!-- Card de resumen rápido -->
+            <div class="de-card de-resumen-card">
+                <div class="de-resumen-title">Resumen</div>
+                <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
+                        <span style="color:var(--de-muted);">Categoría</span>
+                        <span style="font-weight:600; color:var(--de-danger);">
+                            {{ egreso.get_categoria_display }}
+                        </span>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
+                        <span style="color:var(--de-muted);">Fecha</span>
+                        <span style="font-weight:600;">{{ egreso.fecha|date:"d/m/Y" }}</span>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
+                        <span style="color:var(--de-muted);">Sede</span>
+                        <span style="font-weight:600;">{{ egreso.sede.nombre }}</span>
+                    </div>
+
+                    <div style="height:1px; background:var(--de-border);"></div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.78rem; color:var(--de-muted);">Total</span>
+                        <span style="font-family:var(--de-mono); font-size:1.05rem; font-weight:700; color:var(--de-danger);">
+                            Gs. {{ egreso.monto|formato_guaranies }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /sidebar -->
+    </div><!-- /de-grid -->
+</div><!-- /de-root -->
+
+<!-- Modal: ver imagen -->
+<div class="de-modal-overlay" id="deModalImg" onclick="cerrarModalImagen(event)">
+    <img src="" id="deImgGrande" alt="Comprobante" class="de-modal-img" onclick="event.stopPropagation(); toggleZoom()">
+    <div class="de-modal-actions">
+        <a href="" id="deDownloadBtn" download class="de-modal-btn download">
+            <i class="bi bi-cloud-arrow-down"></i> Descargar
+        </a>
+        <button class="de-modal-btn close" onclick="cerrarModalImagen()">
+            <i class="bi bi-x-lg"></i> Cerrar
+        </button>
     </div>
 </div>
 
-<!-- Modal para visualizar imagen modernizado -->
-<div class="modal fade modal-fullscreen-custom" id="modalImagen" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen m-0">
-        <div class="modal-content bg-transparent border-0">
-            <button type="button" class="modal-close-btn" data-bs-dismiss="modal" aria-label="Close">
-                <i class="bi bi-x-lg"></i>
-            </button>
-            
-            <div class="modal-image-container" onclick="toggleZoom(event)">
-                <img src="" id="imagenModal" alt="Comprobante" class="modal-image-content">
-                
-                <a href="" id="btnDescargarImagen" download class="modal-download-btn no-print">
-                    <i class="bi bi-cloud-arrow-down"></i> Descargar Comprobante
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de confirmación para eliminar/solicitar -->
-<div class="modal fade" id="modalEliminar" tabindex="-1">
+<!-- Modal: confirmar eliminar -->
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header {% if user.is_staff %}bg-danger{% else %}bg-warning{% endif %} text-white">
-                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> {% if user.is_staff %}Confirmar Eliminación{% else %}Solicitar Eliminación{% endif %}</h5>
+                <h5 class="modal-title" style="font-family:var(--de-sans); font-weight:600; font-size:0.95rem;">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    {% if user.is_staff %}Confirmar eliminación{% else %}Solicitar eliminación{% endif %}
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="font-family:var(--de-sans); font-size:0.88rem;">
                 {% if user.is_staff %}
-                    <p>¿Está seguro de que desea eliminar este egreso?</p>
-                    <div class="alert alert-warning small">
-                        <strong>N°:</strong> {{ egreso.numero_comprobante }}<br>
-                        <strong>Monto:</strong> Gs. {{ egreso.monto|formato_guaranies }}<br>
-                        <strong>Concepto:</strong> {{ egreso.concepto|truncatewords:10 }}
-                    </div>
-                    <p class="text-danger mb-0"><i class="bi bi-info-circle"></i> Esta acción no se puede deshacer.</p>
+                <p>¿Seguro que deseas eliminar el egreso
+                    <strong>{% if egreso.numero_comprobante %}#{{ egreso.numero_comprobante }}{% else %}sin comprobante{% endif %}</strong>?
+                </p>
+                <p class="text-danger" style="font-size:0.8rem;">
+                    <i class="bi bi-info-circle"></i> Esta acción no se puede deshacer.
+                </p>
                 {% else %}
-                    <p>Para eliminar este egreso, debes enviar una solicitud al administrador detallando el motivo.</p>
+                <p>Para eliminar este registro, debes enviar una solicitud al administrador indicando el motivo.</p>
                 {% endif %}
 
-                <form action="{% url 'eliminar_egreso' egreso.id %}" method="post" class="mt-3">
+                <form action="{% url 'eliminar_egreso' egreso.uuid %}" method="post" class="mt-3">
                     {% csrf_token %}
                     {% if not user.is_staff %}
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Motivo de la eliminación</label>
-                        <textarea name="motivo" class="form-control" rows="3" placeholder="Explica por qué es necesario eliminar este egreso..." required></textarea>
+                        <label class="form-label" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">
+                            Motivo
+                        </label>
+                        <textarea name="motivo" class="form-control" rows="3"
+                                  placeholder="Explica por qué debe eliminarse este registro..." required></textarea>
                     </div>
                     {% endif %}
-                    
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn {% if user.is_staff %}btn-danger{% else %}btn-warning{% endif %} px-4">
-                            <i class="bi bi-trash"></i> {% if user.is_staff %}Sí, Eliminar{% else %}Enviar Solicitud{% endif %}
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn {% if user.is_staff %}btn-danger{% else %}btn-warning{% endif %} btn-sm">
+                            <i class="bi bi-trash3"></i>
+                            {% if user.is_staff %}Eliminar definitivamente{% else %}Enviar solicitud{% endif %}
                         </button>
                     </div>
                 </form>
@@ -380,98 +480,37 @@
 </div>
 
 <script>
-function confirmarAccionEliminar() {
-    new bootstrap.Modal(document.getElementById('modalEliminar')).show();
-}
-function abrirModalImagen(url) {
-    const img = document.getElementById('imagenModal');
-    const downloadBtn = document.getElementById('btnDescargarImagen');
-    
-    img.src = url;
-    img.classList.remove('zoomed');
-    downloadBtn.href = url;
-    
-    new bootstrap.Modal(document.getElementById('modalImagen')).show();
-}
-
-function toggleZoom(event) {
-    if (event.target.closest('.modal-download-btn')) return;
-    const img = document.getElementById('imagenModal');
-    const downloadBtn = document.getElementById('btnDescargarImagen');
-    const ZOOM_SCALE = 1.5;
-
-    const isZoomed = img.classList.toggle('zoomed');
-
-    if (downloadBtn) downloadBtn.style.display = isZoomed ? 'none' : '';
-
-    if (isZoomed) {
-        enablePan(img, ZOOM_SCALE);
-    } else {
-        disablePan(img);
+    /* Modal imagen */
+    function abrirModalImagen(url) {
+        const overlay  = document.getElementById('deModalImg');
+        const img      = document.getElementById('deImgGrande');
+        const download = document.getElementById('deDownloadBtn');
+        img.src        = url;
+        img.classList.remove('zoomed');
+        download.href  = url;
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
     }
 
-    function enablePan(target, scale) {
-        target.dataset.tx = target.dataset.tx || '0';
-        target.dataset.ty = target.dataset.ty || '0';
-        let startX = 0, startY = 0;
-        let startTx = parseFloat(target.dataset.tx);
-        let startTy = parseFloat(target.dataset.ty);
-        let dragging = false;
-
-        target.style.transform = `scale(${scale}) translate(${startTx}px, ${startTy}px)`;
-        target.style.cursor = 'grab';
-        target.style.touchAction = 'none';
-
-        function onPointerDown(e) {
-            e.preventDefault();
-            dragging = true;
-            try { target.setPointerCapture(e.pointerId); } catch (err) {}
-            startX = e.clientX;
-            startY = e.clientY;
-            startTx = parseFloat(target.dataset.tx) || 0;
-            startTy = parseFloat(target.dataset.ty) || 0;
-            target.style.cursor = 'grabbing';
-        }
-        function onPointerMove(e) {
-            if (!dragging) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            const tx = startTx + dx;
-            const ty = startTy + dy;
-            target.dataset.tx = tx;
-            target.dataset.ty = ty;
-            target.style.transform = `scale(${scale}) translate(${tx}px, ${ty}px)`;
-        }
-        function onPointerUp(e) {
-            if (!dragging) return;
-            dragging = false;
-            try { target.releasePointerCapture(e.pointerId); } catch (err) {}
-            target.style.cursor = 'grab';
-        }
-
-        target.__panHandlers = { onPointerDown, onPointerMove, onPointerUp };
-        target.addEventListener('pointerdown', onPointerDown);
-        window.addEventListener('pointermove', onPointerMove);
-        window.addEventListener('pointerup', onPointerUp);
-        window.addEventListener('pointercancel', onPointerUp);
+    function cerrarModalImagen(e) {
+        if (e && e.target !== document.getElementById('deModalImg') && e.type !== 'click') return;
+        if (e && e.target.closest('.de-modal-actions')) return;
+        document.getElementById('deModalImg').classList.remove('open');
+        document.body.style.overflow = '';
     }
 
-    function disablePan(target) {
-        const t = target || document.getElementById('imagenModal');
-        const h = t.__panHandlers || {};
-        if (h.onPointerDown) t.removeEventListener('pointerdown', h.onPointerDown);
-        if (h.onPointerMove) window.removeEventListener('pointermove', h.onPointerMove);
-        if (h.onPointerUp) {
-            window.removeEventListener('pointerup', h.onPointerUp);
-            window.removeEventListener('pointercancel', h.onPointerUp);
-        }
-        t.__panHandlers = null;
-        t.style.cursor = '';
-        t.style.touchAction = '';
-        t.dataset.tx = '0';
-        t.dataset.ty = '0';
-        t.style.transform = '';
+    function toggleZoom() {
+        document.getElementById('deImgGrande').classList.toggle('zoomed');
     }
-}
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') cerrarModalImagen();
+    });
+
+    /* Modal eliminar */
+    function abrirModalEliminar() {
+        new bootstrap.Modal(document.getElementById('modalEliminar')).show();
+    }
 </script>
+
 {% endblock %}

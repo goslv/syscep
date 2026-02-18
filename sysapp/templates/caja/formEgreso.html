@@ -1,230 +1,469 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
 
-{% block title %}{{ titulo }}{% endblock %}
+{% block title %}{{ titulo }} - ITS CEP{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
 
 {% block content %}
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
     :root {
         --danger: #ef4444;
         --danger-dark: #b91c1c;
+        --danger-soft: #fee2e2;
+
+        --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db;
+        --gray-400: #9ca3af; --gray-500: #6b7280; --gray-600: #4b5563; --gray-700: #374151;
+        --gray-800: #1f2937; --gray-900: #111827;
+        --success: #10b981; --success-light: #d1fae5;
+        --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,.05); --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+        --font-sans: 'Inter', -apple-system, sans-serif;
     }
 
     [data-theme="dark"] {
-        --ink: #f8fafc;
-        --muted: #94a3b8;
+        --danger: #ef4444; --danger-dark: #dc2626; --danger-soft: #7f1d1d;
+        --gray-50: #111827; --gray-100: #1f2937; --gray-200: #374151; --gray-300: #4b5563;
+        --gray-400: #6b7280; --gray-500: #9ca3af; --gray-600: #d1d5db; --gray-700: #e5e7eb;
+        --gray-800: #f3f4f6; --gray-900: #f9fafb; --success-light: #064e3b;
     }
 
-    .egreso-shell {
-        border-radius: 18px;
-        padding: 1.5rem;
+    .ef { font-family: var(--font-sans); color: var(--gray-800); padding: 2rem 1.5rem; }
+    .ef-shell { max-width: 860px; margin: 0 auto; }
+
+    /* Header */
+    .ef-header {
+        background: white; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding: 1.5rem 2rem; border-bottom: 1px solid var(--gray-200);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    [data-theme="dark"] .ef-header { background: var(--gray-50); }
+    .ef-header-left { display: flex; align-items: center; gap: 1rem; }
+    .ef-header-title h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 .25rem; color: var(--gray-900); }
+    .ef-header-title p  { margin: 0; font-size: .875rem; color: var(--gray-500); }
+    .ef-header-badge {
+        background: var(--gray-100); padding: 0.5rem 1rem; border-radius: 100px;
+        font-size: 0.75rem; font-weight: 600; color: var(--gray-600);
+        display: flex; align-items: center; gap: 0.5rem;
     }
 
-    .egreso-card {
-        border: none;
-        border-radius: 18px;
-        box-shadow: 0 24px 45px rgba(15, 23, 42, 0.12);
-        overflow: hidden;
-        font-family: 'IBM Plex Sans', sans-serif;
-        background-color: var(--card-bg);
+    /* Body */
+    .ef-body { background: white; border-radius: 0 0 var(--radius-lg) var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; }
+    [data-theme="dark"] .ef-body { background: var(--gray-50); }
+
+    /* Section */
+    .ef-section { padding: 2rem; border-bottom: 1px solid var(--gray-200); animation: slideIn .3s ease both; }
+    .ef-section:last-child { border-bottom: none; }
+    .ef-section:hover { background-color: var(--gray-50); }
+    [data-theme="dark"] .ef-section:hover { background: transparent; }
+    @keyframes slideIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .ef-section:nth-child(1) { animation-delay:.05s; }
+    .ef-section:nth-child(2) { animation-delay:.1s; }
+    .ef-section:nth-child(3) { animation-delay:.15s; }
+    .ef-section:nth-child(4) { animation-delay:.2s; }
+
+    .ef-section-header { display:flex; align-items:flex-start; gap:1rem; margin-bottom:1.5rem; }
+    .ef-section-number {
+        width:32px; height:32px; min-width:32px; background:var(--danger-soft);
+        border-radius:50%; display:flex; align-items:center; justify-content:center;
+        font-weight:700; color:var(--danger); font-size:.875rem;
+    }
+    .ef-section-header h2 { font-size:1.125rem; font-weight:600; margin:0; color:var(--gray-900); }
+    .ef-section-header p  { margin:.25rem 0 0; font-size:.875rem; color:var(--gray-500); }
+
+    /* Grid */
+    .ef-grid { display:grid; gap:1.5rem; }
+    .ef-grid-2 { grid-template-columns:repeat(2,1fr); }
+    .ef-grid-3 { grid-template-columns:repeat(3,1fr); }
+    @media(max-width:768px) { .ef-grid-2,.ef-grid-3 { grid-template-columns:1fr; } }
+
+    /* Fields */
+    .ef-field { display:flex; flex-direction:column; gap:.5rem; }
+    .ef-label {
+        font-size:.813rem; font-weight:600; color:var(--gray-700);
+        display:flex; align-items:center; gap:.25rem;
+    }
+    .ef-label-required::after { content:'*'; color:var(--danger); margin-left:.25rem; }
+
+    .ef .form-control, .ef .form-select {
+        padding:.75rem 1rem !important; border:1.5px solid var(--gray-200) !important;
+        border-radius:var(--radius-md) !important; font-size:.938rem !important;
+        color:var(--gray-800) !important; background:white !important;
+        transition:all .2s ease; width:100%; font-family:var(--font-sans) !important;
+    }
+    [data-theme="dark"] .ef .form-control, [data-theme="dark"] .ef .form-select {
+        background:var(--gray-100) !important; color:var(--gray-800) !important;
+    }
+    .ef .form-control:focus, .ef .form-select:focus {
+        outline:none !important; border-color:var(--danger) !important;
+        box-shadow:0 0 0 4px var(--danger-soft) !important;
+    }
+    .ef textarea.form-control { resize:vertical; min-height:80px; }
+
+    .ef-hint { font-size:.75rem; color:var(--gray-500); display:flex; align-items:center; gap:.25rem; }
+    .ef-error-message {
+        font-size:.75rem; color:var(--danger); display:flex; align-items:center;
+        gap:.25rem; margin-top:.25rem;
     }
 
-    .card-body { background-color: var(--card-bg); color: var(--text-main); }
-
-    .form-control, .form-select {
-        background-color: var(--body-bg) !important;
-        border-color: var(--border-color) !important;
-        color: var(--text-main) !important;
+    /* Input group */
+    .input-group-text {
+        background: var(--gray-100); border: 1.5px solid var(--gray-200);
+        border-right: none; border-radius: var(--radius-md) 0 0 var(--radius-md);
+        color: var(--gray-600); font-weight: 600;
     }
 
-    .form-control:focus, .form-select:focus {
-        background-color: var(--card-bg) !important;
-        border-color: var(--danger) !important;
+    /* Total card (adaptada para egresos) */
+    .ef-total-card {
+        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+        border-radius: var(--radius-lg); padding: 1.5rem; color: white;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 1rem; margin-top: 1rem;
     }
+    .ef-total-label { font-size:.875rem; font-weight:500; opacity:.9; display:flex; align-items:center; gap:.5rem; }
+    .ef-total-amount { font-size:2rem; font-weight:700; line-height:1.2; }
+    .ef-total-amount small { font-size:1rem; font-weight:400; opacity:.8; margin-right:.25rem; }
 
-    .egreso-section-title {
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--text-muted);
-        font-family: 'Space Grotesk', sans-serif;
+    /* Image upload */
+    .ef-image-upload {
+        border:2px dashed var(--gray-300); border-radius:var(--radius-lg); padding:2rem;
+        text-align:center; transition:all .2s ease; cursor:pointer; background:var(--gray-50);
     }
+    .ef-image-upload:hover { border-color:var(--danger); background:var(--danger-soft); }
+    .ef-image-upload i { font-size:2rem; color:var(--gray-400); margin-bottom:.5rem; }
+    .ef-image-upload p { color:var(--gray-600); font-size:.875rem; margin:0; }
+    .ef-image-upload small { color:var(--gray-500); font-size:.75rem; display:block; margin-top:.5rem; }
 
-    h2, label { color: var(--text-main); }
+    .ef-preview {
+        margin-top:1rem; border-radius:var(--radius-md); overflow:hidden;
+        max-width:200px; border:1px solid var(--gray-200);
+    }
+    .ef-preview img { width:100%; height:auto; display:block; cursor:zoom-in; transition:transform .2s; }
+    .ef-preview img:hover { transform:scale(1.02); }
 
-    .text-muted { color: var(--text-muted) !important; }
-    [data-theme="dark"] .text-muted { color: var(--muted) !important; }
+    /* Actions */
+    .ef-actions {
+        display:flex; align-items:center; justify-content:flex-end; gap:1rem;
+        padding:2rem; background:var(--gray-50); border-top:1px solid var(--gray-200);
+    }
+    [data-theme="dark"] .ef-actions { background:var(--gray-100); }
+    .ef-btn {
+        padding:.75rem 1.5rem; border-radius:var(--radius-md); font-weight:600; font-size:.875rem;
+        display:inline-flex; align-items:center; gap:.5rem; cursor:pointer;
+        transition:all .2s ease; border:none; text-decoration:none; font-family:var(--font-sans);
+    }
+    .ef-btn-primary {
+        background:var(--danger); color:white; box-shadow:0 4px 6px -1px rgba(239,68,68,.2);
+    }
+    .ef-btn-primary:hover { background:var(--danger-dark); transform:translateY(-2px); color:white; }
+    .ef-btn-secondary { background:white; color:var(--gray-700); border:1.5px solid var(--gray-200); }
+    [data-theme="dark"] .ef-btn-secondary { color: #0b1220}
+    .ef-btn-secondary:hover { background:var(--gray-50); border-color:var(--gray-300); color:var(--gray-900); }
+
+    /* Formato para el monto formateado */
+    #montoFormateado {
+        font-size: 0.9rem; color: var(--gray-600);
+        padding: 0.25rem 0; display: flex; align-items: center; gap: 0.3rem;
+    }
+    #montoFormateado strong { color: var(--danger); font-size: 1rem; }
 </style>
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 egreso-shell">
-            <div class="card egreso-card">
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data" id="formEgreso">
-                        {% csrf_token %}
+<div class="ef">
+    <div class="ef-shell mt-5">
+        <form method="post" enctype="multipart/form-data" id="formEgreso">
+            {% csrf_token %}
 
-                        {% if form.errors %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <strong><i class="fas fa-exclamation-triangle"></i> Errores en el formulario:</strong>
-                            <ul class="mb-0 mt-2">
-                                {% for field, errors in form.errors.items %}
-                                    {% for error in errors %}
-                                        <li>{{ field }}: {{ error }}</li>
-                                    {% endfor %}
-                                {% endfor %}
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <!-- Cabecera -->
+            <div class="ef-header">
+                <div class="ef-header-left">
+                </div>
+                <div class="ef-header-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>{{ titulo }}</span>
+                </div>
+            </div>
+
+            <div class="ef-body">
+                <!-- SECCIÓN 1: Datos básicos -->
+                <div class="ef-section">
+                    <div class="ef-section-header">
+                        <div class="ef-section-number">1</div>
+                        <div>
+                            <h2>Información básica</h2>
+                            <p>Datos del comprobante y fecha</p>
                         </div>
-                        {% endif %}
+                    </div>
 
-                        <div class="row">
-                            <!-- Número de Comprobante (opcional) -->
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.numero_comprobante.id_for_label }}" class="form-label">
-                                    <i class="fas fa-receipt"></i> {{ form.numero_comprobante.label }}
-                                    <small class="text-muted">(opcional)</small>
-                                </label>
-                                {{ form.numero_comprobante }}
-                                {% if form.numero_comprobante.help_text %}
-                                <small class="form-text text-muted">{{ form.numero_comprobante.help_text }}</small>
-                                {% endif %}
-                                {% if form.numero_comprobante.errors %}
-                                <div class="text-danger small mt-1">{{ form.numero_comprobante.errors }}</div>
-                                {% endif %}
+                    <div class="ef-grid ef-grid-2">
+                        <div class="ef-field">
+                            <label class="ef-label">Nº de Comprobante</label>
+                            {{ form.numero_comprobante }}
+                            <div class="ef-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Opcional - Factura o recibo
                             </div>
-
-                            <!-- Fecha -->
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.fecha.id_for_label }}" class="form-label">
-                                    <i class="fas fa-calendar"></i> {{ form.fecha.label }} *
-                                </label>
-                                {{ form.fecha }}
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <!-- Sede -->
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.sede.id_for_label }}" class="form-label">
-                                    <i class="fas fa-building"></i> {{ form.sede.label }} *
-                                </label>
-                                {{ form.sede }}
-                            </div>
-
-                            <!-- Categoría -->
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.categoria.id_for_label }}" class="form-label">
-                                    <i class="fas fa-tags"></i> {{ form.categoria.label }} *
-                                </label>
-                                {{ form.categoria }}
-                            </div>
-                        </div>
-
-                        <!-- Concepto -->
-                        <div class="mb-3">
-                            <label for="{{ form.concepto.id_for_label }}" class="form-label egreso-section-title">
-                                <i class="fas fa-align-left"></i> {{ form.concepto.label }} *
-                            </label>
-                            {{ form.concepto }}
-                        </div>
-
-                        <!-- Monto -->
-                        <div class="mb-3">
-                            <label for="{{ form.monto.id_for_label }}" class="form-label egreso-section-title">
-                                <i class="fas fa-money-bill-wave"></i> {{ form.monto.label }} *
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">Gs.</span>
-                                {{ form.monto }}
-                            </div>
-                            <small class="form-text text-muted">Ingrese el monto sin puntos ni comas</small>
-                            <div id="montoFormateado" class="text-muted mt-1"></div>
-                        </div>
-
-                        <!-- Comprobante -->
-                        <div class="mb-3">
-                            <label for="{{ form.comprobante.id_for_label }}" class="form-label">
-                                <i class="fas fa-image"></i> {{ form.comprobante.label }}
-                                <small class="text-muted">(opcional)</small>
-                            </label>
-                            {{ form.comprobante }}
-                            {% if egreso.comprobante %}
-                            <div class="mt-2">
-                                <small class="text-muted">Archivo actual:</small>
-                                <a href="{{ egreso.comprobante.url }}" target="_blank" class="d-block">
-                                    <img src="{{ egreso.comprobante.url }}" alt="Comprobante" class="img-thumbnail" style="max-width: 200px;">
-                                </a>
+                            {% if form.numero_comprobante.errors %}
+                            <div class="ef-error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.numero_comprobante.errors.0 }}
                             </div>
                             {% endif %}
-                            <small class="form-text text-muted">Formatos permitidos: JPG, PNG, PDF</small>
                         </div>
 
-                        <!-- Observaciones -->
-                        <div class="mb-3">
-                            <label for="{{ form.observaciones.id_for_label }}" class="form-label">
-                                <i class="fas fa-comment"></i> {{ form.observaciones.label }}
-                                <small class="text-muted">(opcional)</small>
-                            </label>
-                            {{ form.observaciones }}
+                        <div class="ef-field">
+                            <label class="ef-label ef-label-required">Fecha</label>
+                            {{ form.fecha }}
+                            {% if form.fecha.errors %}
+                            <div class="ef-error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.fecha.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="ef-grid ef-grid-2" style="margin-top: 1rem;">
+                        <div class="ef-field">
+                            <label class="ef-label ef-label-required">Sede</label>
+                            {{ form.sede }}
+                            {% if form.sede.errors %}
+                            <div class="ef-error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.sede.errors.0 }}
+                            </div>
+                            {% endif %}
                         </div>
 
-                        {% if egreso %}
-                        <div class="mb-3">
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle"></i>
-                                Registrado por: <strong>{{ egreso.usuario_registro.username }}</strong>
-                                el {{ egreso.fecha_creacion|date:"d/m/Y H:i" }}
-                            </small>
+                        <div class="ef-field">
+                            <label class="ef-label ef-label-required">Categoría</label>
+                            {{ form.categoria }}
+                            {% if form.categoria.errors %}
+                            <div class="ef-error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.categoria.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: Concepto y Monto -->
+                <div class="ef-section">
+                    <div class="ef-section-header">
+                        <div class="ef-section-number">2</div>
+                        <div>
+                            <h2>Concepto y monto</h2>
+                            <p>Detalle del gasto e importe</p>
+                        </div>
+                    </div>
+
+                    <div class="ef-field">
+                        <label class="ef-label ef-label-required">Concepto</label>
+                        {{ form.concepto }}
+                        {% if form.concepto.errors %}
+                        <div class="ef-error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.concepto.errors.0 }}
                         </div>
                         {% endif %}
-
-                        <hr class="my-4">
-
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'lista_caja' %}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Cancelar
-                            </a>
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-save"></i> {{ boton }}
-                            </button>
+                        <div class="ef-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Descripción detallada del gasto
                         </div>
-                    </form>
+                    </div>
+
+                    <!-- Tarjeta de total -->
+                    <div class="ef-total-card">
+                        <div>
+                            <div class="ef-total-label">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Monto del egreso
+                            </div>
+                            <div class="ef-total-amount">
+                                <small>Gs.</small>
+                                <span id="montoDisplay">0</span>
+                            </div>
+                        </div>
+                        <div class="pf-field" style="min-width:200px; display: flex; flex-direction: column; gap: 0.5rem;">
+                            {{ form.monto }}
+                            {% if form.importe_total.errors %}<div class="pf-error-message" style="color:#fca5a5;"><i class="bi bi-exclamation-circle"></i> {{ form.importe_total.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="ef-field" style="margin-top: 1rem;">
+                        {% if form.monto.errors %}
+                        <div class="ef-error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.monto.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
+
+                <!-- SECCIÓN 3: Comprobante y observaciones -->
+                <div class="ef-section">
+                    <div class="ef-section-header">
+                        <div class="ef-section-number">3</div>
+                        <div>
+                            <h2>Comprobante y notas</h2>
+                            <p>Adjunte el comprobante si es necesario</p>
+                        </div>
+                    </div>
+
+                    <div class="ef-field">
+                        <label class="ef-label">Comprobante</label>
+                        <div class="ef-image-upload" onclick="document.getElementById('id_comprobante').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Haz clic para subir una imagen</p>
+                            <small>JPG, PNG o PDF (máx. 5 MB)</small>
+                        </div>
+                        {{ form.comprobante }}
+
+                        {% if egreso and egreso.comprobante %}
+                        <div class="ef-preview">
+                            <img src="{{ egreso.comprobante.url }}"
+                                 id="imagenPreview"
+                                 onclick="abrirModalImg('{{ egreso.comprobante.url }}')"
+                                 alt="Comprobante actual">
+                            <div class="ef-hint" style="padding: 0.5rem; text-align: center;">
+                                <i class="fas fa-search-plus"></i> Clic para ampliar
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="ef-preview" id="previewContainer" style="display: none;">
+                            <img src="" id="imagenPreview" alt="Vista previa">
+                            <div class="ef-hint" style="padding: 0.5rem; text-align: center;">
+                                <i class="fas fa-eye"></i> Vista previa
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="ef-field" style="margin-top: 1.5rem;">
+                        <label class="ef-label">Observaciones</label>
+                        {{ form.observaciones }}
+                        <div class="ef-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Opcional - Información adicional relevante
+                        </div>
+                    </div>
+
+                    {% if egreso %}
+                    <div class="ef-field" style="margin-top: 1rem;">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Registrado por: <strong>{{ egreso.usuario_registro.get_full_name|default:egreso.usuario_registro.username }}</strong>
+                            el {{ egreso.fecha_creacion|date:"d/m/Y H:i" }}
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Acciones -->
+                <div class="ef-actions">
+                    <a href="{% url 'lista_caja' %}" class="ef-btn ef-btn-secondary">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="ef-btn ef-btn-primary">
+                        {{ boton }}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para imagen -->
+<div class="modal fade" id="modalImg" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content" style="background: transparent; border: none;">
+            <div class="modal-header border-0" style="background: rgba(0,0,0,0.9); color: white;">
+                <h5 class="modal-title">
+                    <i class="fas fa-receipt"></i>
+                    Comprobante de egreso
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center" style="background: rgba(0,0,0,0.9); padding: 2rem;">
+                <img src="" id="imgModalGrande" alt="Comprobante"
+                     style="max-width: 100%; max-height: 80vh; border-radius: 8px;">
             </div>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const montoInput = document.querySelector('input[name="monto"]');
-    const montoFormateado = document.getElementById('montoFormateado');
+    document.addEventListener('DOMContentLoaded', function () {
+        const montoInput = document.querySelector('input[name="monto"]');
+        const montoDisplay = document.getElementById('montoDisplay');
+        const montoFormateado = document.getElementById('montoFormateado');
 
-    if (montoInput && montoFormateado) {
-        montoInput.addEventListener('input', function () {
-            const valor = parseInt(this.value.replace(/\D/g, '')) || 0;
-            if (valor > 0) {
-                montoFormateado.innerHTML = '<i class="fas fa-arrow-right"></i> <strong>Gs. ' +
-                    valor.toLocaleString('es-PY') + '</strong>';
-            } else {
+        function actualizarMonto() {
+            const valor = parseFloat(montoInput?.value) || 0;
+            if (montoDisplay) {
+                montoDisplay.textContent = valor > 0 ? valor.toLocaleString('es-PY') : '0';
+            }
+            if (montoFormateado && valor > 0) {
+                montoFormateado.innerHTML = `
+                <i class="fas fa-arrow-right"></i>
+                <strong>Gs. ${valor.toLocaleString('es-PY')}</strong>
+            `;
+            } else if (montoFormateado) {
                 montoFormateado.innerHTML = '';
             }
-        });
-
-        if (montoInput.value) montoInput.dispatchEvent(new Event('input'));
-    }
-
-    document.getElementById('formEgreso').addEventListener('submit', function (e) {
-        const monto = parseInt(montoInput?.value) || 0;
-        if (monto <= 0) {
-            e.preventDefault();
-            alert('El monto debe ser mayor a 0');
-            montoInput?.focus();
         }
+
+        if (montoInput) {
+            montoInput.addEventListener('input', actualizarMonto);
+            actualizarMonto(); // Inicializar
+        }
+
+        // Preview de imagen
+        const fileInput = document.getElementById('id_comprobante');
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const preview = document.getElementById('imagenPreview');
+                    const container = document.getElementById('previewContainer');
+
+                    if (preview) preview.src = ev.target.result;
+                    if (container) container.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Validación del formulario
+        document.getElementById('formEgreso')?.addEventListener('submit', function(e) {
+            const monto = parseFloat(montoInput?.value) || 0;
+            if (monto <= 0) {
+                e.preventDefault();
+                montoInput?.focus();
+
+                // Mostrar mensaje de error si no existe
+                if (!document.querySelector('#montoFormateado .text-danger')) {
+                    const error = document.createElement('div');
+                    error.className = 'ef-error-message';
+                    error.innerHTML = '<i class="fas fa-exclamation-circle"></i> El monto debe ser mayor a 0';
+                    document.querySelector('#montoFormateado')?.appendChild(error);
+                }
+            }
+        });
     });
-});
+
+    function abrirModalImg(url) {
+        const modalImg = document.getElementById('imgModalGrande');
+        if (modalImg) {
+            modalImg.src = url;
+            const modal = new bootstrap.Modal(document.getElementById('modalImg'));
+            modal.show();
+        }
+    }
 </script>
 {% endblock %}
