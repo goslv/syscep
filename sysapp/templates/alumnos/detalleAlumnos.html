@@ -21,6 +21,10 @@
         letter-spacing: 0.5px;
         margin-bottom: 0.25rem;
     }
+    .puntos-estrellas {
+        display: flex;
+        gap: 0.5rem;
+    }
     .info-value {
         font-weight: 600;
         color: var(--text-main);
@@ -75,6 +79,12 @@
 
     [data-theme="dark"] .table-hover tbody tr:hover {
         background-color: rgba(148, 163, 184, 0.1) !important;
+    }
+    [data-theme="dark"] .alert-danger{
+        background-color: rgba(113, 28, 35, 0.68);
+        border-color: #f5c6cb;
+        color: #f8d7da;
+
     }
 
     /* Estilos para tablas responsivas en móviles */
@@ -265,7 +275,7 @@
                     </div>
                     <div class="mb-3">
                         <div class="info-label">Fecha de Registro</div>
-                        <div class="info-value text-muted small">{{ alumno.fecha_registro|date:"d/m/Y H:i" }}</div>
+                        <div class="info-value small">{{ alumno.fecha_registro|date:"d/m/Y H:i" }}</div>
                     </div>
                 </div>
                 <div class="col-12">
@@ -331,7 +341,7 @@
                         <div class="text-success fw-bold">Habilitado</div>
                     {% else %}
                         <div class="text-danger fw-bold">No Habilitado</div>
-                        <small class="text-muted">Debe estar al día con sus cuotas</small>
+                        <small>Debe estar al día con sus cuotas</small>
                     {% endif %}
                 </div>
             {% endif %}
