@@ -218,10 +218,12 @@
     /* Search */
     .pf-search-container { position:relative; }
     .pf-search-results {
-        position:absolute; top:100%; left:0; right:0; z-index:1000;
+        position:absolute; top:100%; left:0; right:0; z-index:9999;
         background:white; border:1.5px solid var(--gray-200); border-radius:var(--radius-md);
         box-shadow:var(--shadow-lg); max-height:250px; overflow-y:auto; display:none; margin-top:.25rem;
     }
+    .pf-section { position: relative; }
+    .pf-search-container { position: relative; z-index: 9999; }
     [data-theme="dark"] .pf-search-results { background:var(--gray-50); }
     .pf-search-result { padding:.75rem 1rem; cursor:pointer; border-bottom:1px solid var(--gray-200); transition:background-color .2s; }
     .pf-search-result:last-child { border-bottom:none; }
@@ -325,15 +327,33 @@
             <span class="pf-toggle-description">El pago no corresponde a un alumno inscripto</span>
         </span>
                     </label>
-
                     <div id="camposAlumno" style="margin-top:1.5rem;">
                         <div class="pf-field">
                             <label class="pf-label pf-label-required">Alumno</label>
-                            <div class="pf-search-container">
-                                <input type="text" id="alumnoSearch" class="pf-input" autocomplete="off"
-                                       placeholder="Buscar por nombre, apellido o cédula…"
-                                       value="{% if pago and pago.alumno %}{{ pago.alumno.nombre_completo }}{% endif %}">
-                                <div id="alumnoResults" class="pf-search-results"></div>
+                            <div style="display:flex; gap:.6rem; align-items:flex-start;">
+                                <div class="pf-search-container" style="flex:1;">
+                                    <input type="text" id="alumnoSearch" class="pf-input" autocomplete="off"
+                                           placeholder="Buscar por nombre, apellido o cédula…"
+                                           value="{% if pago and pago.alumno %}{{ pago.alumno.nombre_completo }}{% endif %}">
+                                    <div id="alumnoResults" class="pf-search-results"></div>
+                                </div>
+                                <a href="{% url 'crear_alumno' %}"
+                                   target="_blank"
+                                   title="Registrar nuevo alumno (abre en nueva pestaña)"
+                                   style="
+                   display:inline-flex; align-items:center; gap:.4rem;
+                   padding:.72rem 1rem; border-radius:var(--radius-md);
+                   background:var(--primary-soft); color:var(--primary);
+                   border:1.5px solid var(--primary); font-size:.85rem;
+                   font-weight:700; text-decoration:none; white-space:nowrap;
+                   transition:all .2s ease; font-family:var(--font-sans);
+                   flex-shrink:0;
+               "
+                                   onmouseover="this.style.background='var(--primary)';this.style.color='white';"
+                                   onmouseout="this.style.background='var(--primary-soft)';this.style.color='var(--primary)';">
+                                    <i class="bi bi-person-plus-fill"></i>
+                                    Nuevo alumno
+                                </a>
                             </div>
                             <div class="d-none">{{ form.alumno }}</div>
                             {% if form.alumno.errors %}<div class="pf-error-message"><i class="bi bi-exclamation-circle"></i> {{ form.alumno.errors.0 }}</div>{% endif %}
