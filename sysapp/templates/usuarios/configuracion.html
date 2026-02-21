@@ -3,70 +3,746 @@
 {% block title %}{{ titulo }} - ITS CEP{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card shadow-lg border-0 rounded-lg">
-                <div class="card-header bg-dark text-white text-center py-4">
-                    <h3 class="font-weight-light my-1"><i class="bi bi-gear-fill me-2"></i>{{ titulo }}</h3>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    /* ─── Tokens consistentes ─────────────────────────────── */
+    :root {
+        --cf-bg:        #f8fafc;
+        --cf-surface:   #ffffff;
+        --cf-ink:       #0f1825;
+        --cf-muted:     #5e6f88;
+        --cf-border:    #e1e9f0;
+        --cf-primary:   #0ea5e9;
+        --cf-primary-dk: #0284c7;
+        --cf-primary-lt: #e0f2fe;
+        --cf-success:   #10b981;
+        --cf-success-lt: #e4f9f0;
+        --cf-warning:   #f59e0b;
+        --cf-warning-lt: #fef5e5;
+        --cf-danger:    #ef4444;
+        --cf-danger-lt: #fee9e9;
+        --cf-gray-lt:   #f1f5f9;
+        --cf-r:         16px;
+        --cf-sh-sm:     0 2px 8px rgba(0,0,0,.04);
+        --cf-sh-md:     0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.03);
+        --cf-sh-lg:     0 12px 32px rgba(0,0,0,.08);
+        --cf-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+        --cf-bg:        #0e121b;
+        --cf-surface:   #161c26;
+        --cf-ink:       #edf2f9;
+        --cf-muted:     #8f9fb2;
+        --cf-border:    #232b36;
+        --cf-primary-lt: #0c2a3a;
+        --cf-success-lt: #12352d;
+        --cf-warning-lt: #302010;
+        --cf-danger-lt: #2f1518;
+        --cf-gray-lt:   #1e2630;
+    }
+
+    .cf {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--cf-ink);
+        background: var(--cf-bg);
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
+    }
+
+    .cf * { box-sizing: border-box; }
+
+    /* ─── Header mejorado ───────────────────────────────── */
+    .cf-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .cf-head-left {
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+    }
+
+    .cf-head-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--cf-ink);
+        margin: 0;
+        letter-spacing: -0.75px;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+    }
+
+    .cf-head-title i {
+        font-size: 1.8rem;
+        color: var(--cf-primary);
+        background: var(--cf-primary-lt);
+        padding: .5rem;
+        border-radius: 14px;
+    }
+
+    .cf-head-breadcrumb {
+        font-size: .85rem;
+        color: var(--cf-muted);
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .cf-head-breadcrumb a {
+        color: var(--cf-primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .cf-head-breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    /* ─── Contenedor principal ───────────────────────────── */
+    .cf-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* ─── Cards mejoradas ────────────────────────────────── */
+    .cf-card {
+        background: var(--cf-surface);
+        border: 1px solid var(--cf-border);
+        border-radius: 24px;
+        box-shadow: var(--cf-sh-lg);
+        overflow: hidden;
+        animation: slideIn .4s ease both;
+        margin-bottom: 1.5rem;
+    }
+
+    .cf-card:last-child {
+        margin-bottom: 0;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ─── Header de card con gradiente ───────────────────── */
+    .cf-card-header {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, var(--cf-primary) 0%, var(--cf-primary-dk) 100%);
+        color: white;
+    }
+
+    .cf-card-header h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .cf-card-header p {
+        font-size: .85rem;
+        opacity: .9;
+        margin: .5rem 0 0;
+    }
+
+    .cf-card-header i {
+        font-size: 1.4rem;
+    }
+
+    /* ─── Cuerpo de la card ──────────────────────────────── */
+    .cf-card-body {
+        padding: 2rem;
+    }
+
+    /* ─── Sección de cambio de contraseña ────────────────── */
+    .cf-password-section {
+        margin-bottom: 2rem;
+    }
+
+    .cf-password-toggle {
+        width: 100%;
+        padding: 1.25rem;
+        background: var(--cf-gray-lt);
+        border: 2px dashed var(--cf-border);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: var(--cf-transition);
+    }
+
+    .cf-password-toggle:hover {
+        border-color: var(--cf-primary);
+        background: var(--cf-primary-lt);
+        transform: translateY(-2px);
+    }
+
+    .cf-password-toggle-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .cf-password-toggle-left i {
+        font-size: 1.5rem;
+        color: var(--cf-primary);
+        background: var(--cf-surface);
+        padding: .75rem;
+        border-radius: 14px;
+        box-shadow: var(--cf-sh-sm);
+    }
+
+    .cf-password-toggle-left div {
+        text-align: left;
+    }
+
+    .cf-password-toggle-left strong {
+        font-size: 1rem;
+        color: var(--cf-ink);
+        display: block;
+        margin-bottom: .25rem;
+    }
+
+    .cf-password-toggle-left small {
+        font-size: .8rem;
+        color: var(--cf-muted);
+    }
+
+    .cf-password-toggle-right i {
+        font-size: 1.2rem;
+        color: var(--cf-muted);
+        transition: var(--cf-transition);
+    }
+
+    .cf-password-toggle:hover .cf-password-toggle-right i {
+        color: var(--cf-primary);
+        transform: translateX(5px);
+    }
+
+    /* ─── Formulario de contraseña ───────────────────────── */
+    .cf-password-form {
+        background: var(--cf-gray-lt);
+        border: 1px solid var(--cf-border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        animation: fadeIn .3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cf-field {
+        margin-bottom: 1.25rem;
+    }
+
+    .cf-label {
+        font-size: .8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--cf-muted);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        margin-bottom: .5rem;
+    }
+
+    .cf-label i {
+        font-size: .85rem;
+        color: var(--cf-primary);
+    }
+
+    .cf-input {
+        width: 100%;
+        padding: .75rem 1rem;
+        border: 1.5px solid var(--cf-border);
+        border-radius: 12px;
+        background: var(--cf-surface);
+        font-size: .95rem;
+        font-family: inherit;
+        color: var(--cf-ink);
+        transition: var(--cf-transition);
+    }
+
+    .cf-input:focus {
+        outline: none;
+        border-color: var(--cf-primary);
+        box-shadow: 0 0 0 4px rgba(14,165,233,.1);
+    }
+
+    .cf-input:hover {
+        border-color: var(--cf-primary);
+    }
+
+    .cf-hint {
+        font-size: .75rem;
+        color: var(--cf-muted);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        margin-top: .5rem;
+    }
+
+    .cf-hint i {
+        font-size: .75rem;
+        color: var(--cf-primary);
+    }
+
+    .cf-error {
+        font-size: .8rem;
+        color: var(--cf-danger);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        margin-top: .25rem;
+    }
+
+    .cf-error i {
+        font-size: .8rem;
+    }
+
+    /* ─── Botones mejorados ──────────────────────────────── */
+    .cf-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        padding: .8rem 1.8rem;
+        border-radius: 12px;
+        font-size: .95rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: var(--cf-transition);
+        text-decoration: none;
+        white-space: nowrap;
+        letter-spacing: .02em;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .cf-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255,255,255,.2);
+        transform: translate(-50%, -50%);
+        transition: width .4s, height .4s;
+    }
+
+    .cf-btn:active::after {
+        width: 200px;
+        height: 200px;
+    }
+
+    .cf-btn i { font-size: 1.1rem; }
+
+    .cf-btn-primary {
+        background: linear-gradient(135deg, var(--cf-primary) 0%, var(--cf-primary-dk) 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(14,165,233,.25);
+    }
+    .cf-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(14,165,233,.35);
+        color: #fff;
+    }
+
+    .cf-btn-secondary {
+        background: var(--cf-surface);
+        color: var(--cf-ink);
+        border: 1.5px solid var(--cf-border);
+    }
+    .cf-btn-secondary:hover {
+        background: var(--cf-gray-lt);
+        border-color: var(--cf-primary);
+        color: var(--cf-primary);
+        transform: translateY(-2px);
+    }
+
+    .cf-btn-link {
+        background: transparent;
+        color: var(--cf-muted);
+        border: none;
+        padding: .5rem;
+        font-size: .9rem;
+    }
+    .cf-btn-link:hover {
+        color: var(--cf-primary);
+        text-decoration: underline;
+    }
+
+    .cf-btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    /* ─── Sección de preferencias ────────────────────────── */
+    .cf-preferences {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .cf-preference-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background: var(--cf-gray-lt);
+        border: 1px solid var(--cf-border);
+        border-radius: 16px;
+        transition: var(--cf-transition);
+    }
+
+    .cf-preference-item:hover {
+        border-color: var(--cf-primary);
+        transform: translateY(-2px);
+    }
+
+    .cf-preference-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .cf-preference-left i {
+        font-size: 1.2rem;
+        color: var(--cf-primary);
+        background: var(--cf-surface);
+        padding: .5rem;
+        border-radius: 10px;
+    }
+
+    .cf-preference-left div {
+        text-align: left;
+    }
+
+    .cf-preference-left strong {
+        font-size: .95rem;
+        color: var(--cf-ink);
+        display: block;
+        margin-bottom: .2rem;
+    }
+
+    .cf-preference-left small {
+        font-size: .75rem;
+        color: var(--cf-muted);
+    }
+
+    .cf-preference-right {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .cf-theme-badge {
+        padding: .3rem .8rem;
+        background: var(--cf-surface);
+        border: 1px solid var(--cf-border);
+        border-radius: 999px;
+        font-size: .75rem;
+        font-weight: 600;
+        color: var(--cf-ink);
+    }
+
+    .cf-theme-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1.5px solid var(--cf-border);
+        background: var(--cf-surface);
+        color: var(--cf-muted);
+        cursor: pointer;
+        transition: var(--cf-transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .cf-theme-btn:hover {
+        border-color: var(--cf-primary);
+        color: var(--cf-primary);
+        transform: scale(1.1);
+    }
+
+    /* ─── Sección de enlaces ─────────────────────────────── */
+    .cf-links {
+        display: flex;
+        flex-direction: column;
+        gap: .75rem;
+        margin-top: 1rem;
+    }
+
+    .cf-link {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        padding: .75rem 1rem;
+        color: var(--cf-ink);
+        text-decoration: none;
+        border-radius: 12px;
+        transition: var(--cf-transition);
+    }
+
+    .cf-link:hover {
+        background: var(--cf-gray-lt);
+        transform: translateX(5px);
+    }
+
+    .cf-link i {
+        color: var(--cf-primary);
+        font-size: 1rem;
+    }
+
+    .cf-link span {
+        flex: 1;
+        font-size: .9rem;
+    }
+
+    .cf-link small {
+        color: var(--cf-muted);
+        font-size: .8rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .cf {
+            padding: 1rem;
+        }
+
+        .cf-head {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .cf-card-body {
+            padding: 1.5rem;
+        }
+
+        .cf-btn-group {
+            flex-direction: column;
+        }
+
+        .cf-password-toggle-left i {
+            font-size: 1.2rem;
+            padding: .6rem;
+        }
+
+        .cf-preference-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .cf-preference-right {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+</style>
+
+<div class="cf">
+    <div class="cf-container">
+        <!-- Header -->
+        <div class="cf-head">
+            <div class="cf-head-left">
+                <div class="cf-head-title">
+                    <i class="bi bi-gear-fill"></i>
+                    {{ titulo }}
                 </div>
-                <div class="card-body p-4">
-                    <div id="passwordSectionHeader" class="text-center mb-3 {% if form.errors %}d-none{% endif %}">
-                        <button type="button" class="btn btn-outline-dark w-100 py-3" id="btnTogglePassword">
-                            <i class="bi bi-shield-lock me-2"></i> Cambiar contraseña
-                        </button>
+                <div class="cf-head-breadcrumb">
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <a href="{% url 'mi_perfil' %}">Mi Perfil</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span>Configuración</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card principal - Configuración de cuenta -->
+        <div class="cf-card">
+            <div class="cf-card-header">
+                <h3>
+                    <i class="bi bi-shield-lock-fill"></i>
+                    Seguridad de la cuenta
+                </h3>
+                <p>Administra tu contraseña y preferencias de seguridad</p>
+            </div>
+
+            <div class="cf-card-body">
+                <!-- Sección de cambio de contraseña -->
+                <div class="cf-password-section">
+                    <div class="cf-password-toggle" id="btnTogglePassword">
+                        <div class="cf-password-toggle-left">
+                            <i class="bi bi-key-fill"></i>
+                            <div>
+                                <strong>Cambiar contraseña</strong>
+                                <small>Actualiza tu contraseña periódicamente por seguridad</small>
+                            </div>
+                        </div>
+                        <div class="cf-password-toggle-right">
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
                     </div>
 
-                    <div id="passwordFormContainer" class="{% if not form.errors %}d-none{% endif %}">
-
+                    <div class="cf-password-form" id="passwordFormContainer" style="display: none;">
                         <form method="post">
                             {% csrf_token %}
-                            
+
                             {% for field in form %}
-                            <div class="mb-3">
-                                <label for="{{ field.id_for_label }}" class="form-label small fw-bold">{{ field.label }}</label>
+                            <div class="cf-field">
+                                <label for="{{ field.id_for_label }}" class="cf-label">
+                                    <i class="bi bi-{% if forloop.first %}lock{% elif forloop.counter == 2 %}shield-lock{% else %}check-circle{% endif %}"></i>
+                                    {{ field.label }}
+                                </label>
                                 {{ field }}
                                 {% if field.help_text %}
-                                <div class="form-text small">{{ field.help_text }}</div>
+                                <div class="cf-hint">
+                                    <i class="bi bi-info-circle"></i>
+                                    {{ field.help_text }}
+                                </div>
                                 {% endif %}
                                 {% if field.errors %}
-                                <div class="text-danger small mt-1">
+                                <div class="cf-error">
                                     {% for error in field.errors %}
-                                        {{ error }}
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}
                                     {% endfor %}
                                 </div>
                                 {% endif %}
                             </div>
                             {% endfor %}
 
-                            <div class="d-grid gap-2 mt-4">
-                                <button type="submit" class="btn btn-dark btn-lg">
-                                    <i class="bi bi-shield-check me-2"></i> Actualizar Contraseña
+                            <div class="cf-btn-group">
+                                <button type="submit" class="cf-btn cf-btn-primary">
+                                    <i class="bi bi-shield-check"></i>
+                                    Actualizar Contraseña
                                 </button>
-                                <button type="button" class="btn btn-link text-muted" id="btnCancelPassword">
+                                <button type="button" class="cf-btn cf-btn-secondary" id="btnCancelPassword">
                                     Cancelar
                                 </button>
                             </div>
                         </form>
                     </div>
+                </div>
 
-                    <div class="mt-3 text-center">
-                        <a href="{% url 'mi_perfil' %}" class="btn btn-outline-secondary w-100">
-                            Volver al Perfil
-                        </a>
-                    </div>
+                <!-- Enlaces relacionados -->
+                <div class="cf-links">
+                    <a href="{% url 'mi_perfil' %}" class="cf-link">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Volver al Perfil</span>
+                        <small>Ver información personal</small>
+                    </a>
                 </div>
             </div>
-            
-            <div class="card shadow-sm border-0 rounded-lg mt-4">
-                <div class="card-body p-4">
-                    <h5 class="mb-3"><i class="bi bi-palette me-2"></i>Preferencias de Visualización</h5>
-                    <p class="text-muted small">El sistema detecta automáticamente tu preferencia de tema, pero puedes cambiarlo en cualquier momento desde la barra superior.</p>
-                    <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded">
-                        <span>Tema Oscuro / Claro</span>
-                        <button class="btn btn-sm btn-outline-primary theme-toggle-btn" onclick="document.getElementById('themeToggle').click()">
-                            Alternar Tema
-                        </button>
+        </div>
+
+        <!-- Card - Preferencias de Visualización -->
+        <div class="cf-card">
+            <div class="cf-card-header" style="background: linear-gradient(135deg, var(--cf-gray-700) 0%, var(--cf-gray-900) 100%);">
+                <h3>
+                    <i class="bi bi-palette-fill"></i>
+                    Preferencias de Visualización
+                </h3>
+                <p>Personaliza la apariencia del sistema</p>
+            </div>
+
+            <div class="cf-card-body">
+                <div class="cf-preferences">
+                    <div class="cf-preference-item">
+                        <div class="cf-preference-left">
+                            <i class="bi bi-moon-stars-fill"></i>
+                            <div>
+                                <strong>Tema Oscuro / Claro</strong>
+                                <small>El sistema detecta automáticamente tu preferencia</small>
+                            </div>
+                        </div>
+                        <div class="cf-preference-right">
+                            <span class="cf-theme-badge" id="currentTheme">Automático</span>
+                            <button class="cf-theme-btn" onclick="document.getElementById('themeToggle').click()" title="Cambiar tema">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="cf-preference-item">
+                        <div class="cf-preference-left">
+                            <i class="bi bi-layout-sidebar"></i>
+                            <div>
+                                <strong>Densidad de la interfaz</strong>
+                                <small>Ajusta el espaciado de los elementos</small>
+                            </div>
+                        </div>
+                        <div class="cf-preference-right">
+                            <span class="cf-theme-badge">Normal</span>
+                            <button class="cf-theme-btn" disabled title="Próximamente">
+                                <i class="bi bi-hourglass-split"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="cf-preference-item">
+                        <div class="cf-preference-left">
+                            <i class="bi bi-fonts"></i>
+                            <div>
+                                <strong>Tamaño de fuente</strong>
+                                <small>Personaliza la legibilidad del texto</small>
+                            </div>
+                        </div>
+                        <div class="cf-preference-right">
+                            <span class="cf-theme-badge">Mediano</span>
+                            <button class="cf-theme-btn" disabled title="Próximamente">
+                                <i class="bi bi-hourglass-split"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cf-hint" style="margin-top: 1rem; justify-content: center;">
+                    <i class="bi bi-info-circle"></i>
+                    Más opciones de personalización próximamente
+                </div>
+            </div>
+        </div>
+
+        <!-- Card - Información del sistema (opcional) -->
+        <div class="cf-card" style="opacity: 0.9;">
+            <div class="cf-card-body" style="padding: 1rem 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <i class="bi bi-info-circle-fill" style="color: var(--cf-muted); font-size: 1.2rem;"></i>
+                    <div>
+                        <strong style="font-size: .9rem;">Versión del sistema</strong>
+                        <div style="font-size: .8rem; color: var(--cf-muted);">ITS CEP v2.0.0</div>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <span class="cf-theme-badge">Estable</span>
                     </div>
                 </div>
             </div>
@@ -74,55 +750,62 @@
     </div>
 </div>
 
-<style>
-    .form-control {
-        border-radius: 8px;
-        padding: 0.6rem 1rem;
-    }
-    [data-theme="dark"] .card {
-        background-color: var(--card-bg);
-        border: 1px solid var(--border-color);
-    }
-    [data-theme="dark"] .bg-light {
-        background-color: var(--body-bg) !important;
-        border-color: var(--border-color);
-        color: var(--text-main);
-    }
-    [data-theme="dark"] .alert-info {
-        background-color: rgba(59, 130, 246, 0.1);
-        color: #93c5fd;
-    }
-    [data-theme="dark"] .btn-outline-dark {
-        color: var(--gray-300);
-        border-color: var(--border-color);
-    }
-    [data-theme="dark"] .btn-outline-dark:hover {
-        background-color: var(--primary-600);
-        color: white;
-    }
-</style>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const btnToggle = document.getElementById('btnTogglePassword');
-    const btnCancel = document.getElementById('btnCancelPassword');
-    const container = document.getElementById('passwordFormContainer');
-    const header = document.getElementById('passwordSectionHeader');
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnToggle = document.getElementById('btnTogglePassword');
+        const btnCancel = document.getElementById('btnCancelPassword');
+        const formContainer = document.getElementById('passwordFormContainer');
+        let isFormVisible = false;
 
-    // Función para mostrar el formulario
-    function showForm() {
-        container.classList.remove('d-none');
-        header.classList.add('d-none');
-    }
+        // Función para mostrar el formulario
+        function showForm() {
+            formContainer.style.display = 'block';
+            isFormVisible = true;
 
-    // Función para ocultar el formulario
-    function hideForm() {
-        container.classList.add('d-none');
-        header.classList.remove('d-none');
-    }
+            // Smooth scroll al formulario
+            formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
-    btnToggle.addEventListener('click', showForm);
-    btnCancel.addEventListener('click', hideForm);
-});
+        // Función para ocultar el formulario
+        function hideForm() {
+            formContainer.style.display = 'none';
+            isFormVisible = false;
+        }
+
+        btnToggle.addEventListener('click', showForm);
+        btnCancel.addEventListener('click', hideForm);
+
+        // Detectar tema actual
+        function updateThemeDisplay() {
+            const themeBadge = document.getElementById('currentTheme');
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            themeBadge.textContent = isDark ? 'Oscuro' : 'Claro';
+        }
+
+        // Escuchar cambios de tema
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'data-theme') {
+                    updateThemeDisplay();
+                }
+            });
+        });
+
+        observer.observe(document.documentElement, { attributes: true });
+        updateThemeDisplay();
+
+        // Validación de contraseña en tiempo real (opcional)
+        const passwordFields = document.querySelectorAll('input[type="password"]');
+        passwordFields.forEach(field => {
+            field.addEventListener('input', function() {
+                // Validación simple de longitud
+                if (this.name === 'new_password1' && this.value.length > 0 && this.value.length < 8) {
+                    this.style.borderColor = 'var(--cf-danger)';
+                } else {
+                    this.style.borderColor = '';
+                }
+            });
+        });
+    });
 </script>
 {% endblock %}

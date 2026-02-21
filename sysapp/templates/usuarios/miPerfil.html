@@ -3,58 +3,678 @@
 {% block title %}{{ titulo }} - ITS CEP{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card shadow-lg border-0 rounded-lg">
-                <div class="card-body p-4">
-                    <div class="text-center mb-4">
-                        <div class="user-dropdown-avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
-                            {{ user.username|first|upper }}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    /* ─── Tokens consistentes ─────────────────────────────── */
+    :root {
+        --mp-bg:        #f8fafc;
+        --mp-surface:   #ffffff;
+        --mp-ink:       #0f1825;
+        --mp-muted:     #5e6f88;
+        --mp-border:    #e1e9f0;
+        --mp-primary:   #2563eb;
+        --mp-primary-dk: #1d4ed8;
+        --mp-primary-lt: #dbeafe;
+        --mp-success:   #10b981;
+        --mp-success-lt: #e4f9f0;
+        --mp-warning:   #f59e0b;
+        --mp-warning-lt: #fef5e5;
+        --mp-danger:    #ef4444;
+        --mp-danger-lt: #fee9e9;
+        --mp-gray-lt:   #f1f5f9;
+        --mp-r:         16px;
+        --mp-sh-sm:     0 2px 8px rgba(0,0,0,.04);
+        --mp-sh-md:     0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.03);
+        --mp-sh-lg:     0 12px 32px rgba(0,0,0,.08);
+        --mp-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+        --mp-bg:        #0e121b;
+        --mp-surface:   #161c26;
+        --mp-ink:       #edf2f9;
+        --mp-muted:     #8f9fb2;
+        --mp-border:    #232b36;
+        --mp-primary-lt: #172946;
+        --mp-success-lt: #12352d;
+        --mp-warning-lt: #302010;
+        --mp-danger-lt: #2f1518;
+        --mp-gray-lt:   #1e2630;
+    }
+
+    .mp {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--mp-ink);
+        background: var(--mp-bg);
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
+    }
+
+    .mp * { box-sizing: border-box; }
+
+    /* ─── Header mejorado ───────────────────────────────── */
+    .mp-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .mp-head-left {
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+    }
+
+    .mp-head-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--mp-ink);
+        margin: 0;
+        letter-spacing: -0.75px;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+    }
+
+    .mp-head-title i {
+        font-size: 1.8rem;
+        color: var(--mp-primary);
+        background: var(--mp-primary-lt);
+        padding: .5rem;
+        border-radius: 14px;
+    }
+
+    .mp-head-breadcrumb {
+        font-size: .85rem;
+        color: var(--mp-muted);
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .mp-head-breadcrumb a {
+        color: var(--mp-primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .mp-head-breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    /* ─── Contenedor principal ───────────────────────────── */
+    .mp-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* ─── Card de perfil mejorada ───────────────────────── */
+    .mp-card {
+        background: var(--mp-surface);
+        border: 1px solid var(--mp-border);
+        border-radius: 24px;
+        box-shadow: var(--mp-sh-lg);
+        overflow: hidden;
+        animation: slideIn .4s ease both;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ─── Header de perfil con avatar ───────────────────── */
+    .mp-profile-header {
+        background: linear-gradient(135deg, var(--mp-primary) 0%, var(--mp-primary-dk) 100%);
+        padding: 2rem 2rem 4rem;
+        position: relative;
+        text-align: center;
+        color: white;
+    }
+
+    .mp-avatar-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .mp-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 30px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--mp-primary);
+        margin: 0 auto 1rem;
+        box-shadow: 0 8px 24px rgba(0,0,0,.2);
+        border: 4px solid rgba(255,255,255,.3);
+        transition: var(--mp-transition);
+    }
+
+    .mp-avatar:hover {
+        transform: scale(1.05);
+        border-color: white;
+    }
+
+    .mp-avatar-badge {
+        position: absolute;
+        bottom: 1rem;
+        right: 0;
+        background: var(--mp-success);
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .9rem;
+        border: 3px solid white;
+    }
+
+    .mp-profile-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 .25rem;
+    }
+
+    .mp-profile-header p {
+        font-size: .9rem;
+        opacity: .9;
+        margin: 0;
+    }
+
+    .mp-member-since {
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--mp-surface);
+        color: var(--mp-ink);
+        padding: .5rem 1.5rem;
+        border-radius: 999px;
+        font-size: .85rem;
+        font-weight: 600;
+        box-shadow: var(--mp-sh-md);
+        border: 1px solid var(--mp-border);
+        white-space: nowrap;
+    }
+
+    .mp-member-since i {
+        color: var(--mp-primary);
+        margin-right: .35rem;
+    }
+
+    /* ─── Cuerpo de la card ──────────────────────────────── */
+    .mp-card-body {
+        padding: 2.5rem 2rem 2rem;
+    }
+
+    /* ─── Campos de solo lectura ────────────────────────── */
+    .mp-readonly-field {
+        margin-bottom: 1.5rem;
+    }
+
+    .mp-readonly-label {
+        font-size: .7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--mp-muted);
+        margin-bottom: .35rem;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+    }
+
+    .mp-readonly-label i {
+        font-size: .8rem;
+        color: var(--mp-primary);
+    }
+
+    .mp-readonly-value {
+        background: var(--mp-gray-lt);
+        border: 1px solid var(--mp-border);
+        border-radius: 12px;
+        padding: .75rem 1rem;
+        font-size: .95rem;
+        color: var(--mp-ink);
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .mp-readonly-value i {
+        color: var(--mp-muted);
+        font-size: .9rem;
+    }
+
+    .mp-readonly-badge {
+        margin-left: auto;
+        background: var(--mp-primary-lt);
+        color: var(--mp-primary);
+        padding: .2rem .6rem;
+        border-radius: 999px;
+        font-size: .7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    /* ─── Campos del formulario ─────────────────────────── */
+    .mp-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+        .mp-form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .mp-field {
+        display: flex;
+        flex-direction: column;
+        gap: .4rem;
+    }
+
+    .mp-field.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .mp-label {
+        font-size: .8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--mp-muted);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+    }
+
+    .mp-label i {
+        font-size: .85rem;
+        color: var(--mp-primary);
+    }
+
+    .mp-input {
+        width: 100%;
+        padding: .75rem 1rem;
+        border: 1.5px solid var(--mp-border);
+        border-radius: 12px;
+        background: var(--mp-bg);
+        font-size: .95rem;
+        font-family: inherit;
+        color: var(--mp-ink);
+        transition: var(--mp-transition);
+    }
+
+    .mp-input:focus {
+        outline: none;
+        border-color: var(--mp-primary);
+        background: var(--mp-surface);
+        box-shadow: 0 0 0 4px rgba(37,99,235,.1);
+    }
+
+    .mp-input:hover {
+        border-color: var(--mp-primary);
+    }
+
+    /* ─── Botones mejorados ──────────────────────────────── */
+    .mp-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--mp-border);
+    }
+
+    .mp-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        padding: .8rem 1.8rem;
+        border-radius: 12px;
+        font-size: .95rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: var(--mp-transition);
+        text-decoration: none;
+        white-space: nowrap;
+        letter-spacing: .02em;
+        position: relative;
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .mp-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255,255,255,.2);
+        transform: translate(-50%, -50%);
+        transition: width .4s, height .4s;
+    }
+
+    .mp-btn:active::after {
+        width: 200px;
+        height: 200px;
+    }
+
+    .mp-btn i { font-size: 1.1rem; }
+
+    .mp-btn-primary {
+        background: linear-gradient(135deg, var(--mp-primary) 0%, var(--mp-primary-dk) 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(37,99,235,.25);
+    }
+    .mp-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37,99,235,.35);
+        color: #fff;
+    }
+
+    .mp-btn-secondary {
+        background: var(--mp-surface);
+        color: var(--mp-ink);
+        border: 1.5px solid var(--mp-border);
+    }
+    .mp-btn-secondary:hover {
+        background: var(--mp-gray-lt);
+        border-color: var(--mp-primary);
+        color: var(--mp-primary);
+        transform: translateY(-2px);
+    }
+
+    /* ─── Footer de la card ──────────────────────────────── */
+    .mp-card-footer {
+        padding: 1.25rem 2rem;
+        background: var(--mp-gray-lt);
+        border-top: 1px solid var(--mp-border);
+        text-align: center;
+    }
+
+    .mp-footer-link {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        color: var(--mp-primary);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: .9rem;
+        transition: var(--mp-transition);
+        padding: .5rem 1rem;
+        border-radius: 999px;
+    }
+
+    .mp-footer-link:hover {
+        background: var(--mp-primary-lt);
+        transform: translateY(-2px);
+    }
+
+    .mp-footer-link i {
+        font-size: 1rem;
+    }
+
+    /* ─── Mensajes de feedback ───────────────────────────── */
+    .mp-alert {
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        animation: slideIn .3s ease;
+    }
+
+    .mp-alert-success {
+        background: var(--mp-success-lt);
+        border: 1px solid var(--mp-success);
+        color: var(--mp-success);
+    }
+
+    .mp-alert-success i {
+        font-size: 1.2rem;
+    }
+
+    .mp-alert-content {
+        flex: 1;
+        font-size: .9rem;
+        font-weight: 500;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .mp {
+            padding: 1rem;
+        }
+
+        .mp-head {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .mp-avatar {
+            width: 80px;
+            height: 80px;
+            font-size: 2rem;
+        }
+
+        .mp-profile-header {
+            padding: 1.5rem 1.5rem 3rem;
+        }
+
+        .mp-member-since {
+            font-size: .75rem;
+            padding: .35rem 1rem;
+        }
+
+        .mp-card-body {
+            padding: 2rem 1.5rem 1.5rem;
+        }
+
+        .mp-actions {
+            flex-direction: column;
+        }
+
+        .mp-card-footer {
+            padding: 1rem 1.5rem;
+        }
+    }
+
+    /* Animaciones */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .mp-avatar {
+        animation: pulse 2s ease infinite;
+    }
+
+    .mp-avatar:hover {
+        animation: none;
+    }
+</style>
+
+<div class="mp">
+    <div class="mp-container">
+        <!-- Header -->
+        <div class="mp-head">
+            <div class="mp-head-left">
+                <div class="mp-head-title">
+                    <i class="bi bi-person-circle"></i>
+                    {{ titulo }}
+                </div>
+                <div class="mp-head-breadcrumb">
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span>Mi Perfil</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card de perfil -->
+        <div class="mp-card">
+            <!-- Header con avatar -->
+            <div class="mp-profile-header">
+                <div class="mp-avatar-container">
+                    <div class="mp-avatar">
+                        {{ user.first_name|default:user.username|first|upper }}
+                    </div>
+                    <div class="mp-avatar-badge" title="Activo">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                </div>
+                <h2>{{ user.get_full_name|default:user.username }}</h2>
+                <p>@{{ user.username }}</p>
+
+                <div class="mp-member-since">
+                    <i class="bi bi-calendar-check"></i>
+                    Miembro desde {{ user.date_joined|date:"d \d\e F \d\e Y" }}
+                </div>
+            </div>
+
+            <!-- Cuerpo del formulario -->
+            <div class="mp-card-body">
+                <!-- Mensaje de éxito (opcional) -->
+                {% if messages %}
+                {% for message in messages %}
+                <div class="mp-alert mp-alert-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div class="mp-alert-content">{{ message }}</div>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Username (solo lectura) -->
+                    <div class="mp-readonly-field">
+                        <div class="mp-readonly-label">
+                            <i class="bi bi-person"></i>
+                            Nombre de usuario
                         </div>
-                        <h4 class="mb-0">{{ user.username }}</h4>
-                        <p class="text-muted small">Miembro desde {{ user.date_joined|date:"d/m/Y" }}</p>
+                        <div class="mp-readonly-value">
+                            <i class="bi bi-at"></i>
+                            {{ user.username }}
+                            <span class="mp-readonly-badge">No editable</span>
+                        </div>
+                        <div class="mp-hint" style="margin-top: .5rem;">
+                            <i class="bi bi-info-circle"></i>
+                            El nombre de usuario no se puede cambiar por seguridad
+                        </div>
                     </div>
 
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Nombre de Usuario</label>
-                            <input type="text" class="form-control bg-light" value="{{ user.username }}" readonly disabled>
-                            <small class="text-muted">El nombre de usuario no se puede cambiar.</small>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.first_name.id_for_label }}" class="form-label small fw-bold">Nombre</label>
-                                {{ form.first_name }}
+                    <!-- Grid de campos editables -->
+                    <div class="mp-form-grid">
+                        <div class="mp-field">
+                            <label for="{{ form.first_name.id_for_label }}" class="mp-label">
+                                <i class="bi bi-person"></i>
+                                Nombre
+                            </label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <div class="mp-error">
+                                <i class="bi bi-exclamation-circle"></i>
+                                {{ form.first_name.errors.0 }}
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.last_name.id_for_label }}" class="form-label small fw-bold">Apellido</label>
-                                {{ form.last_name }}
-                            </div>
+                            {% endif %}
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.email.id_for_label }}" class="form-label small fw-bold">Email</label>
-                            {{ form.email }}
+                        <div class="mp-field">
+                            <label for="{{ form.last_name.id_for_label }}" class="mp-label">
+                                <i class="bi bi-person"></i>
+                                Apellido
+                            </label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <div class="mp-error">
+                                <i class="bi bi-exclamation-circle"></i>
+                                {{ form.last_name.errors.0 }}
+                            </div>
+                            {% endif %}
                         </div>
+                    </div>
 
-                        <div class="row justify-content-center gap-5">
-                            <button type="submit" class="btn btn-primary btn-lg col-md-4 mb-3">
-                                Guardar
-                            </button>
-                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary col-md-4 mb-3">
-                                Cancelar
-                            </a>
+                    <!-- Email -->
+                    <div class="mp-field full-width">
+                        <label for="{{ form.email.id_for_label }}" class="mp-label">
+                            <i class="bi bi-envelope"></i>
+                            Correo electrónico
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="mp-error">
+                            <i class="bi bi-exclamation-circle"></i>
+                            {{ form.email.errors.0 }}
                         </div>
-                    </form>
-                </div>
-                <div class="card-footer text-center py-3">
-                    <div class="small">
-                        <a href="{% url 'configuracion' %}" class="text-decoration-none">
-                            <i class="bi bi-shield-lock me-1"></i> ¿Deseas cambiar tu contraseña?
+                        {% endif %}
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="mp-actions">
+                        <button type="submit" class="mp-btn mp-btn-primary">
+                            <i class="bi bi-check-lg"></i>
+                            Guardar Cambios
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="mp-btn mp-btn-secondary">
+                            <i class="bi bi-x-lg"></i>
+                            Cancelar
                         </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer con enlace a configuración -->
+            <div class="mp-card-footer">
+                <a href="{% url 'configuracion' %}" class="mp-footer-link">
+                    <i class="bi bi-shield-lock"></i>
+                    ¿Deseas cambiar tu contraseña?
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Card adicional: Información de cuenta (opcional) -->
+        <div class="mp-card" style="margin-top: 1.5rem; opacity: 0.9;">
+            <div class="mp-card-body" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <i class="bi bi-shield-check" style="font-size: 1.5rem; color: var(--mp-primary);"></i>
+                    <div>
+                        <strong style="font-size: .9rem;">Estado de la cuenta</strong>
+                        <div style="font-size: .8rem; color: var(--mp-muted); margin-top: .2rem;">
+                            Último acceso: {{ user.last_login|date:"d/m/Y H:i"|default:"Nunca" }}
+                        </div>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <span class="mp-readonly-badge" style="background: var(--mp-success-lt); color: var(--mp-success);">
+                            <i class="bi bi-check-circle-fill"></i> Activa
+                        </span>
                     </div>
                 </div>
             </div>
@@ -62,24 +682,42 @@
     </div>
 </div>
 
-<style>
-    .user-dropdown-avatar {
-        background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 600;
-        border-radius: 50%;
-    }
-    [data-theme="dark"] .card {
-        background-color: var(--card-bg);
-        border: 1px solid var(--border-color);
-    }
-    [data-theme="dark"] .bg-light {
-        background-color: var(--body-bg) !important;
-        border-color: var(--border-color);
-        color: var(--text-main);
-    }
-</style>
+<script>
+    // Validación simple de email (opcional)
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailInput = document.querySelector('input[name="email"]');
+
+        if (emailInput) {
+            emailInput.addEventListener('blur', function() {
+                const email = this.value;
+                if (email && !email.includes('@')) {
+                    this.style.borderColor = 'var(--mp-danger)';
+
+                    // Mostrar mensaje de error si no existe
+                    if (!this.nextElementSibling?.classList.contains('mp-error')) {
+                        const error = document.createElement('div');
+                        error.className = 'mp-error';
+                        error.innerHTML = '<i class="bi bi-exclamation-circle"></i> Ingresa un email válido';
+                        this.parentNode.appendChild(error);
+                    }
+                } else {
+                    this.style.borderColor = '';
+                    const error = this.parentNode.querySelector('.mp-error');
+                    if (error) error.remove();
+                }
+            });
+        }
+
+        // Animación del avatar (pausar al hacer hover)
+        const avatar = document.querySelector('.mp-avatar');
+        if (avatar) {
+            avatar.addEventListener('mouseenter', () => {
+                avatar.style.animation = 'none';
+            });
+            avatar.addEventListener('mouseleave', () => {
+                avatar.style.animation = 'pulse 2s ease infinite';
+            });
+        }
+    });
+</script>
 {% endblock %}
