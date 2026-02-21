@@ -1,0 +1,741 @@
+
+/* Variables específicas de Alumnos (usando las variables globales como base) */
+.la {
+    font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
+    color: var(--text-main);
+}
+.la * {
+    box-sizing: border-box;
+}
+
+/*Header*/
+.la-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.la-head-left {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+.la-head-title {
+    font-family: 'Sora', 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+    letter-spacing: -.6px;
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    line-height: 1.1;
+}
+.la-head-title-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--primary-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    color: var(--primary-600);
+    flex-shrink: 0;
+}
+.la-breadcrumb {
+    font-size: .83rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin-top: .15rem;
+}
+.la-breadcrumb a {
+    color: var(--primary-500);
+    text-decoration: none;
+    font-weight: 600;
+}
+.la-breadcrumb a:hover {
+    text-decoration: underline;
+}
+.la-breadcrumb i {
+    font-size: .55rem;
+    opacity: .7;
+}
+
+/*Botones*/
+.la-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .7rem 1.4rem;
+    border-radius: 12px;
+    font-size: .9rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    text-decoration: none;
+    white-space: nowrap;
+    letter-spacing: .02em;
+    font-family: 'Outfit', sans-serif;
+}
+.la-btn i {
+    font-size: 1.1rem;
+}
+.la-btn-primary {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(7,86,163,.28);
+}
+.la-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(7,86,163,.38);
+    color: #fff;
+}
+.la-btn-ghost {
+    background: var(--card-bg);
+    color: var(--text-main);
+    border: 1.5px solid var(--border-color);
+}
+.la-btn-ghost:hover {
+    background: var(--gray-100);
+    border-color: var(--primary-500);
+    color: var(--primary-500);
+}
+
+/*Stats Cards*/
+.la-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+.la-stat {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 1.25rem;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: var(--transition-normal);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.la-stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    opacity: 0;
+    transition: opacity .2s;
+}
+.la-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+.la-stat:hover::before {
+    opacity: 1;
+}
+
+.la-stat:has(.green)::before {
+    background: linear-gradient(90deg, var(--success), transparent);
+}
+.la-stat:has(.amber)::before {
+    background: linear-gradient(90deg, var(--warning), transparent);
+}
+.la-stat:has(.red)::before {
+    background: linear-gradient(90deg, var(--danger), transparent);
+}
+.la-stat:has(.blue)::before {
+    background: linear-gradient(90deg, var(--primary-500), transparent);
+}
+
+.la-stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    transition: var(--transition-normal);
+}
+.la-stat:hover .la-stat-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+.la-stat-icon.green {
+    background: var(--success-light);
+    color: var(--success);
+}
+.la-stat-icon.amber {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+.la-stat-icon.red {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+.la-stat-icon.blue {
+    background: var(--primary-100);
+    color: var(--primary-600);
+}
+
+.la-stat-content {
+    flex: 1;
+}
+.la-stat-label {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-muted);
+    margin-bottom: .25rem;
+}
+.la-stat-value {
+    font-family: 'Sora', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text-main);
+    letter-spacing: -.5px;
+}
+.la-stat-trend {
+    font-size: .72rem;
+    color: var(--text-muted);
+    margin-top: .3rem;
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+}
+.la-stat-trend.ok {
+    color: var(--success);
+}
+.la-stat-trend.warn {
+    color: var(--warning);
+}
+.la-stat-trend.danger {
+    color: var(--danger);
+}
+
+/*Search Box*/
+.la-search-container {
+    margin-bottom: 1.75rem;
+}
+.la-search {
+    position: relative;
+    max-width: 400px;
+}
+.la-search i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+.la-search input {
+    width: 100%;
+    height: 48px;
+    padding: 0 1rem 0 2.8rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 14px;
+    background: var(--card-bg);
+    font-size: .95rem;
+    font-family: inherit;
+    color: var(--text-main);
+    transition: var(--transition-normal);
+}
+.la-search input:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 4px rgba(7,86,163,.1);
+}
+.la-search input::placeholder {
+    color: var(--text-muted);
+    opacity: .6;
+}
+
+/*Tabla principal*/
+.la-table-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+.la-table-header {
+    padding: 1.25rem 1.5rem;
+    background: var(--gray-100);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.la-table-title {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.la-table-title-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--primary-100);
+    color: var(--primary-600);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.la-table-title h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-main);
+}
+.la-table-count {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: .3rem 1rem;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+.la-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.la-table thead th {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-muted);
+    background: var(--gray-100);
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+}
+.la-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: var(--transition-normal);
+    cursor: pointer;
+}
+.la-table tbody tr:last-child {
+    border-bottom: none;
+}
+.la-table tbody tr:hover {
+    background: var(--primary-100);
+}
+.la-table tbody td {
+    padding: 1rem 1.5rem;
+    font-size: .9rem;
+    color: var(--text-main);
+    vertical-align: middle;
+}
+
+/*Avatar y celdas de nombre*/
+.la-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 8px rgba(7,86,163,.25);
+    text-transform: uppercase;
+}
+.la-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.la-name-info {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+.la-name-primary {
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--text-main);
+}
+.la-name-secondary {
+    font-size: .8rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+}
+
+/*Badges de estado*/
+.la-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .4rem 1rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+.la-badge i {
+    font-size: .75rem;
+}
+.la-badge-success {
+    background: var(--success-light);
+    color: var(--success);
+    border-color: rgba(16,185,129,.2);
+}
+.la-badge-warning {
+    background: var(--warning-light);
+    color: var(--warning);
+    border-color: rgba(245,158,11,.2);
+}
+.la-badge-danger {
+    background: var(--danger-light);
+    color: var(--danger);
+    border-color: rgba(239,68,68,.2);
+}
+.la-badge-secondary {
+    background: var(--gray-100);
+    color: var(--text-muted);
+    border-color: var(--border-color);
+}
+
+/*Badge de Curso*/
+.la-curso-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--gray-100);
+    border: 1.5px solid var(--border-color);
+    font-size: .9rem;
+    font-weight: 800;
+    color: var(--text-main);
+    transition: var(--transition-normal);
+}
+tr:hover .la-curso-badge {
+    border-color: var(--primary-500);
+    background: var(--primary-100);
+    color: var(--primary-600);
+}
+
+/*Acciones de fila (botones de acción)*/
+.la-row-actions {
+    display: flex;
+    gap: .35rem;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: var(--transition-normal);
+}
+tr:hover .la-row-actions {
+    opacity: 1;
+    transform: translateX(0);
+}
+.la-row-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: var(--transition-normal);
+}
+.la-row-action:hover {
+    background: var(--primary-500);
+    border-color: var(--primary-500);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+/*Estados Vacíos (Empty States)*/
+.la-empty {
+    padding: 5rem 2rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+.la-empty-illustration {
+    font-size: 5rem;
+    color: var(--primary-500);
+    opacity: .2;
+    margin-bottom: 1rem;
+}
+.la-empty h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: .5rem;
+}
+.la-empty p {
+    margin: 0 0 1.5rem;
+    font-size: .95rem;
+}
+.la-empty-actions {
+    display: flex;
+    gap: .75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/*Footer de la tabla*/
+.la-table-footer {
+    padding: 1rem 1.5rem;
+    background: var(--gray-100);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: .85rem;
+    color: var(--text-muted);
+}
+
+/*FAB (Botón flotante)*/
+.la-fab {
+    position: fixed;
+    right: 2rem;
+    bottom: 2rem;
+    z-index: 1100;
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 8px 24px rgba(7,86,163,.4);
+    cursor: pointer;
+    transition: var(--transition-normal);
+    text-decoration: none;
+}
+.la-fab:hover {
+    transform: translateY(-4px) scale(1.05);
+    color: #fff;
+}
+.la-fab-tooltip {
+    position: absolute;
+    right: calc(100% + 1rem);
+    background: var(--text-main);
+    color: var(--card-bg);
+    padding: .5rem 1rem;
+    border-radius: 12px;
+    font-size: .85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: var(--transition-normal);
+    pointer-events: none;
+}
+.la-fab:hover .la-fab-tooltip {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/*Responsive*/
+@media (max-width: 1024px) {
+    .la-filters-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .la-filters-actions {
+        grid-column: span 2;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 768px) {
+    .la-head {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .la-head-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+    .la-head-actions .la-btn {
+        width: 100%;
+    }
+    .la-stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    /*Transformación de tabla a tarjetas*/
+    .la-table-container {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+    .la-table-header {
+        border-radius: 16px;
+        margin-bottom: 1rem;
+    }
+    .la-table thead {
+        display: none;
+    }
+    .la-table tbody tr {
+        display: block;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1rem;
+        background: var(--card-bg);
+    }
+    .la-table tbody td {
+        display: block;
+        padding: 0.5rem 0;
+        text-align: left;
+        border: none;
+        width: 100% !important;
+    }
+
+    /* Ocultar columnas específicas en móvil */
+    .la-table tbody td[data-label="Curso"],
+    .la-table tbody td[data-label="Acciones"] {
+        display: none;
+    }
+
+    /* Títulos de las secciones (data-label) */
+    .la-table tbody td[data-label="ALUMNO"]::before,
+    .la-table tbody td[data-label="CARRERA / SEDE"]::before,
+    .la-table tbody td[data-label="ESTADO DE PAGO"]::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Ajustes específicos para celda de alumno */
+    .la-table tbody td[data-label="ALUMNO"] .la-name-cell {
+        width: 100%;
+    }
+    .la-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 0.95rem;
+    }
+    .la-name-primary {
+        font-size: 1rem;
+    }
+    .la-name-secondary {
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Ajustes para carrera/sede */
+    .la-table tbody td[data-label="CARRERA / SEDE"] .la-name-primary {
+        font-size: 0.95rem;
+    }
+    .la-table tbody td[data-label="CARRERA / SEDE"] .la-name-secondary {
+        font-size: 0.85rem;
+    }
+
+    /* Badges */
+    .la-badge {
+        display: inline-flex;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    /* Hover en móvil */
+    .la-table tbody tr:hover {
+        background: var(--primary-100);
+        transform: translateY(-2px);
+        transition: var(--transition-normal);
+    }
+
+    /* FAB móvil */
+    .la-fab {
+        right: 1rem;
+        bottom: 1rem;
+        display: flex;
+        width: 52px;
+        height: 52px;
+    }
+
+    .la-table-footer span:last-child {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .la-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .la-table tbody tr {
+        padding: 0.85rem;
+        margin-bottom: 1rem;
+    }
+    .la-table tbody td {
+        padding: 0.4rem 0;
+    }
+    .la-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.85rem;
+    }
+    .la-name-primary {
+        font-size: 0.95rem;
+    }
+    .la-name-secondary {
+        font-size: 0.8rem;
+    }
+    .la-badge {
+        padding: 0.4rem 0.85rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* ===== DARK MODE (Ajustes específicos para alumnos) ===== */
+[data-theme="dark"] .la-table tbody tr:hover {
+    background: rgba(7,86,163,0.15);
+}
+[data-theme="dark"] .la-table tbody td {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+[data-theme="dark"] .la-curso-badge {
+    background: var(--gray-200);
+    border-color: var(--gray-300);
+    color: var(--text-muted);
+}
