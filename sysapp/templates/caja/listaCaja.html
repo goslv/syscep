@@ -387,9 +387,11 @@
             </div>
         </div>
         <div class="lc-head-actions">
+            {% if user.is_staff %}
             <a href="{% url 'informe_caja' %}" class="lc-btn lc-btn-primary">
                 <i class="bi bi-file-earmark-bar-graph"></i> Informe
             </a>
+            {% endif %}
             <a href="{% url 'registrar_pago' %}" class="lc-btn lc-btn-success">
                 <i class="bi bi-plus-circle"></i> Ingreso
             </a>
