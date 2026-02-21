@@ -42,14 +42,13 @@
 
 <style>
     :root {
-
         /* Colores Primarios (Basados en el Logo) */
         --primary-50: #e6f7ff;
         --primary-100: #bae7ff;
         --primary-200: #91d5ff;
         --primary-300: #69c0ff;
-        --primary-400: #40a9ff;
-        --primary-500: #00bfff; /* Azul claro del logo */
+        --primary-400: rgba(64, 169, 255, 0.82);
+        --primary-500: rgba(0, 191, 255, 0.72); /* Azul claro del logo */
         --primary-rgb: 0, 191, 255;
         --primary-600: #1b3a4b; /* Azul oscuro del logo */
         --primary-700: #0050b3;
@@ -195,9 +194,9 @@
     }
 
     [data-theme="dark"] {
-        --gray-50: rgba(15, 23, 42, 0.6);
-        --gray-100: #0f172a;
-        --gray-200: #1f2937;
+        --gray-50: #1f2530;
+        --gray-100: #161c26;
+        --gray-200: #17202e;
         --gray-300: #334155;
         --gray-400: #94a3b8;
         --gray-500: #cbd5f5;
@@ -206,9 +205,9 @@
         --gray-800: #f1f5f9;
         --gray-900: #f8fafc;
 
-        --sidebar-bg: linear-gradient(180deg, #0b1220 0%, #1f2937 50%, #0b1220 100%);
-        --card-bg: #1e293b;
-        --body-bg: #0f172a;
+        --sidebar-bg: linear-gradient(180deg, #161c26 10%, #1f2937 50%, rgba(45, 45, 46, 0.92) 100%);
+        --card-bg: #161c26;
+        --body-bg: #161c26;
         --text-main: #f1f5f9;
         --text-muted: #94a3b8;
         --border-color: #334155;
@@ -275,7 +274,6 @@
         display: flex;
         align-items: center;
         gap: 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         flex-shrink: 0;
     }
 
@@ -478,11 +476,20 @@
         gap: 1rem;
     }
 
+    [data-theme="dark"] .top-bar {
+        background: var(--card-bg) !important;
+        box-shadow: var(--shadow-sm);
+    }
+
     .top-bar-left {
         display: flex;
         align-items: center;
         gap: 1rem;
         flex: 1;
+    }
+
+    [data-theme="dark"] .search-box input {
+        background: rgba(22, 28, 38, 0.46) !important;
     }
 
     .search-box-mobile-toggle {
@@ -598,7 +605,6 @@
         top: 0;
         position: fixed;
         width: calc(100% - var(--sidebar-width));
-        background: var(--gray-200);
     }
 
     .top-bar-right {
@@ -685,7 +691,7 @@
         width: 38px;
         height: 38px;
         border-radius: 50%;
-        background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+        background: linear-gradient(135deg, var(--primary-400), var(--primary-700));
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1762,7 +1768,6 @@
                 </a>
             </div>
 
-            {% if user.is_staff %}
             <!-- Funcionarios -->
             <div class="nav-item">
                 <a href="{% url 'lista_funcionarios' %}"
@@ -1771,7 +1776,6 @@
                     <span>Funcionarios</span>
                 </a>
             </div>
-            {% endif %}
         </div>
 
         <!-- Sección Académico -->

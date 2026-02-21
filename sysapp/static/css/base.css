@@ -661,7 +661,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0.85rem 1rem 0.5rem;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.06);
 }
 
 .notification-count {
@@ -694,6 +694,10 @@ body {
     text-align: left;
     width: 100%;
     transition: background 150ms ease;
+}
+
+[data-theme="dark"] .notification-panel-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
 .notification-item:hover {
@@ -1677,7 +1681,7 @@ body {
 }
 
 [data-theme="dark"] .notification-panel {
-    background: #0f172a;
+    background: #161c26;
     border-color: rgba(148, 163, 184, 0.2);
 }
 
