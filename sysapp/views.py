@@ -26,9 +26,7 @@ from .forms import (
 from .decorators import admin_required
 
 
-# ══════════════════════════════════════════════════════════════════════════
 #  AUTENTICACIÓN
-# ══════════════════════════════════════════════════════════════════════════
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -1022,6 +1020,8 @@ def lista_caja(request):
     context = {
         'ingresos': ingresos,
         'egresos': egresos,
+        'ingresos_hoy': ingresos_hoy,
+        'egresos_hoy': egresos_hoy,
         'total_ingresos': total_ingresos,
         'total_egresos': total_egresos,
         'balance': balance,
