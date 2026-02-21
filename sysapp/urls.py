@@ -44,6 +44,8 @@ urlpatterns = [
     path('funcionarios/crear/', views.crear_funcionario, name='crear_funcionario'),
     path('funcionarios/asistencia/', views.registrar_asistencia, name='registrar_asistencia'),
     path('funcionarios/asistencias/', views.lista_asistencias, name='lista_asistencias'),
+    path('funcionarios/<int:funcionario_id>/', views.detalle_funcionario, name='detalle_funcionario'),
+    path('funcionarios/<int:funcionario_id>/editar/', views.editar_funcionario, name='editar_funcionario'),
 
     # Sedes
     path('sedes/', views.lista_sedes, name='lista_sedes'),
