@@ -301,13 +301,13 @@
             <button class="lc-tab ingresos active" data-tab="ingresos">
                 <i class="bi bi-arrow-up-circle-fill"></i> Ingresos
                 <span style="background:rgba(5,150,105,.15);color:var(--lc-green);border-radius:999px;padding:.1rem .6rem;font-size:.72rem;">
-                    {{ ingresos|length }}
+                    {{ ingresos_hoy|length }}
                 </span>
             </button>
             <button class="lc-tab egresos" data-tab="egresos">
                 <i class="bi bi-arrow-down-circle-fill"></i> Egresos
                 <span style="background:rgba(220,38,38,.12);color:var(--lc-red);border-radius:999px;padding:.1rem .6rem;font-size:.72rem;">
-                    {{ egresos|length }}
+                    {{ egresos_hoy|length }}
                 </span>
             </button>
         </div>
@@ -319,11 +319,11 @@
             <div class="lc-toolbar">
                 <div class="lc-toolbar-left">
                     <span class="lc-chip lc-chip-day">
-                        <i class="bi bi-calendar-check"></i>{{ fecha_hoy }}
+                        <i class="bi bi-calendar-check"></i> Solo hoy — {{ fecha_hoy }}
                     </span>
                     <span class="lc-chip lc-chip-count">
                         <i class="bi bi-receipt"></i>
-                        {{ ingresos|length }} registro{{ ingresos|length|pluralize }}
+                        {{ ingresos_hoy|length }} registro{{ ingresos_hoy|length|pluralize }}
                     </span>
                 </div>
                 <div class="lc-toolbar-right">
@@ -354,7 +354,7 @@
                         </tr>
                         </thead>
                         <tbody id="tbody-ingresos">
-                        {% for pago in ingresos %}
+                        {% for pago in ingresos_hoy %}
                         <tr onclick="window.location.href='{% url 'detalle_pago' pago.uuid %}'"
                             data-num="{{ pago.numero_recibo|default:'' }}">
                             <td>
@@ -409,11 +409,11 @@
                     </table>
                 </div>
 
-                {% if ingresos %}
+                {% if ingresos_hoy %}
                 <div class="lc-table-footer">
                     <div class="lc-table-count">
                         <i class="bi bi-cash me-1"></i>
-                        {{ ingresos|length }} Registro{{ ingresos|length|pluralize }}
+                        {{ ingresos_hoy|length }} Registro{{ ingresos_hoy|length|pluralize }}
                     </div>
                     <span id="footer-ingresos">
                         <i class="bi bi-sort-numeric-down me-1"></i>N° Recibo: ASC
@@ -434,7 +434,7 @@
                     </span>
                     <span class="lc-chip lc-chip-count">
                         <i class="bi bi-arrow-down-circle"></i>
-                        {{ egresos|length }} egreso{{ egresos|length|pluralize }}
+                        {{ egresos_hoy|length }} egreso{{ egresos_hoy|length|pluralize }}
                     </span>
                 </div>
                 <div class="lc-toolbar-right">
@@ -465,7 +465,7 @@
                         </tr>
                         </thead>
                         <tbody id="tbody-egresos">
-                        {% for egreso in egresos %}
+                        {% for egreso in egresos_hoy %}
                         <tr onclick="window.location.href='{% url 'detalle_egreso' egreso.uuid %}'"
                             data-num="{{ egreso.numero_comprobante|default:'' }}">
                             <td>
@@ -518,11 +518,11 @@
                     </table>
                 </div>
 
-                {% if egresos %}
+                {% if egresos_hoy %}
                 <div class="lc-table-footer">
                     <div class="lc-table-count">
                         <i class="bi bi-cash me-1"></i>
-                        {{ egresos|length }} egreso{{ egresos|length|pluralize }}
+                        {{ egresos_hoy|length }} egreso{{ egresos_hoy|length|pluralize }}
                     </div>
                     <span id="footer-egresos">
                         <i class="bi bi-sort-numeric-down me-1"></i>N° Comp.: ASC
