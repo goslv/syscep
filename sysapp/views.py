@@ -1,9 +1,11 @@
 from django.contrib.auth.models import User
+from django.db import models
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.db.models import Sum, Count, Q
+from django.template import context
 from django.utils import timezone
 from django.contrib import messages
 from django.http import JsonResponse
@@ -104,34 +106,47 @@ def dashboard(request):
 
 @login_required
 def lista_alumnos(request):
-    alumnos   = Alumno.objects.filter(activo=True).select_related('carrera', 'sede')
-    sede_id   = request.GET.get('sede')
-    carrera_id= request.GET.get('carrera')
-    estado    = request.GET.get('estado')
-    busqueda  = request.GET.get('busqueda')
+    sede_id    = request.GET.get('sede')
+    carrera_id = request.GET.get('carrera')
+    estado     = request.GET.get('estado')
+    busqueda   = request.GET.get('busqueda')
+
+    # Totales globales — estado_pagos es @property Python, no campo de BD
+    # No se puede usar .filter(estado_pagos=...), igual que en dashboard
+    todos_activos    = list(Alumno.objects.filter(activo=True).select_related('carrera', 'sede'))
+    total_al_dia     = sum(1 for a in todos_activos if a.estado_pagos == 'AL_DIA')
+    total_por_vencer = sum(1 for a in todos_activos if a.estado_pagos == 'CERCANO_VENCIMIENTO')
+    total_atrasados  = sum(1 for a in todos_activos if a.estado_pagos == 'ATRASADO')
+    total_alumnos    = len(todos_activos)
+
+    # Filtrar en Python
+    alumnos = todos_activos
 
     if sede_id:
-        alumnos = alumnos.filter(sede_id=sede_id)
+        alumnos = [a for a in alumnos if str(a.sede_id) == sede_id]
     if carrera_id:
-        alumnos = alumnos.filter(carrera_id=carrera_id)
+        alumnos = [a for a in alumnos if str(a.carrera_id) == carrera_id]
     if busqueda:
-        alumnos = alumnos.filter(
-            Q(nombre__icontains=busqueda) |
-            Q(apellido__icontains=busqueda) |
-            Q(cedula__icontains=busqueda)
-        )
-
-    alumnos_list = list(alumnos)
+        b = busqueda.lower()
+        alumnos = [
+            a for a in alumnos
+            if b in a.nombre.lower()
+               or b in a.apellido.lower()
+               or b in (a.cedula or '').lower()
+        ]
     if estado:
-        alumnos_list = [a for a in alumnos_list if a.estado_pagos == estado]
+        alumnos = [a for a in alumnos if a.estado_pagos == estado]
 
     return render(request, 'alumnos/listaAlumnos.html', {
-        'alumnos':  alumnos_list,
-        'sedes':    Sede.objects.filter(activa=True),
-        'carreras': Carrera.objects.filter(activa=True),
-        'filtros':  {'sede': sede_id, 'carrera': carrera_id, 'estado': estado, 'busqueda': busqueda},
+        'alumnos':          alumnos,
+        'total_al_dia':     total_al_dia,
+        'total_por_vencer': total_por_vencer,
+        'total_atrasados':  total_atrasados,
+        'total_alumnos':    total_alumnos,
+        'sedes':            Sede.objects.filter(activa=True),
+        'carreras':         Carrera.objects.filter(activa=True),
+        'filtros':          {'sede': sede_id, 'carrera': carrera_id, 'estado': estado, 'busqueda': busqueda},
     })
-
 
 @login_required
 def detalle_alumno(request, alumno_uuid):
@@ -526,7 +541,6 @@ def eliminar_pago(request, pago_uuid):
 #  FUNCIONARIOS
 
 @login_required
-@admin_required
 def lista_funcionarios(request):
     funcionarios = Funcionario.objects.filter(activo=True).select_related('sede')
     cargo   = request.GET.get('cargo')
@@ -541,7 +555,6 @@ def lista_funcionarios(request):
 
 
 @login_required
-@admin_required
 def crear_funcionario(request):
     if request.method == 'POST':
         form = FuncionarioForm(request.POST)
@@ -557,7 +570,6 @@ def crear_funcionario(request):
 
 
 @login_required
-@admin_required
 def registrar_asistencia(request):
     if request.method == 'POST':
         form = AsistenciaForm(request.POST)
@@ -574,7 +586,6 @@ def registrar_asistencia(request):
 
 
 @login_required
-@admin_required
 def lista_asistencias(request):
     asistencias  = AsistenciaFuncionario.objects.all().select_related('funcionario').order_by('-fecha')
     fecha        = request.GET.get('fecha')
@@ -586,10 +597,71 @@ def lista_asistencias(request):
         'funcionarios': Funcionario.objects.filter(activo=True),
     })
 
+@login_required
+def detalle_funcionario(request, funcionario_id):
+    funcionario = get_object_or_404(Funcionario, pk=funcionario_id)
 
-# ══════════════════════════════════════════════════════════════════════════
+    hoy   = timezone.now().date()
+    anio  = int(request.GET.get('anio', hoy.year))
+    mes   = int(request.GET.get('mes',  hoy.month))
+
+    asistencias_mes = funcionario.asistencias.filter(
+        fecha__year=anio, fecha__month=mes
+    ).order_by('-fecha')
+
+    # ── Totales del mes seleccionado ──────────────────────────────────
+    total_presencias = asistencias_mes.filter(presente=True).count()
+    total_ausencias  = asistencias_mes.filter(presente=False).count()
+    total_horas_mes  = asistencias_mes.aggregate(
+        models.Sum('horas_trabajadas')
+    )['horas_trabajadas__sum'] or 0
+
+    egresos = funcionario.egresos_funcionario.all().order_by('-fecha')
+    total_egresos_pagados = funcionario.total_egresos()
+
+    historial_asistencias = funcionario.asistencias.all()[:50]
+
+    MESES = [
+        (1,'Enero'),(2,'Febrero'),(3,'Marzo'),(4,'Abril'),
+        (5,'Mayo'),(6,'Junio'),(7,'Julio'),(8,'Agosto'),
+        (9,'Septiembre'),(10,'Octubre'),(11,'Noviembre'),(12,'Diciembre'),
+    ]
+    anios_disponibles = list(range(hoy.year - 3, hoy.year + 1))
+
+    return render(request, 'funcionarios/detalleFuncionario.html', {
+        'funcionario':          funcionario,
+        'asistencias_mes':      asistencias_mes,
+        'total_presencias':     total_presencias,
+        'total_ausencias':      total_ausencias,
+        'total_horas_mes':      total_horas_mes,
+        'egresos':              egresos,
+        'total_egresos_pagados':total_egresos_pagados,
+        'historial_asistencias':historial_asistencias,
+        'mes_seleccionado':     mes,
+        'anio_seleccionado':    anio,
+        'meses':                MESES,
+        'anios':                anios_disponibles,
+    })
+
+@login_required
+def editar_funcionario(request, funcionario_id):
+    funcionario = get_object_or_404(Funcionario, pk=funcionario_id)
+    if request.method == 'POST':
+        form = FuncionarioForm(request.POST, instance=funcionario)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Funcionario {funcionario.nombre_completo} actualizado exitosamente.')
+            return redirect('detalle_funcionario', funcionario_id=funcionario.id)
+    else:
+        form = FuncionarioForm(instance=funcionario)
+    return render(request, 'funcionarios/formFuncionario.html', {
+        'form':       form,
+        'funcionario':funcionario,
+        'titulo':     f'Editar Funcionario: {funcionario.nombre_completo}',
+        'boton':      'Guardar Cambios',
+    })
+
 #  SEDES
-# ══════════════════════════════════════════════════════════════════════════
 
 @login_required
 @admin_required
@@ -598,7 +670,6 @@ def lista_sedes(request):
     sedes = Sede.objects.filter(activa=True)
     sedes_data = [{'sede': s, 'ingresos_hoy': s.rendicion_dia(hoy)['total_ingresos']} for s in sedes]
     return render(request, 'sedes/listaSedes.html', {'sedes_data': sedes_data, 'fecha': hoy})
-
 
 @login_required
 @admin_required
