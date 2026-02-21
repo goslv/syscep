@@ -538,19 +538,36 @@ def eliminar_pago(request, pago_uuid):
 
 #  FUNCIONARIOS
 
-@login_required
 def lista_funcionarios(request):
-    funcionarios = Funcionario.objects.filter(activo=True).select_related('sede')
-    cargo   = request.GET.get('cargo')
-    sede_id = request.GET.get('sede')
-    if cargo:   funcionarios = funcionarios.filter(cargo=cargo)
-    if sede_id: funcionarios = funcionarios.filter(sede_id=sede_id)
-    return render(request, 'funcionarios/listaFuncionarios.html', {
-        'funcionarios': funcionarios,
-        'sedes':        Sede.objects.filter(activa=True),
-        'cargos':       Funcionario.CARGO_CHOICES,
-    })
+    funcionarios = Funcionario.objects.select_related('sede').all()
 
+    # Filtros
+    cargo = request.GET.get('cargo')
+    sede  = request.GET.get('sede')
+    activo = request.GET.get('activo')
+
+    if cargo:
+        funcionarios = funcionarios.filter(cargo=cargo)
+    if sede:
+        funcionarios = funcionarios.filter(sede_id=sede)
+    if activo:
+        funcionarios = funcionarios.filter(activo=(activo == 'true'))
+
+    #Totales para las stat-cards
+    todos = Funcionario.objects.all()
+
+    context = {
+        'funcionarios':        funcionarios,
+        'total_funcionarios':  funcionarios.count(),
+        'sedes':               Sede.objects.all(),
+        'cargos':              Funcionario.CARGO_CHOICES,
+
+        'total_docencia':      todos.filter(cargo='DOCENCIA').count(),
+        'total_administrativo': todos.filter(cargo='ADMINISTRATIVO').count(),
+        'total_direccion':     todos.filter(cargo='DIRECCION').count(),
+        'total_activos':       todos.filter(activo=True).count(),
+    }
+    return render(request, 'funcionarios/listaFuncionarios.html', context)
 
 @login_required
 def crear_funcionario(request):
