@@ -1,0 +1,548 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ funcionario.nombre_completo }} - ITS CEP{% endblock %}
+{% block page_title %}Perfil de Funcionario{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    :root {
+        --df-bg:         #f8fafc;
+        --df-surface:    #ffffff;
+        --df-ink:        #0f1825;
+        --df-muted:      #5e6f88;
+        --df-border:     #e1e9f0;
+        --df-primary: #1c3037;
+        --df-primary-dk: #204263;
+        --df-primary-lt: #eef2ff;
+        --df-success:    #10b981;
+        --df-success-lt: #e4f9f0;
+        --df-danger:     #ef4444;
+        --df-danger-lt:  #fee9e9;
+        --df-warning:    #f59e0b;
+        --df-warning-lt: #fef5e5;
+        --df-info:       #0ea5e9;
+        --df-info-lt:    #e0f2fe;
+        --df-gray-lt:    #f1f5f9;
+        --df-sh-sm:  0 2px 8px rgba(0,0,0,.04);
+        --df-sh-md:  0 4px 16px rgba(0,0,0,.06);
+        --df-sh-lg:  0 12px 32px rgba(0,0,0,.08);
+        --df-tr:     all .2s cubic-bezier(.4,0,.2,1);
+    }
+
+    [data-theme="dark"] {
+        --df-bg:         #0e121b;
+        --df-surface:    #161c26;
+        --df-ink:        #edf2f9;
+        --df-muted:      #8f9fb2;
+        --df-border:     #232b36;
+        --df-primary-lt: #1e333a;
+        --df-success-lt: #12352d;
+        --df-danger-lt:  #2f1518;
+        --df-warning-lt: #302010;
+        --df-info-lt:    #0c2a3a;
+        --df-gray-lt:    #1e2630;
+    }
+
+    .df { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--df-ink); padding: 1.5rem; }
+    .df * { box-sizing: border-box; }
+
+    /* ── Header ──────────────────────────────────────────────── */
+    .df-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem; }
+    .df-breadcrumb { font-size:.85rem; color:var(--df-muted); display:flex; align-items:center; gap:.5rem; }
+    .df-breadcrumb a { color:var(--df-primary); text-decoration:none; font-weight:600; }
+    .df-breadcrumb a:hover { text-decoration:underline; }
+    .df-head-actions { display:flex; gap:.75rem; }
+
+    /* ── Hero card ───────────────────────────────────────────── */
+    .df-hero {
+        background: linear-gradient(135deg, var(--df-primary) 0%, var(--df-primary-dk) 100%);
+        border-radius: 24px;
+        padding: 2rem;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 1.75rem;
+        box-shadow: var(--df-sh-lg);
+        flex-wrap: wrap;
+    }
+    .df-hero-avatar {
+        width: 90px; height: 90px; min-width: 90px;
+        border-radius: 24px;
+        background: rgba(255,255,255,.2);
+        border: 3px solid rgba(255,255,255,.35);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem; font-weight: 800; color: white;
+        backdrop-filter: blur(10px);
+    }
+    .df-hero-info { flex: 1; }
+    .df-hero-name { font-size: 1.8rem; font-weight: 800; margin: 0 0 .25rem; letter-spacing: -0.5px; }
+    .df-hero-sub  { font-size: 1rem; opacity: .85; margin: 0 0 1rem; display:flex; align-items:center; gap:.5rem; }
+    .df-hero-tags { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .df-hero-tag  {
+        background: rgba(255,255,255,.15);
+        border: 1px solid rgba(255,255,255,.25);
+        border-radius: 999px;
+        padding: .35rem .9rem;
+        font-size: .8rem; font-weight: 600;
+        display: flex; align-items: center; gap: .4rem;
+        backdrop-filter: blur(10px);
+    }
+    .df-hero-stats { display:flex; gap:2rem; text-align:center; flex-wrap:wrap; }
+    .df-hero-stat-val  { font-size: 2rem; font-weight: 800; line-height: 1; }
+    .df-hero-stat-label{ font-size: .75rem; opacity: .8; margin-top: .25rem; }
+
+    /* ── Grid layout ─────────────────────────────────────────── */
+    .df-grid { display: grid; grid-template-columns: 340px 1fr; gap: 1.75rem; align-items: start; }
+    @media (max-width: 1024px) { .df-grid { grid-template-columns: 1fr; } }
+
+    /* ── Card base ───────────────────────────────────────────── */
+    .df-card {
+        background: var(--df-surface);
+        border: 1px solid var(--df-border);
+        border-radius: 20px;
+        box-shadow: var(--df-sh-md);
+        overflow: hidden;
+        margin-bottom: 1.75rem;
+    }
+    .df-card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--df-border);
+        background: var(--df-gray-lt);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .df-card-title {
+        display: flex; align-items: center; gap: .65rem;
+        font-size: 1rem; font-weight: 700; margin: 0;
+    }
+    .df-card-title i {
+        font-size: 1rem;
+        color: var(--df-primary);
+        background: var(--df-primary-lt);
+        padding: .4rem;
+        border-radius: 10px;
+    }
+    [data-theme="dark"] .df-card-title i {
+        color: #91d5ff !important;
+        background: var(--df-primary);
+
+    }
+    .df-card-body { padding: 1.5rem; }
+
+    /* ── Info list ───────────────────────────────────────────── */
+    .df-info-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .9rem; }
+    .df-info-item { display: flex; align-items: flex-start; gap: 1rem; }
+    .df-info-icon {
+        width: 36px; height: 36px; min-width: 36px;
+        border-radius: 10px; background: var(--df-primary-lt); color: var(--df-primary);
+        display: flex; align-items: center; justify-content: center; font-size: .95rem;
+    }
+    [data-theme="dark"] .df-info-icon { background: var(--df-primary); color: #91d5ff !important; }
+    .df-info-content { flex: 1; }
+    .df-info-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--df-muted); }
+    .df-info-value { font-size: .95rem; font-weight: 600; color: var(--df-ink); margin-top: .15rem; }
+
+    /* ── Stats mini ──────────────────────────────────────────── */
+    .df-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.75rem; }
+    @media (max-width:600px) { .df-stats-row { grid-template-columns: 1fr 1fr; } }
+    .df-stat-mini {
+        background: var(--df-surface);
+        border: 1px solid var(--df-border);
+        border-radius: 16px;
+        padding: 1.25rem 1rem;
+        box-shadow: var(--df-sh-sm);
+        text-align: center;
+        transition: var(--df-tr);
+    }
+    .df-stat-mini:hover { transform: translateY(-3px); box-shadow: var(--df-sh-md); }
+    .df-stat-mini-icon {
+        width: 44px; height: 44px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; margin: 0 auto .5rem;
+    }
+    .df-stat-mini-val   { font-size: 1.6rem; font-weight: 800; line-height: 1; color: var(--df-ink); }
+    .df-stat-mini-label { font-size: .72rem; color: var(--df-muted); margin-top: .25rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+
+    /* ── Mes selector ────────────────────────────────────────── */
+    .df-mes-form {
+        display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+        background: var(--df-gray-lt);
+        border: 1px solid var(--df-border);
+        border-radius: 14px;
+        padding: .85rem 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    .df-mes-form label { font-size: .8rem; font-weight: 700; color: var(--df-muted); text-transform: uppercase; letter-spacing: .05em; }
+    .df-mes-form select {
+        height: 38px; padding: 0 .75rem;
+        border: 1.5px solid var(--df-border); border-radius: 10px;
+        background: var(--df-surface); color: var(--df-ink);
+        font-size: .9rem; font-family: inherit;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235e6f88' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right .6rem center;
+        background-size: 14px;
+        padding-right: 2rem;
+        cursor: pointer;
+    }
+    .df-mes-form select:focus { outline: none; border-color: var(--df-primary); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
+
+    /* ── Table ───────────────────────────────────────────────── */
+    .df-table-wrap { overflow-x: auto; }
+    .df-table { width: 100%; border-collapse: collapse; }
+    .df-table thead th {
+        padding: .85rem 1.25rem;
+        text-align: left;
+        font-size: .72rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .08em;
+        color: var(--df-muted);
+        background: var(--df-gray-lt);
+        border-bottom: 2px solid var(--df-border);
+        white-space: nowrap;
+    }
+    .df-table tbody tr { border-bottom: 1px solid var(--df-border); transition: var(--df-tr); }
+    .df-table tbody tr:last-child { border-bottom: none; }
+    .df-table tbody tr:hover { background: var(--df-primary-lt); }
+    .df-table tbody td { padding: .9rem 1.25rem; font-size: .9rem; color: var(--df-ink); vertical-align: middle; }
+
+    /* ── Badge ───────────────────────────────────────────────── */
+    .df-badge {
+        display: inline-flex; align-items: center; gap: .35rem;
+        padding: .3rem .8rem; border-radius: 999px;
+        font-size: .78rem; font-weight: 700; border: 1px solid transparent;
+    }
+    .df-badge-success  { background:var(--df-success-lt);  color:var(--df-success);  border-color:rgba(16,185,129,.2); }
+    .df-badge-danger   { background:var(--df-danger-lt);   color:var(--df-danger);   border-color:rgba(239,68,68,.2); }
+    .df-badge-primary  { background:var(--df-primary-lt);  color:var(--df-primary);  border-color:rgba(99,102,241,.2); }
+    .df-badge-warning  { background:var(--df-warning-lt);  color:var(--df-warning);  border-color:rgba(245,158,11,.2); }
+    .df-badge-info     { background:var(--df-info-lt);     color:var(--df-info);     border-color:rgba(14,165,233,.2); }
+    .df-badge-secondary{ background:var(--df-gray-lt);     color:var(--df-muted);    border-color:var(--df-border); }
+
+    /* ── Egreso row ──────────────────────────────────────────── */
+    .df-egreso-monto { font-weight: 700; font-size: 1rem; color: var(--df-danger); }
+
+    /* ── Btn ─────────────────────────────────────────────────── */
+    .df-btn {
+        display: inline-flex; align-items: center; gap: .5rem;
+        padding: .65rem 1.25rem; border-radius: 12px;
+        font-size: .875rem; font-weight: 700; border: none;
+        cursor: pointer; transition: var(--df-tr); text-decoration: none;
+        white-space: nowrap;
+    }
+    .df-btn i { font-size: 1rem; }
+    .df-btn-primary  { background: linear-gradient(135deg,var(--df-primary) 0%,var(--df-primary-dk) 100%); color:#fff; font-size: .875rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+    .df-btn-primary:hover  { transform:translateY(-2px); box-shadow:0 8px 20px rgba(99,102,241,.35); color:#fff; }
+    .df-btn-outline  { background:var(--df-surface); color:var(--df-ink); border:1.5px solid var(--df-border); }
+    .df-btn-outline:hover  { background:var(--df-gray-lt); border-color:var(--df-primary); color:var(--df-primary); }
+    .df-btn-success  { background:linear-gradient(135deg,var(--df-success) 0%,#0b9e6e 100%); color:#fff; box-shadow:0 4px 12px rgba(16,185,129,.25); }
+    .df-btn-success:hover  { transform:translateY(-2px); color:#fff; }
+    .df-btn-warning  { background:linear-gradient(135deg,var(--df-warning) 0%,#d97706 100%); color:#fff; box-shadow:0 4px 12px rgba(245,158,11,.25); }
+    .df-btn-warning:hover  { transform:translateY(-2px); color:#fff; }
+    .df-btn-sm { padding: .4rem .85rem; font-size: .8rem; border-radius: 9px; }
+
+    /* ── Empty state ─────────────────────────────────────────── */
+    .df-empty { padding: 3rem 1.5rem; text-align: center; color: var(--df-muted); }
+    .df-empty i { font-size: 3rem; opacity: .25; display: block; margin-bottom: .75rem; }
+    .df-empty p { margin: 0; font-size: .9rem; }
+
+    /* ── Total horas resumen ─────────────────────────────────── */
+    .df-horas-summary {
+        background: linear-gradient(135deg, var(--df-info) 0%, #0284c7 100%);
+        border-radius: 16px; padding: 1.25rem 1.5rem; color: white;
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 1.25rem; flex-wrap: wrap; gap: .75rem;
+    }
+    .df-horas-summary-label { font-size: .85rem; opacity: .9; display:flex; align-items:center; gap:.5rem; }
+    .df-horas-summary-val   { font-size: 2rem; font-weight: 800; }
+
+    /* ── Animaciones ─────────────────────────────────────────── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .df-hero    { animation: fadeUp .35s ease both; }
+    .df-card    { animation: fadeUp .35s ease both; }
+    .df-card:nth-child(1) { animation-delay: .05s; }
+    .df-card:nth-child(2) { animation-delay: .10s; }
+    .df-card:nth-child(3) { animation-delay: .15s; }
+    .df-stat-mini { animation: fadeUp .3s ease both; }
+    .df-stat-mini:nth-child(1) { animation-delay: .08s; }
+    .df-stat-mini:nth-child(2) { animation-delay: .13s; }
+    .df-stat-mini:nth-child(3) { animation-delay: .18s; }
+</style>
+
+<div class="df mt-5">
+
+    <!-- ── Header / breadcrumb ──────────────────────────────── -->
+    <div class="df-head">
+        <div class="df-breadcrumb">
+            <a href="{% url 'dashboard' %}">Inicio</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{% url 'lista_funcionarios' %}">Funcionarios</a>
+            <i class="bi bi-chevron-right"></i>
+            <span>{{ funcionario.nombre_completo }}</span>
+        </div>
+        <div class="df-head-actions">
+            <a href="{% url 'editar_funcionario' funcionario.id %}" class="df-btn df-btn-warning">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="{% url 'registrar_asistencia' %}?funcionario={{ funcionario.id }}" class="df-btn df-btn-success">
+                <i class="bi bi-calendar-check"></i> Registrar Asistencia
+            </a>
+        </div>
+    </div>
+
+    <!-- ── Hero card ────────────────────────────────────────── -->
+    <div class="df-hero">
+        <div class="df-hero-avatar">
+            {{ funcionario.nombre|first|upper }}{{ funcionario.apellido|first|upper }}
+        </div>
+        <div class="df-hero-info">
+            <h1 class="df-hero-name">{{ funcionario.nombre_completo }}</h1>
+            <p class="df-hero-sub">
+                <i class="bi bi-building"></i>
+                {{ funcionario.sede.nombre }}
+            </p>
+            <div class="df-hero-tags">
+                <span class="df-hero-tag">
+                    <i class="bi bi-briefcase-fill"></i>
+                    {{ funcionario.get_cargo_display }}
+                </span>
+                <span class="df-hero-tag">
+                    <i class="bi bi-card-text"></i>
+                    CI: {{ funcionario.cedula }}
+                </span>
+                {% if funcionario.activo %}
+                <span class="df-hero-tag" style="background:rgba(16,185,129,.2); border-color:rgba(16,185,129,.35);">
+                    <i class="bi bi-check-circle-fill"></i> Activo
+                </span>
+                {% else %}
+                <span class="df-hero-tag" style="background:rgba(239,68,68,.2); border-color:rgba(239,68,68,.35);">
+                    <i class="bi bi-x-circle-fill"></i> Inactivo
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="df-hero-stats">
+            {% if user.is_staff %}
+            <div>
+                <div class="df-hero-stat-val">{{ total_egresos_pagados|floatformat:0 }}</div>
+                <div class="df-hero-stat-label">Gs. pagados</div>
+            </div>
+            {% endif %}
+            <div>
+                <div class="df-hero-stat-val">{{ egresos.count }}</div>
+                <div class="df-hero-stat-label">Liquidaciones</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Layout 2 columnas ─────────────────────────────────── -->
+    <div class="df-grid">
+
+        <!-- Columna izquierda: datos personales -->
+        <div>
+            <div class="df-card">
+                <div class="df-card-header">
+                    <h2 class="df-card-title"><i class="bi bi-person-lines-fill"></i> Datos personales</h2>
+                </div>
+                <div class="df-card-body">
+                    <ul class="df-info-list">
+                        <li class="df-info-item">
+                            <div class="df-info-icon"><i class="bi bi-telephone-fill"></i></div>
+                            <div class="df-info-content">
+                                <div class="df-info-label">Teléfono principal</div>
+                                <div class="df-info-value">{{ funcionario.telefono_principal }}</div>
+                            </div>
+                        </li>
+                        {% if funcionario.telefono_secundario %}
+                        <li class="df-info-item">
+                            <div class="df-info-icon"><i class="bi bi-telephone"></i></div>
+                            <div class="df-info-content">
+                                <div class="df-info-label">Teléfono secundario</div>
+                                <div class="df-info-value">{{ funcionario.telefono_secundario }}</div>
+                            </div>
+                        </li>
+                        {% endif %}
+                        <li class="df-info-item">
+                            <div class="df-info-icon"><i class="bi bi-calendar3"></i></div>
+                            <div class="df-info-content">
+                                <div class="df-info-label">Fecha de ingreso</div>
+                                <div class="df-info-value">{{ funcionario.fecha_ingreso|date:"d \d\e F \d\e Y" }}</div>
+                            </div>
+                        </li>
+                        <li class="df-info-item">
+                            <div class="df-info-icon"><i class="bi bi-building"></i></div>
+                            <div class="df-info-content">
+                                <div class="df-info-label">Sede</div>
+                                <div class="df-info-value">{{ funcionario.sede.nombre }}</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Sueldos / egresos asociados -->
+            <div class="df-card">
+                <div class="df-card-header">
+                    <h2 class="df-card-title"><i class="bi bi-cash-stack"></i> Historial de sueldos</h2>
+                    <a href="{% url 'registrar_egreso' %}" class="df-btn df-btn-primary df-btn-sm">
+                        <i class="bi bi-plus"></i>
+                    </a>
+                </div>
+                <div class="df-card-body" style="padding:0;">
+                    {% if egresos %}
+                    <div class="df-table-wrap">
+                        <table class="df-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Concepto</th>
+                                    <th>Monto</th>
+                                    <th>Comprobante</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eg in egresos %}
+                                <tr>
+                                    <td>{{ eg.fecha|date:"d/m/Y" }}</td>
+                                    <td style="max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ eg.concepto }}</td>
+                                    <td class="df-egreso-monto">Gs. {{ eg.monto|floatformat:0 }}</td>
+                                    <td>
+                                        {% if eg.numero_comprobante %}
+                                        <span class="df-badge df-badge-secondary"># {{ eg.numero_comprobante }}</span>
+                                        {% else %}
+                                        <span style="color:var(--df-muted); font-size:.8rem;">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="padding:.85rem 1.25rem; background:var(--df-gray-lt); border-top:1px solid var(--df-border); text-align:right;">
+                        <span style="font-size:.85rem; color:var(--df-muted);">Total:</span>
+                        <strong style="font-size:1.1rem; color:var(--df-danger); margin-left:.5rem;">
+                            Gs. {{ total_egresos_pagados|floatformat:0 }}
+                        </strong>
+                    </div>
+                    {% else %}
+                    <div class="df-empty">
+                        <i class="bi bi-cash"></i>
+                        <p>Sin sueldos registrados todavía.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: asistencias -->
+        <div>
+
+            <!-- Stats del mes -->
+            <div class="df-stats-row">
+                <div class="df-stat-mini">
+                    <div class="df-stat-mini-icon" style="background:var(--df-success-lt); color:var(--df-success);">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="df-stat-mini-val">{{ total_presencias }}</div>
+                    <div class="df-stat-mini-label">Presencias</div>
+                </div>
+                <div class="df-stat-mini">
+                    <div class="df-stat-mini-icon" style="background:var(--df-danger-lt); color:var(--df-danger);">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </div>
+                    <div class="df-stat-mini-val">{{ total_ausencias }}</div>
+                    <div class="df-stat-mini-label">Ausencias</div>
+                </div>
+                <div class="df-stat-mini">
+                    <div class="df-stat-mini-icon" style="background:var(--df-info-lt); color:var(--df-info);">
+                        <i class="bi bi-clock-fill"></i>
+                    </div>
+                    <div class="df-stat-mini-val">{{ total_horas_mes|floatformat:1 }}</div>
+                    <div class="df-stat-mini-label">Horas del mes</div>
+                </div>
+            </div>
+
+            <!-- Selector de mes/año -->
+            <div class="df-card">
+                <div class="df-card-header">
+                    <h2 class="df-card-title"><i class="bi bi-calendar-month"></i> Asistencias del mes</h2>
+                </div>
+                <div class="df-card-body">
+                    <!-- Filtro -->
+                    <form method="get" class="df-mes-form">
+                        <label for="selMes">Mes:</label>
+                        <select name="mes" id="selMes" onchange="this.form.submit()">
+                            {% for num, nombre in meses %}
+                            <option value="{{ num }}" {% if num == mes_seleccionado %}selected{% endif %}>{{ nombre }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="selAnio">Año:</label>
+                        <select name="anio" id="selAnio" onchange="this.form.submit()">
+                            {% for a in anios %}
+                            <option value="{{ a }}" {% if a == anio_seleccionado %}selected{% endif %}>{{ a }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+
+                    {% if total_horas_mes %}
+                    <div class="df-horas-summary">
+                        <span class="df-horas-summary-label"><i class="bi bi-clock-history"></i> Total horas trabajadas este mes</span>
+                        <span class="df-horas-summary-val">{{ total_horas_mes|floatformat:1 }} h</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Tabla asistencias del mes -->
+                    {% if asistencias_mes %}
+                    <div class="df-table-wrap">
+                        <table class="df-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Horas</th>
+                                    <th>Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for a in asistencias_mes %}
+                                <tr>
+                                    <td>{{ a.fecha|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if a.presente %}
+                                        <span class="df-badge df-badge-success"><i class="bi bi-check-circle-fill"></i> Presente</span>
+                                        {% else %}
+                                        <span class="df-badge df-badge-danger"><i class="bi bi-x-circle-fill"></i> Ausente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if a.horas_trabajadas %}
+                                        <span class="df-badge df-badge-info">
+                                            <i class="bi bi-clock"></i> {{ a.horas_trabajadas }}h
+                                        </span>
+                                        {% else %}
+                                        <span style="color:var(--df-muted); font-size:.85rem;">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--df-muted);">
+                                        {{ a.observaciones|default:"—" }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="df-empty">
+                        <i class="bi bi-calendar-x"></i>
+                        <p>No hay asistencias registradas para este mes.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div><!-- /columna derecha -->
+    </div><!-- /grid -->
+</div>
+{% endblock %}
