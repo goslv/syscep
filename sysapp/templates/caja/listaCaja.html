@@ -20,6 +20,7 @@
         --lc-blue:     #0756a3;
         --lc-blue-dk:  #071e60;
         --lc-blue-lt:  #e9f0fe;
+        --lc-gray-lt:  #f1f5f9;
         --lc-sh:       0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.06);
         --lc-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -32,6 +33,7 @@
         --lc-green-lt: #0a2118;
         --lc-red-lt:   #220d0d;
         --lc-blue-lt:  #0d1e35;
+        --lc-gray-lt:  #181c23;
         --lc-sh:       0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.5);
     }
 
@@ -44,7 +46,6 @@
         margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
     }
     .lc-head-left { display: flex; flex-direction: column; gap: .25rem; }
-
     .lc-head-title {
         font-family: 'Sora', 'Plus Jakarta Sans', sans-serif;
         font-size: 1.9rem; font-weight: 800; color: var(--lc-ink);
@@ -64,7 +65,6 @@
     .lc-breadcrumb a { color: var(--lc-blue); text-decoration: none; font-weight: 600; }
     .lc-breadcrumb a:hover { text-decoration: underline; }
     .lc-breadcrumb i { font-size: .55rem; opacity: .7; }
-
     .lc-head-actions { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
 
     /* ─── Botones ─────────────────────────────────────────── */
@@ -76,52 +76,48 @@
         text-decoration: none; white-space: nowrap;
     }
     .lc-btn i { font-size: 1rem; }
-    .lc-btn-primary {
-        background: linear-gradient(135deg, var(--lc-blue), var(--lc-blue-dk));
-        color: #fff; box-shadow: 0 4px 12px rgba(7,86,163,.25);
-    }
+    .lc-btn-primary { background: linear-gradient(135deg, var(--lc-blue), var(--lc-blue-dk)); color: #fff; box-shadow: 0 4px 12px rgba(7,86,163,.25); }
     .lc-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(7,86,163,.35); color: #fff; }
-    .lc-btn-success {
-        background: linear-gradient(135deg, var(--lc-green), #047857);
-        color: #fff; box-shadow: 0 4px 12px rgba(5,150,105,.25);
-    }
+    .lc-btn-success { background: linear-gradient(135deg, var(--lc-green), #047857); color: #fff; box-shadow: 0 4px 12px rgba(5,150,105,.25); }
     .lc-btn-success:hover { transform: translateY(-1px); color: #fff; }
-    .lc-btn-danger {
-        background: linear-gradient(135deg, var(--lc-red), #b91c1c);
-        color: #fff; box-shadow: 0 4px 12px rgba(220,38,38,.25);
+    .lc-btn-danger  { background: linear-gradient(135deg, var(--lc-red), #b91c1c); color: #fff; box-shadow: 0 4px 12px rgba(220,38,38,.25); }
+    .lc-btn-danger:hover  { transform: translateY(-1px); color: #fff; }
+
+    /* Botón de ordenamiento */
+    .btn-sort {
+        display: inline-flex; align-items: center; gap: .45rem;
+        padding: .5rem 1.1rem; border-radius: 10px;
+        font-size: .82rem; font-weight: 700; font-family: 'Outfit', sans-serif;
+        border: 1.5px solid var(--lc-border);
+        background: var(--lc-surface); color: var(--lc-muted);
+        cursor: pointer; transition: var(--lc-transition); white-space: nowrap;
+        user-select: none;
     }
-    .lc-btn-danger:hover { transform: translateY(-1px); color: #fff; }
+    .btn-sort:hover { border-color: var(--lc-blue); color: var(--lc-blue); background: var(--lc-blue-lt); }
+    .btn-sort i.sort-icon { font-size: .95rem; transition: transform .3s ease; }
+    /* Cuando el orden es DESC, rotamos el icono 180° */
+    .btn-sort.order-desc i.sort-icon { transform: rotate(180deg); }
+    /* Colores de estado */
+    .btn-sort.order-asc  { border-color: var(--lc-blue); color: var(--lc-blue); background: var(--lc-blue-lt); }
+    .btn-sort.order-desc { border-color: var(--lc-red);  color: var(--lc-red);  background: var(--lc-red-lt); }
 
     /* ─── Stats ───────────────────────────────────────────── */
-    .lc-stats {
-        display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1rem; margin-bottom: 1.5rem;
-    }
+    .lc-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
     .lc-stat-card {
         background: var(--lc-surface); border: 1px solid var(--lc-border);
-        border-radius: 20px; padding: 1.3rem 1.5rem;
-        box-shadow: var(--lc-sh); display: flex; flex-direction: column; gap: .5rem;
+        border-radius: 20px; padding: 1.3rem 1.5rem; box-shadow: var(--lc-sh);
+        display: flex; flex-direction: column; gap: .5rem;
         transition: var(--lc-transition); position: relative; overflow: hidden;
-        text-decoration: none;
+        text-decoration: none; color: inherit;
     }
-    .lc-stat-card::before {
-        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    }
+    .lc-stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
     .lc-stat-card.green::before { background: linear-gradient(90deg, var(--lc-green), transparent); }
     .lc-stat-card.red::before   { background: linear-gradient(90deg, var(--lc-red),   transparent); }
     .lc-stat-card.blue::before  { background: linear-gradient(90deg, var(--lc-blue),  transparent); }
     .lc-stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,.1); }
-
-    .lc-stat-label {
-        font-size: .73rem; font-weight: 700; text-transform: uppercase;
-        letter-spacing: .08em; color: var(--lc-muted);
-        display: flex; align-items: center; gap: .35rem;
-    }
+    .lc-stat-label { font-size: .73rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--lc-muted); display: flex; align-items: center; gap: .35rem; }
     .lc-stat-label i { font-size: .95rem; }
-    .lc-stat-value {
-        font-family: 'Sora', sans-serif;
-        font-size: 1.75rem; font-weight: 700; line-height: 1.2;
-    }
+    .lc-stat-value { font-family: 'Sora', sans-serif; font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
     .lc-stat-value small { font-size: 1.1rem; font-weight: 500; opacity: .8; margin-right: .25rem; }
     .lc-stat-card.green .lc-stat-value { color: var(--lc-green); }
     .lc-stat-card.red   .lc-stat-value { color: var(--lc-red); }
@@ -135,243 +131,115 @@
     .lc-link.danger { color: var(--lc-red); }
 
     /* ─── Card con tabs ───────────────────────────────────── */
-    .lc-card {
-        background: var(--lc-surface); border: 1px solid var(--lc-border);
-        border-radius: 20px; box-shadow: var(--lc-sh); overflow: hidden;
-        animation: lc-fade .3s ease both;
-    }
+    .lc-card { background: var(--lc-surface); border: 1px solid var(--lc-border); border-radius: 20px; box-shadow: var(--lc-sh); overflow: hidden; animation: lc-fade .3s ease both; }
     @keyframes lc-fade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
     .lc-tabs { display: flex; border-bottom: 2px solid var(--lc-border); background: var(--lc-bg); }
     .lc-tab {
-        flex: 1; padding: 1.1rem 1rem;
-        border: none; background: transparent;
-        font-family: 'Sora', sans-serif;
-        font-size: .82rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
-        color: var(--lc-muted); cursor: pointer; transition: all .2s;
+        flex: 1; padding: 1.1rem 1rem; border: none; background: transparent;
+        font-family: 'Sora', sans-serif; font-size: .82rem; font-weight: 700;
+        letter-spacing: .05em; text-transform: uppercase; color: var(--lc-muted);
+        cursor: pointer; transition: all .2s;
         display: flex; align-items: center; justify-content: center; gap: .5rem;
         border-bottom: 3px solid transparent; margin-bottom: -2px;
     }
     .lc-tab:hover { color: var(--lc-ink); background: rgba(0,0,0,.02); }
     [data-theme="dark"] .lc-tab:hover { background: rgba(255,255,255,.04); }
-    .lc-tab.active           { color: var(--lc-blue); border-bottom-color: var(--lc-blue); background: var(--lc-surface); }
-    .lc-tab.ingresos.active  { color: var(--lc-green); border-bottom-color: var(--lc-green); }
-    .lc-tab.egresos.active   { color: var(--lc-red);   border-bottom-color: var(--lc-red); }
+    .lc-tab.active          { color: var(--lc-blue);  border-bottom-color: var(--lc-blue);  background: var(--lc-surface); }
+    .lc-tab.ingresos.active { color: var(--lc-green); border-bottom-color: var(--lc-green); }
+    .lc-tab.egresos.active  { color: var(--lc-red);   border-bottom-color: var(--lc-red); }
     .lc-tab i { font-size: 1.1rem; }
-
     .lc-tab-content { display: none; }
     .lc-tab-content.active { display: block; }
 
-    /* ===== ESTILO DE TABLA COPIADO DE listaAlumnos.html ===== */
-    .lc-table-container {
-        background: var(--lc-surface); border: 1px solid var(--lc-border);
-        border-radius: 20px; box-shadow: var(--lc-sh); overflow: hidden;
-    }
-
-    .lc-table-header {
-        padding: 1.25rem 1.5rem; background: var(--lc-gray-lt);
-        border-bottom: 1px solid var(--lc-border);
-        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
-    }
-
-    .lc-table-title { display: flex; align-items: center; gap: .75rem; }
-    .lc-table-title-icon {
-        width: 34px; height: 34px; border-radius: 10px;
-        background: var(--lc-blue-lt); color: var(--lc-blue); font-size: 1rem;
-        display: flex; align-items: center; justify-content: center;
-    }
-    .lc-table-title h2 { font-size: 1rem; font-weight: 700; margin: 0; color: var(--lc-ink); }
-    .lc-table-count {
-        background: var(--lc-surface); border: 1px solid var(--lc-border);
-        border-radius: 999px; padding: .3rem 1rem; font-size: .8rem; font-weight: 600; color: var(--lc-muted);
-    }
-
-    .lc-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .lc-table thead th {
-        padding: 1rem 1.5rem;
-        text-align: left;
-        font-size: .75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        color: var(--lc-muted);
+    /* ─── Toolbar de la tabla ─────────────────────────────── */
+    .lc-toolbar {
+        padding: .9rem 1.5rem;
         background: var(--lc-gray-lt);
-        border-bottom: 2px solid var(--lc-border);
-        white-space: nowrap;
-    }
-
-    .lc-table thead th.text-right { text-align: right; }
-    .lc-table thead th.text-center { text-align: center; }
-
-    .lc-table tbody tr {
         border-bottom: 1px solid var(--lc-border);
-        transition: var(--lc-transition);
-        cursor: pointer;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: .75rem;
     }
+    .lc-toolbar-left  { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+    .lc-toolbar-right { display: flex; align-items: center; gap: .5rem; }
+
+    /* Chips de info */
+    .lc-chip {
+        display: inline-flex; align-items: center; gap: .35rem;
+        padding: .28rem .85rem; border-radius: 999px;
+        font-size: .75rem; font-weight: 700;
+    }
+    .lc-chip-day   { background: var(--lc-blue-lt); color: var(--lc-blue); border: 1px solid rgba(7,86,163,.15); }
+    .lc-chip-count { background: var(--lc-surface); color: var(--lc-muted); border: 1px solid var(--lc-border); }
+
+    /* ─── Tabla ───────────────────────────────────────────── */
+    .lc-table-container { overflow: hidden; }
+    .lc-table { width: 100%; border-collapse: collapse; }
+    .lc-table thead th {
+        padding: 1rem 1.5rem; text-align: left;
+        font-size: .75rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .08em; color: var(--lc-muted);
+        background: var(--lc-gray-lt); border-bottom: 2px solid var(--lc-border);
+        white-space: nowrap; user-select: none;
+    }
+    /* Columna N° Recibo — sortable desde encabezado también */
+    .lc-table thead th.th-recibo {
+        cursor: pointer; transition: color .15s;
+    }
+    .lc-table thead th.th-recibo:hover { color: var(--lc-blue); }
+    .lc-table thead th.th-recibo.asc  { color: var(--lc-blue); }
+    .lc-table thead th.th-recibo.desc { color: var(--lc-red); }
+    .th-sort-arrow { margin-left: .3rem; font-size: .8rem; opacity: .35; transition: opacity .2s, transform .3s; display: inline-block; }
+    .th-recibo.asc  .th-sort-arrow { opacity: 1; transform: rotate(0deg); }
+    .th-recibo.desc .th-sort-arrow { opacity: 1; transform: rotate(180deg); }
+
+    .lc-table thead th.text-right  { text-align: right; }
+    .lc-table thead th.text-center { text-align: center; }
+    .lc-table tbody tr { border-bottom: 1px solid var(--lc-border); transition: var(--lc-transition); cursor: pointer; }
     .lc-table tbody tr:last-child { border-bottom: none; }
     .lc-table tbody tr:hover { background: var(--lc-blue-lt); }
-    .lc-table tbody td {
-        padding: 1rem 1.5rem;
-        font-size: .9rem;
-        color: var(--lc-ink);
-        vertical-align: middle;
-    }
+    .lc-table tbody td { padding: 1rem 1.5rem; font-size: .9rem; color: var(--lc-ink); vertical-align: middle; }
 
-    .lc-alumno-cell, .lc-concepto-cell {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    .lc-alumno-primary, .lc-concepto-primary {
-        font-weight: 600;
-        font-size: .95rem;
-        color: var(--lc-ink);
-    }
-
-    .lc-alumno-secondary, .lc-concepto-secondary {
-        font-size: .8rem;
-        color: var(--lc-muted);
-        display: flex;
-        align-items: center;
-        gap: .35rem;
-    }
-
-    .lc-concepto-secondary i { font-size: .7rem; }
+    .lc-alumno-cell, .lc-concepto-cell { display: flex; flex-direction: column; gap: .25rem; }
+    .lc-alumno-primary, .lc-concepto-primary { font-weight: 600; font-size: .95rem; color: var(--lc-ink); }
+    .lc-alumno-secondary, .lc-concepto-secondary { font-size: .8rem; color: var(--lc-muted); display: flex; align-items: center; gap: .35rem; }
 
     /* Badges */
-    .lc-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: .4rem;
-        padding: .4rem 1rem;
-        border-radius: 999px;
-        font-size: .8rem;
-        font-weight: 700;
-        border: 1px solid transparent;
-        white-space: nowrap;
-    }
+    .lc-badge { display: inline-flex; align-items: center; gap: .4rem; padding: .4rem 1rem; border-radius: 999px; font-size: .8rem; font-weight: 700; border: 1px solid transparent; white-space: nowrap; }
     .lc-badge i { font-size: .75rem; }
-    .lc-badge-success { background: var(--lc-green-lt); color: var(--lc-green); border-color: rgba(16,185,129,.2); }
-    .lc-badge-warning { background: var(--lc-amber-lt); color: var(--lc-amber); border-color: rgba(245,158,11,.2); }
-    .lc-badge-danger  { background: var(--lc-red-lt);   color: var(--lc-red);   border-color: rgba(239,68,68,.2); }
-    .lc-badge-secondary { background: var(--lc-gray-lt); color: var(--lc-muted); border-color: var(--lc-border); }
+    .lc-badge-success   { background: var(--lc-green-lt); color: var(--lc-green); border-color: rgba(16,185,129,.2); }
+    .lc-badge-secondary { background: var(--lc-gray-lt);  color: var(--lc-muted); border-color: var(--lc-border); }
 
-    /* Fecha */
-    .lc-date {
-        color: var(--lc-muted);
-        font-size: .84rem;
-        font-family: monospace;
-    }
-
-    /* Monto */
-    .lc-monto {
-        text-align: right;
-        font-family: 'Sora', sans-serif;
-        font-size: .95rem;
-        font-weight: 700;
-        white-space: nowrap;
-    }
+    .lc-date { color: var(--lc-muted); font-size: .84rem; font-family: monospace; }
+    .lc-monto { text-align: right; font-family: 'Sora', sans-serif; font-size: .95rem; font-weight: 700; white-space: nowrap; }
     .monto-ingreso { color: var(--lc-green); }
     .monto-egreso  { color: var(--lc-red); }
 
-    /* Acciones - MISMO ESTILO QUE listaAlumnos */
-    .lc-row-actions {
-        display: flex;
-        gap: .35rem;
-        opacity: 0;
-        transform: translateX(-10px);
-        transition: var(--lc-transition);
-        justify-content: center;
-    }
+    .lc-row-actions { display: flex; gap: .35rem; opacity: 0; transform: translateX(-10px); transition: var(--lc-transition); justify-content: center; }
+    tr:hover .lc-row-actions { opacity: 1; transform: translateX(0); }
+    .lc-row-action { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--lc-border); background: var(--lc-surface); color: var(--lc-muted); text-decoration: none; font-size: 1rem; transition: var(--lc-transition); }
+    .lc-row-action:hover { background: var(--lc-blue); border-color: var(--lc-blue); color: #fff; transform: scale(1.1); }
 
-    tr:hover .lc-row-actions {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    .lc-empty { padding: 5rem 2rem; text-align: center; color: var(--lc-muted); }
+    .lc-empty-illustration { font-size: 5rem; color: var(--lc-blue); opacity: .2; margin-bottom: 1rem; }
+    .lc-empty h3 { font-size: 1.25rem; font-weight: 700; color: var(--lc-ink); margin-bottom: .5rem; }
+    .lc-empty p  { margin: 0; font-size: .95rem; }
 
-    .lc-row-action {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        border: 1px solid var(--lc-border);
-        background: var(--lc-surface);
-        color: var(--lc-muted);
-        text-decoration: none;
-        font-size: 1rem;
-        transition: var(--lc-transition);
-    }
-
-    .lc-row-action:hover {
-        background: var(--lc-blue);
-        border-color: var(--lc-blue);
-        color: #fff;
-        transform: scale(1.1);
-    }
-
-    /* Empty state */
-    .lc-empty {
-        padding: 5rem 2rem;
-        text-align: center;
-        color: var(--lc-muted);
-    }
-    .lc-empty-illustration {
-        font-size: 5rem;
-        color: var(--lc-blue);
-        opacity: .2;
-        margin-bottom: 1rem;
-    }
-    .lc-empty h3 {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--lc-ink);
-        margin-bottom: .5rem;
-    }
-    .lc-empty p {
-        margin: 0 0 1.5rem;
-        font-size: .95rem;
-    }
-
-    /* Footer */
-    .lc-table-footer {
-        padding: 1rem 1.5rem;
-        background: var(--lc-gray-lt);
-        border-top: 1px solid var(--lc-border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: .85rem;
-        color: var(--lc-muted);
-    }
-
-    /* Responsive */
-    @media (max-width: 1024px) {
-        .lc-table thead th { padding: 1rem; }
-        .lc-table tbody td { padding: 1rem; }
-    }
+    .lc-table-footer { padding: 1rem 1.5rem; background: var(--lc-gray-lt); border-top: 1px solid var(--lc-border); display: flex; align-items: center; justify-content: space-between; font-size: .85rem; color: var(--lc-muted); }
+    .lc-table-count { background: var(--lc-surface); border: 1px solid var(--lc-border); border-radius: 999px; padding: .3rem 1rem; font-size: .8rem; font-weight: 600; color: var(--lc-muted); }
 
     @media (max-width: 768px) {
         .lc-head { flex-direction: column; align-items: stretch; }
         .lc-head-actions { flex-wrap: wrap; }
         .lc-stats { grid-template-columns: 1fr; }
         .lc-tab { font-size: .78rem; padding: .9rem .5rem; }
-
-        /* En móvil, ocultar columnas menos importantes */
-        .lc-table thead th:nth-child(3),
-        .lc-table tbody td:nth-child(3) { display: none; }
+        .lc-table thead th:nth-child(3), .lc-table tbody td:nth-child(3) { display: none; }
     }
 </style>
 
 <div class="lc mt-5">
 
-    <!-- ── Header ───────────────────────────────── -->
+    <!-- ── Header ─────────────────────────────────────────── -->
     <div class="lc-head">
         <div class="lc-head-left">
             <div class="lc-head-title">
@@ -401,44 +269,24 @@
         </div>
     </div>
 
-    <!--Stats-->
+    <!-- ── Stats ──────────────────────────────────────────── -->
     <div class="lc-stats">
         <a href="{% url 'lista_pagos' %}?fecha_desde={{ fecha_hoy_param }}&fecha_hasta={{ fecha_hoy_param }}"
            class="lc-stat-card green">
-            <div class="lc-stat-label">
-                <i class="bi bi-arrow-up-circle-fill"></i> Ingresos hoy
-            </div>
-            <div class="lc-stat-value">
-                <small>Gs.</small>{{ total_ingresos_hoy|formato_guaranies }}
-            </div>
-            <div class="lc-stat-sub">
-                <i class="bi bi-calendar-day"></i> {{ fecha_hoy }}
-            </div>
+            <div class="lc-stat-label"><i class="bi bi-arrow-up-circle-fill"></i> Ingresos hoy</div>
+            <div class="lc-stat-value"><small>Gs.</small>{{ total_ingresos_hoy|formato_guaranies }}</div>
+            <div class="lc-stat-sub"><i class="bi bi-calendar-day"></i> {{ fecha_hoy }}</div>
         </a>
-
         <a href="{% url 'lista_egresos' %}?fecha_desde={{ fecha_hoy_param }}&fecha_hasta={{ fecha_hoy_param }}"
            class="lc-stat-card red">
-            <div class="lc-stat-label">
-                <i class="bi bi-arrow-down-circle-fill"></i> Egresos hoy
-            </div>
-            <div class="lc-stat-value">
-                <small>Gs.</small>{{ total_egresos_hoy|formato_guaranies }}
-            </div>
-            <div class="lc-stat-sub">
-                <i class="bi bi-calendar-day"></i> {{ fecha_hoy }}
-            </div>
+            <div class="lc-stat-label"><i class="bi bi-arrow-down-circle-fill"></i> Egresos hoy</div>
+            <div class="lc-stat-value"><small>Gs.</small>{{ total_egresos_hoy|formato_guaranies }}</div>
+            <div class="lc-stat-sub"><i class="bi bi-calendar-day"></i> {{ fecha_hoy }}</div>
         </a>
-
         <div class="lc-stat-card {% if balance_hoy >= 0 %}blue{% else %}red{% endif %}">
-            <div class="lc-stat-label">
-                <i class="bi bi-calculator-fill"></i> Balance {{ fecha_hoy }}
-            </div>
-            <div class="lc-stat-value">
-                <small>Gs.</small>{{ balance_hoy|formato_guaranies }}
-            </div>
-            <div class="lc-stat-sub">
-                <i class="bi bi-arrow-left-right"></i> Ingresos − Egresos
-            </div>
+            <div class="lc-stat-label"><i class="bi bi-calculator-fill"></i> Balance {{ fecha_hoy }}</div>
+            <div class="lc-stat-value"><small>Gs.</small>{{ balance_hoy|formato_guaranies }}</div>
+            <div class="lc-stat-sub"><i class="bi bi-arrow-left-right"></i> Ingresos − Egresos</div>
         </div>
     </div>
 
@@ -447,39 +295,72 @@
         <a href="{% url 'lista_egresos' %}" class="lc-link danger">Ver todos los egresos</a>
     </div>
 
-    <!-- ── Card con tabs ────────────────────────── -->
+    <!-- ── Card con tabs ──────────────────────────────────── -->
     <div class="lc-card">
         <div class="lc-tabs">
             <button class="lc-tab ingresos active" data-tab="ingresos">
                 <i class="bi bi-arrow-up-circle-fill"></i> Ingresos
+                <span style="background:rgba(5,150,105,.15);color:var(--lc-green);border-radius:999px;padding:.1rem .6rem;font-size:.72rem;">
+                    {{ ingresos|length }}
+                </span>
             </button>
             <button class="lc-tab egresos" data-tab="egresos">
                 <i class="bi bi-arrow-down-circle-fill"></i> Egresos
+                <span style="background:rgba(220,38,38,.12);color:var(--lc-red);border-radius:999px;padding:.1rem .6rem;font-size:.72rem;">
+                    {{ egresos|length }}
+                </span>
             </button>
         </div>
 
-        <!-- Tab Ingresos -->
+        <!-- ══ TAB INGRESOS ══════════════════════════════════ -->
         <div class="lc-tab-content active" id="tab-ingresos">
+
+            <!-- Toolbar: badge "Solo hoy" + botón de orden -->
+            <div class="lc-toolbar">
+                <div class="lc-toolbar-left">
+                    <span class="lc-chip lc-chip-day">
+                        <i class="bi bi-calendar-check"></i>{{ fecha_hoy }}
+                    </span>
+                    <span class="lc-chip lc-chip-count">
+                        <i class="bi bi-receipt"></i>
+                        {{ ingresos|length }} registro{{ ingresos|length|pluralize }}
+                    </span>
+                </div>
+                <div class="lc-toolbar-right">
+                    <button class="btn-sort order-asc" id="btn-sort-ingresos"
+                            onclick="toggleSort('ingresos')"
+                            title="Cambiar orden por N° de Recibo">
+                        <i class="bi bi-sort-numeric-down sort-icon"></i>
+                        <span id="label-sort-ingresos">Recibo: ASC</span>
+                    </button>
+                </div>
+            </div>
+
             <div class="lc-table-container">
                 <div class="table-responsive">
                     <table class="lc-table">
                         <thead>
                         <tr>
-                            <th>Fecha</th>
-                            <th>Recibo</th>
+                            <th class="th-recibo asc" id="th-ingresos"
+                                onclick="toggleSort('ingresos')"
+                                title="Ordenar por N° de Recibo">
+                                N° Recibo
+                                <i class="bi bi-arrow-up th-sort-arrow"></i>
+                            </th>
                             <th>Alumno / Cliente</th>
                             <th>Concepto</th>
                             <th class="text-right">Monto</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="tbody-ingresos">
                         {% for pago in ingresos %}
-                        <tr onclick="window.location.href='{% url 'detalle_pago' pago.uuid %}'">
-                            <td class="lc-date">{{ pago.fecha|date:"d/m/y" }}</td>
+                        <tr onclick="window.location.href='{% url 'detalle_pago' pago.uuid %}'"
+                            data-num="{{ pago.numero_recibo|default:'' }}">
                             <td>
                                 <span class="lc-badge {% if pago.numero_recibo %}lc-badge-success{% else %}lc-badge-secondary{% endif %}">
-                                    {% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}—{% endif %}
+                                    <i class="bi {% if pago.numero_recibo %}bi-receipt{% else %}bi-dash{% endif %}"></i>
+                                    {% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}
                                 </span>
                             </td>
                             <td>
@@ -515,13 +396,11 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6">
+                            <td colspan="5">
                                 <div class="lc-empty">
-                                    <div class="lc-empty-illustration">
-                                        <i class="bi bi-cash-stack"></i>
-                                    </div>
-                                    <h3>No hay ingresos registrados</h3>
-                                    <p>Comienza registrando un nuevo ingreso desde el botón superior.</p>
+                                    <div class="lc-empty-illustration"><i class="bi bi-cash-stack"></i></div>
+                                    <h3>Sin ingresos hoy</h3>
+                                    <p>No hay ingresos registrados para el día de hoy.</p>
                                 </div>
                             </td>
                         </tr>
@@ -536,32 +415,64 @@
                         <i class="bi bi-cash me-1"></i>
                         {{ ingresos|length }} Registro{{ ingresos|length|pluralize }}
                     </div>
-                    <span><i class="bi bi-calendar me-1"></i>Ordenado por fecha</span>
+                    <span id="footer-ingresos">
+                        <i class="bi bi-sort-numeric-down me-1"></i>N° Recibo: ASC
+                    </span>
                 </div>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Tab Egresos -->
+        <!-- ══ TAB EGRESOS ═══════════════════════════════════ -->
         <div class="lc-tab-content" id="tab-egresos">
+
+            <!-- Toolbar: badge "Solo hoy" + botón de orden -->
+            <div class="lc-toolbar">
+                <div class="lc-toolbar-left">
+                    <span class="lc-chip lc-chip-day">
+                        <i class="bi bi-calendar-check"></i> Solo hoy — {{ fecha_hoy }}
+                    </span>
+                    <span class="lc-chip lc-chip-count">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        {{ egresos|length }} egreso{{ egresos|length|pluralize }}
+                    </span>
+                </div>
+                <div class="lc-toolbar-right">
+                    <button class="btn-sort order-asc" id="btn-sort-egresos"
+                            onclick="toggleSort('egresos')"
+                            title="Cambiar orden por N° de Comprobante">
+                        <i class="bi bi-sort-numeric-down sort-icon"></i>
+                        <span id="label-sort-egresos">Comp.: ASC</span>
+                    </button>
+                </div>
+            </div>
+
             <div class="lc-table-container">
                 <div class="table-responsive">
                     <table class="lc-table">
                         <thead>
                         <tr>
-                            <th>Fecha</th>
-                            <th>Comp.</th>
+                            <th class="th-recibo asc" id="th-egresos"
+                                onclick="toggleSort('egresos')"
+                                title="Ordenar por N° de Comprobante">
+                                N° Comp.
+                                <i class="bi bi-arrow-up th-sort-arrow"></i>
+                            </th>
                             <th>Categoría / Concepto</th>
+                            <th>Sede</th>
                             <th class="text-right">Monto</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="tbody-egresos">
                         {% for egreso in egresos %}
-                        <tr onclick="window.location.href='{% url 'detalle_egreso' egreso.uuid %}'">
-                            <td class="lc-date">{{ egreso.fecha|date:"d/m/y" }}</td>
+                        <tr onclick="window.location.href='{% url 'detalle_egreso' egreso.uuid %}'"
+                            data-num="{{ egreso.numero_comprobante|default:'' }}">
                             <td>
-                                <span class="lc-badge lc-badge-secondary">{{ egreso.numero_comprobante|truncatechars:8 }}</span>
+                                <span class="lc-badge lc-badge-secondary">
+                                    <i class="bi bi-file-text"></i>
+                                    {{ egreso.numero_comprobante|default:"—" }}
+                                </span>
                             </td>
                             <td>
                                 <div class="lc-concepto-cell">
@@ -569,10 +480,12 @@
                                     <span class="lc-concepto-secondary">
                                         <i class="bi bi-chat"></i> {{ egreso.concepto|truncatechars:30 }}
                                     </span>
-                                    <span class="lc-concepto-secondary">
-                                        <i class="bi bi-building"></i> {{ egreso.sede.nombre }}
-                                    </span>
                                 </div>
+                            </td>
+                            <td>
+                                <span class="lc-concepto-secondary">
+                                    <i class="bi bi-building"></i> {{ egreso.sede.nombre }}
+                                </span>
                             </td>
                             <td class="lc-monto monto-egreso text-right">
                                 Gs. {{ egreso.monto|formato_guaranies }}
@@ -594,11 +507,9 @@
                         <tr>
                             <td colspan="5">
                                 <div class="lc-empty">
-                                    <div class="lc-empty-illustration">
-                                        <i class="bi bi-cash-stack"></i>
-                                    </div>
-                                    <h3>No hay egresos registrados</h3>
-                                    <p>Comienza registrando un nuevo egreso desde el botón superior.</p>
+                                    <div class="lc-empty-illustration"><i class="bi bi-cash-stack"></i></div>
+                                    <h3>Sin egresos hoy</h3>
+                                    <p>No hay egresos registrados para el día de hoy.</p>
                                 </div>
                             </td>
                         </tr>
@@ -613,16 +524,77 @@
                         <i class="bi bi-cash me-1"></i>
                         {{ egresos|length }} egreso{{ egresos|length|pluralize }}
                     </div>
-                    <span><i class="bi bi-calendar me-1"></i>Ordenado por fecha</span>
+                    <span id="footer-egresos">
+                        <i class="bi bi-sort-numeric-down me-1"></i>N° Comp.: ASC
+                    </span>
                 </div>
                 {% endif %}
             </div>
         </div>
-    </div>
 
-</div>
+    </div><!-- /lc-card -->
+</div><!-- /lc -->
 
 <script>
+    // ─── Estado de cada tabla (asc por defecto) ────────────────
+    const sortState = { ingresos: 'asc', egresos: 'asc' };
+
+    // Extrae el número entero de un string de recibo/comprobante
+    function extraerNumero(val) {
+        if (!val) return null;
+        const solo = val.replace(/\D/g, '');
+        return solo ? parseInt(solo, 10) : null;
+    }
+
+    // ─── Toggle principal ──────────────────────────────────────
+    function toggleSort(tab) {
+        // Invertir estado
+        sortState[tab] = sortState[tab] === 'asc' ? 'desc' : 'asc';
+        const isAsc = sortState[tab] === 'asc';
+
+        // Reordenar filas en el DOM
+        const tbody = document.getElementById('tbody-' + tab);
+        const rows  = [...tbody.querySelectorAll('tr[data-num]')];
+
+        rows.sort((a, b) => {
+            const nA = extraerNumero(a.dataset.num);
+            const nB = extraerNumero(b.dataset.num);
+            // Filas sin número siempre al final
+            if (nA === null && nB === null) return 0;
+            if (nA === null) return 1;
+            if (nB === null) return -1;
+            return isAsc ? nA - nB : nB - nA;
+        });
+        rows.forEach(r => tbody.appendChild(r));
+
+        // ─── Actualizar botón ──────────────────────────────────
+        const btn   = document.getElementById('btn-sort-' + tab);
+        const icon  = btn.querySelector('.sort-icon');
+        const label = document.getElementById('label-sort-' + tab);
+        const th    = document.getElementById('th-' + tab);
+        const foot  = document.getElementById('footer-' + tab);
+        const etiq  = tab === 'ingresos' ? 'Recibo' : 'Comp.';
+
+        if (isAsc) {
+            // ── ASC ──
+            btn.className         = 'btn-sort order-asc';
+            icon.className        = 'bi bi-sort-numeric-down sort-icon';
+            label.textContent     = `${etiq}: ASC`;
+            th.className          = 'th-recibo asc';
+            th.querySelector('.th-sort-arrow').className = 'bi bi-arrow-up th-sort-arrow';
+            if (foot) foot.innerHTML = `<i class="bi bi-sort-numeric-down me-1"></i>N° ${etiq}: ASC`;
+        } else {
+            // ── DESC ──
+            btn.className         = 'btn-sort order-desc';
+            icon.className        = 'bi bi-sort-numeric-up-alt sort-icon';
+            label.textContent     = `${etiq}: DESC`;
+            th.className          = 'th-recibo desc';
+            th.querySelector('.th-sort-arrow').className = 'bi bi-arrow-down th-sort-arrow';
+            if (foot) foot.innerHTML = `<i class="bi bi-sort-numeric-up-alt me-1"></i>N° ${etiq}: DESC`;
+        }
+    }
+
+    // ─── Tabs ──────────────────────────────────────────────────
     document.querySelectorAll('.lc-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const target = tab.dataset.tab;
@@ -631,6 +603,13 @@
             tab.classList.add('active');
             document.getElementById('tab-' + target).classList.add('active');
         });
+    });
+
+    // ─── Orden inicial ASC al cargar ──────────────────────────
+    // Hacemos un ciclo desc→asc para que la lógica de sort se ejecute
+    document.addEventListener('DOMContentLoaded', () => {
+        sortState.ingresos = 'desc'; toggleSort('ingresos');
+        sortState.egresos  = 'desc'; toggleSort('egresos');
     });
 </script>
 {% endblock %}
