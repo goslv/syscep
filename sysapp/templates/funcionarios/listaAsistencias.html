@@ -1,116 +1,1086 @@
 {% extends 'base.html' %}
 
 {% block title %}Asistencias - ITS CEP{% endblock %}
-{% block page_title %}Registro de Asistencias{% endblock %}
 
 {% block content %}
-<div class="row mb-4 mt-5">
-    <div class="col-md-12">
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <a href="{% url 'lista_funcionarios' %}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Volver
-                </a>
-                <a href="{% url 'registrar_asistencia' %}" class="btn btn-success">
-                    <i class="bi bi-plus-circle"></i> Registrar Asistencia
-                </a>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    /* ─── Tokens consistentes ─────────────────────────────── */
+    :root {
+        --la-bg:        #f8fafc;
+        --la-surface:   #ffffff;
+        --la-ink:       #0f1825;
+        --la-muted:     #5e6f88;
+        --la-border:    #e1e9f0;
+        --la-primary:   #0ea5e9;
+        --la-primary-dk: #0284c7;
+        --la-primary-lt: #e0f2fe;
+        --la-success:   #10b981;
+        --la-success-lt: #e4f9f0;
+        --la-warning:   #f59e0b;
+        --la-warning-lt: #fef5e5;
+        --la-danger:    #ef4444;
+        --la-danger-lt: #fee9e9;
+        --la-gray-lt:   #f1f5f9;
+        --la-r:         16px;
+        --la-sh-sm:     0 2px 8px rgba(0,0,0,.04);
+        --la-sh-md:     0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.03);
+        --la-sh-lg:     0 12px 32px rgba(0,0,0,.08);
+        --la-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+        --la-bg:        #0e121b;
+        --la-surface:   #161c26;
+        --la-ink:       #edf2f9;
+        --la-muted:     #8f9fb2;
+        --la-border:    #232b36;
+        --la-primary-lt: #0c2a3a;
+        --la-success-lt: #12352d;
+        --la-warning-lt: #302010;
+        --la-danger-lt: #2f1518;
+        --la-gray-lt:   #1e2630;
+    }
+
+    .la {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--la-ink);
+        background: var(--la-bg);
+        min-height: 100vh;
+        padding: 1.5rem;
+    }
+
+    .la * { box-sizing: border-box; }
+
+    /* ─── Header mejorado ───────────────────────────────── */
+    .la-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .la-head-left {
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+    }
+
+    .la-head-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--la-ink);
+        margin: 0;
+        letter-spacing: -0.75px;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+    }
+
+    .la-head-title i {
+        font-size: 1.8rem;
+        color: var(--la-primary);
+        background: var(--la-primary-lt);
+        padding: .5rem;
+        border-radius: 14px;
+    }
+
+    .la-head-breadcrumb {
+        font-size: .85rem;
+        color: var(--la-muted);
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .la-head-breadcrumb a {
+        color: var(--la-primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .la-head-breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .la-head-actions {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        flex-wrap: wrap;
+    }
+
+    /* ─── Botones mejorados ─────────────────────────────── */
+    .la-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        padding: .7rem 1.4rem;
+        border-radius: 12px;
+        font-size: .9rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: var(--la-transition);
+        text-decoration: none;
+        white-space: nowrap;
+        letter-spacing: .02em;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .la-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255,255,255,.2);
+        transform: translate(-50%, -50%);
+        transition: width .4s, height .4s;
+    }
+
+    .la-btn:active::after {
+        width: 200px;
+        height: 200px;
+    }
+
+    .la-btn i { font-size: 1.1rem; }
+
+    .la-btn-primary {
+        background: linear-gradient(135deg, var(--la-primary) 0%, var(--la-primary-dk) 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(14,165,233,.25);
+    }
+    .la-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(14,165,233,.35);
+        color: #fff;
+    }
+
+    .la-btn-success {
+        background: linear-gradient(135deg, var(--la-success) 0%, #0b9e6e 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(16,185,129,.25);
+    }
+    .la-btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16,185,129,.35);
+        color: #fff;
+    }
+
+    .la-btn-secondary {
+        background: var(--la-surface);
+        color: var(--la-ink);
+        border: 1.5px solid var(--la-border);
+    }
+    .la-btn-secondary:hover {
+        background: var(--la-gray-lt);
+        border-color: var(--la-primary);
+        color: var(--la-primary);
+        transform: translateY(-2px);
+    }
+
+    .la-btn-outline {
+        background: transparent;
+        color: var(--la-ink);
+        border: 1.5px solid var(--la-border);
+    }
+    .la-btn-outline:hover {
+        background: var(--la-gray-lt);
+        border-color: var(--la-primary);
+        color: var(--la-primary);
+    }
+
+    /* ─── Stats cards ───────────────────────────────────── */
+    .la-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .la-stat {
+        background: var(--la-surface);
+        border: 1px solid var(--la-border);
+        border-radius: 20px;
+        padding: 1.25rem;
+        box-shadow: var(--la-sh-md);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: var(--la-transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .la-stat::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--stat-color), transparent);
+    }
+
+    .la-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--la-sh-lg);
+    }
+
+    .la-stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+        transition: var(--la-transition);
+    }
+
+    .la-stat:hover .la-stat-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .la-stat-icon.primary { background: var(--la-primary-lt); color: var(--la-primary); --stat-color: var(--la-primary); }
+    .la-stat-icon.success { background: var(--la-success-lt); color: var(--la-success); --stat-color: var(--la-success); }
+    .la-stat-icon.warning { background: var(--la-warning-lt); color: var(--la-warning); --stat-color: var(--la-warning); }
+    .la-stat-icon.danger  { background: var(--la-danger-lt);  color: var(--la-danger); --stat-color: var(--la-danger); }
+
+    .la-stat-content {
+        flex: 1;
+    }
+
+    .la-stat-label {
+        font-size: .75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--la-muted);
+        margin-bottom: .25rem;
+    }
+
+    .la-stat-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--la-ink);
+        letter-spacing: -0.5px;
+    }
+
+    .la-stat-sub {
+        font-size: .7rem;
+        color: var(--la-muted);
+        margin-top: .25rem;
+        display: flex;
+        align-items: center;
+        gap: .25rem;
+    }
+
+    /* ─── Filtros mejorados ─────────────────────────────── */
+    .la-filters-card {
+        background: var(--la-surface);
+        border: 1px solid var(--la-border);
+        border-radius: 20px;
+        box-shadow: var(--la-sh-md);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        transition: var(--la-transition);
+        animation: slideIn .3s ease both;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .la-filters-header {
+        padding: 1rem 1.5rem;
+        background: var(--la-gray-lt);
+        border-bottom: 1px solid var(--la-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .la-filters-header-left {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+    }
+
+    .la-filters-header-left i {
+        font-size: 1.1rem;
+        color: var(--la-primary);
+        background: var(--la-primary-lt);
+        padding: .5rem;
+        border-radius: 10px;
+    }
+
+    .la-filters-header-left h3 {
+        font-size: .95rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--la-ink);
+    }
+
+    .la-filters-badge {
+        background: var(--la-primary);
+        color: white;
+        font-size: .7rem;
+        font-weight: 700;
+        padding: .15rem .45rem;
+        border-radius: 20px;
+        margin-left: .5rem;
+    }
+
+    .la-filters-header-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .la-filters-clear {
+        font-size: .8rem;
+        color: var(--la-primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .la-filters-clear:hover {
+        text-decoration: underline;
+    }
+
+    .la-filters-toggle {
+        transition: transform .3s ease;
+        color: var(--la-muted);
+    }
+
+    .la-filters-card.collapsed .la-filters-toggle {
+        transform: rotate(180deg);
+    }
+
+    .la-filters-body {
+        padding: 1.5rem;
+        transition: all .3s ease;
+    }
+
+    .la-filters-card.collapsed .la-filters-body {
+        display: none;
+    }
+
+    .la-filters-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    @media (max-width: 768px) {
+        .la-filters-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .la-field {
+        display: flex;
+        flex-direction: column;
+        gap: .35rem;
+    }
+
+    .la-field label {
+        font-size: .75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--la-muted);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+    }
+
+    .la-field label i {
+        font-size: .8rem;
+        color: var(--la-primary);
+    }
+
+    .la-input,
+    .la-select {
+        width: 100%;
+        height: 44px;
+        padding: 0 1rem;
+        border: 1.5px solid var(--la-border);
+        border-radius: 12px;
+        background: var(--la-bg);
+        font-size: .9rem;
+        font-family: inherit;
+        color: var(--la-ink);
+        transition: var(--la-transition);
+    }
+
+    .la-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235e6f88' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px;
+        padding-right: 2.5rem;
+    }
+
+    .la-input:focus,
+    .la-select:focus {
+        outline: none;
+        border-color: var(--la-primary);
+        background: var(--la-surface);
+        box-shadow: 0 0 0 4px rgba(14,165,233,.1);
+    }
+
+    .la-filters-actions {
+        display: flex;
+        gap: .5rem;
+        align-items: center;
+    }
+
+    .la-filters-actions .la-btn {
+        height: 44px;
+        padding: 0 1.5rem;
+    }
+
+    /* ─── Tabla mejorada ────────────────────────────────── */
+    .la-table-container {
+        background: var(--la-surface);
+        border: 1px solid var(--la-border);
+        border-radius: 20px;
+        box-shadow: var(--la-sh-md);
+        overflow: hidden;
+        animation: slideIn .4s ease both;
+        animation-delay: .1s;
+    }
+
+    .la-table-header {
+        padding: 1.25rem 1.5rem;
+        background: var(--la-gray-lt);
+        border-bottom: 1px solid var(--la-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .la-table-title {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+    }
+
+    .la-table-title i {
+        font-size: 1.1rem;
+        color: var(--la-primary);
+        background: var(--la-primary-lt);
+        padding: .5rem;
+        border-radius: 10px;
+    }
+
+    .la-table-title h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--la-ink);
+    }
+
+    .la-table-count {
+        background: var(--la-surface);
+        border: 1px solid var(--la-border);
+        border-radius: 999px;
+        padding: .3rem 1rem;
+        font-size: .8rem;
+        font-weight: 600;
+        color: var(--la-muted);
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+    }
+
+    .la-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .la-table thead th {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        font-size: .75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--la-muted);
+        background: var(--la-gray-lt);
+        border-bottom: 2px solid var(--la-border);
+        white-space: nowrap;
+    }
+
+    .la-table tbody tr {
+        border-bottom: 1px solid var(--la-border);
+        transition: var(--la-transition);
+    }
+
+    .la-table tbody tr:hover {
+        background: var(--la-primary-lt);
+    }
+
+    .la-table tbody td {
+        padding: 1rem 1.5rem;
+        font-size: .9rem;
+        color: var(--la-ink);
+        vertical-align: middle;
+    }
+
+    /* Fecha */
+    .la-date {
+        font-weight: 700;
+        color: var(--la-ink);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .la-date-day {
+        font-size: 1rem;
+    }
+
+    .la-date-month {
+        font-size: .75rem;
+        color: var(--la-muted);
+        text-transform: uppercase;
+    }
+
+    /* Badges mejorados */
+    .la-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .4rem 1rem;
+        border-radius: 999px;
+        font-size: .8rem;
+        font-weight: 700;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        transition: var(--la-transition);
+    }
+
+    .la-badge i { font-size: .75rem; }
+
+    .la-badge-success {
+        background: var(--la-success-lt);
+        color: var(--la-success);
+        border-color: rgba(16,185,129,.2);
+    }
+
+    .la-badge-danger {
+        background: var(--la-danger-lt);
+        color: var(--la-danger);
+        border-color: rgba(239,68,68,.2);
+    }
+
+    .la-badge-primary {
+        background: var(--la-primary-lt);
+        color: var(--la-primary);
+        border-color: rgba(14,165,233,.2);
+    }
+
+    .la-badge-secondary {
+        background: var(--la-gray-lt);
+        color: var(--la-muted);
+        border-color: var(--la-border);
+    }
+
+    /* Cargo */
+    .la-cargo {
+        display: inline-block;
+        padding: .3rem .8rem;
+        border-radius: 999px;
+        font-size: .75rem;
+        font-weight: 600;
+        background: var(--la-gray-lt);
+        color: var(--la-muted);
+        border: 1px solid var(--la-border);
+    }
+
+    /* Observaciones */
+    .la-observaciones {
+        max-width: 250px;
+        font-size: .85rem;
+        color: var(--la-ink);
+        line-height: 1.4;
+    }
+
+    .la-observaciones.empty {
+        color: var(--la-muted);
+        font-style: italic;
+    }
+
+    /* Empty state */
+    .la-empty {
+        padding: 5rem 2rem;
+        text-align: center;
+        color: var(--la-muted);
+    }
+
+    .la-empty-illustration {
+        font-size: 5rem;
+        color: var(--la-primary);
+        opacity: .2;
+        margin-bottom: 1rem;
+    }
+
+    .la-empty h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--la-ink);
+        margin-bottom: .5rem;
+    }
+
+    .la-empty p {
+        margin: 0 0 1.5rem;
+        font-size: .95rem;
+    }
+
+    .la-empty-actions {
+        display: flex;
+        gap: .75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Alerta informativa */
+    .la-alert {
+        padding: 1rem 1.5rem;
+        background: var(--la-primary-lt);
+        border: 1px solid var(--la-primary);
+        border-radius: 12px;
+        color: var(--la-primary-dk);
+        font-size: .85rem;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        margin-top: 1rem;
+    }
+
+    .la-alert i {
+        font-size: 1.1rem;
+    }
+
+    .la-alert strong {
+        font-weight: 700;
+    }
+
+    /* Footer */
+    .la-table-footer {
+        padding: 1rem 1.5rem;
+        background: var(--la-gray-lt);
+        border-top: 1px solid var(--la-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: .85rem;
+        color: var(--la-muted);
+    }
+
+    /* FAB móvil */
+    .la-fab {
+        position: fixed;
+        right: 2rem;
+        bottom: 2rem;
+        z-index: 1100;
+        width: 60px;
+        height: 60px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, var(--la-primary) 0%, var(--la-primary-dk) 100%);
+        color: #fff;
+        border: none;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 24px rgba(14,165,233,.4);
+        cursor: pointer;
+        transition: var(--la-transition);
+        text-decoration: none;
+    }
+
+    .la-fab:hover {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 12px 32px rgba(14,165,233,.5);
+        border-radius: 30px;
+        color: #fff;
+    }
+
+    .la-fab-tooltip {
+        position: absolute;
+        right: calc(100% + 1rem);
+        background: var(--la-ink);
+        color: var(--la-surface);
+        padding: .5rem 1rem;
+        border-radius: 12px;
+        font-size: .85rem;
+        font-weight: 600;
+        white-space: nowrap;
+        opacity: 0;
+        transform: translateX(10px);
+        transition: var(--la-transition);
+        pointer-events: none;
+    }
+
+    .la-fab:hover .la-fab-tooltip {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .la {
+            padding: 1rem;
+        }
+
+        .la-head {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .la-head-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .la-head-actions .la-btn {
+            width: 100%;
+        }
+
+        .la-stats-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .la-stat {
+            padding: 1rem;
+        }
+
+        .la-stat-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+        }
+
+        .la-stat-value {
+            font-size: 1.4rem;
+        }
+
+        .la-table thead th:nth-child(4),
+        .la-table tbody td:nth-child(4) {
+            display: none;
+        }
+
+        .la-fab {
+            display: flex;
+        }
+
+        .la-table-footer span:last-child {
+            display: none;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .la-stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .la-filters-actions {
+            flex-direction: column;
+        }
+
+        .la-filters-actions .la-btn {
+            width: 100%;
+        }
+
+        .la-table thead th:nth-child(3),
+        .la-table tbody td:nth-child(3) {
+            display: none;
+        }
+
+        .la-table-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .la-table-count {
+            align-self: flex-start;
+        }
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .la-stat {
+        animation: fadeIn .3s ease forwards;
+    }
+
+    .la-stat:nth-child(1) { animation-delay: .05s; }
+    .la-stat:nth-child(2) { animation-delay: .1s; }
+    .la-stat:nth-child(3) { animation-delay: .15s; }
+    .la-stat:nth-child(4) { animation-delay: .2s; }
+</style>
+
+<div class="la mt-5">
+    <!-- ─── Header mejorado ─────────────────────────────── -->
+    <div class="la-head">
+        <div class="la-head-left">
+            <div class="la-head-title">
+                <i class="bi bi-calendar-check-fill"></i>
+                Asistencias
+            </div>
+            <div class="la-head-breadcrumb">
+                <a href="{% url 'dashboard' %}">Inicio</a>
+                <i class="bi bi-chevron-right"></i>
+                <a href="{% url 'lista_funcionarios' %}">Funcionarios</a>
+                <i class="bi bi-chevron-right"></i>
+                <span>Registro de Asistencias</span>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Filtros -->
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="stat-card">
-            <form method="get" class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Funcionario</label>
-                    <select name="funcionario" class="form-select">
-                        <option value="">Todos los funcionarios</option>
-                        {% for funcionario in funcionarios %}
-                            <option value="{{ funcionario.id }}">{{ funcionario.nombre_completo }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Fecha</label>
-                    <input type="date" name="fecha" class="form-control">
-                </div>
-                <div class="col-md-12">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-search"></i> Buscar
-                    </button>
-                    <a href="{% url 'lista_asistencias' %}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Limpiar
-                    </a>
+        <div class="la-head-actions">
+            <a href="{% url 'registrar_asistencia' %}" class="la-btn la-btn-success">
+                <i class="bi bi-plus-circle"></i>
+                Nueva Asistencia
+            </a>
+        </div>
+    </div>
+
+    <!-- ─── Filtros mejorados ───────────────────────────── -->
+    <div class="la-filters-card" id="filtersCard">
+        <div class="la-filters-header" onclick="toggleFilters()">
+            <div class="la-filters-header-left">
+                <i class="bi bi-funnel-fill"></i>
+                <h3>Filtros de búsqueda</h3>
+                {% if request.GET.funcionario or request.GET.fecha %}
+                <span class="la-filters-badge">{{ request.GET|length }}</span>
+                {% endif %}
+            </div>
+            <div class="la-filters-header-right">
+                <a href="{% url 'lista_asistencias' %}" class="la-filters-clear" onclick="event.stopPropagation()">
+                    <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                </a>
+                <i class="bi bi-chevron-up la-filters-toggle"></i>
+            </div>
+        </div>
+
+        <div class="la-filters-body">
+            <form method="get">
+                <div class="la-filters-grid">
+                    <div class="la-field">
+                        <label>
+                            <i class="bi bi-person-badge"></i>
+                            Funcionario
+                        </label>
+                        <select name="funcionario" class="la-select">
+                            <option value="">Todos los funcionarios</option>
+                            {% for funcionario in funcionarios %}
+                            <option value="{{ funcionario.id }}"
+                                    {% if request.GET.funcionario == funcionario.id|stringformat:"s" %}selected{% endif %}>
+                            {{ funcionario.nombre_completo }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="la-field">
+                        <label>
+                            <i class="bi bi-calendar3"></i>
+                            Fecha
+                        </label>
+                        <input type="date" name="fecha" class="la-input"
+                               value="{{ request.GET.fecha }}">
+                    </div>
+
+                    <div class="la-filters-actions">
+                        <button type="submit" class="la-btn la-btn-primary">
+                            <i class="bi bi-search"></i>
+                            Buscar
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
+
+    <!-- ─── Tabla de asistencias ────────────────────────── -->
+    <div class="la-table-container">
+        <div class="la-table-header">
+            <div class="la-table-title">
+                <i class="bi bi-table"></i>
+                <h2>Registro de asistencias</h2>
+            </div>
+            <div class="la-table-count">
+                <i class="bi bi-list-check"></i>
+                {{ asistencias|length }} registro{{ asistencias|length|pluralize }}
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="la-table">
+                <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Funcionario</th>
+                    <th>Cargo</th>
+                    <th>Estado</th>
+                    <th>Observaciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for asistencia in asistencias %}
+                <tr>
+                    <td>
+                        <div class="la-date">
+                            <span class="la-date-day">{{ asistencia.fecha|date:"d/m/Y" }}</span>
+                            <span class="la-date-month">{{ asistencia.fecha|date:"l"|slice:":3"|upper }}</span>
+                        </div>
+                    </td>
+
+                    <td>
+                        <strong>{{ asistencia.funcionario.nombre_completo }}</strong>
+                    </td>
+
+                    <td>
+                            <span class="la-cargo">
+                                {{ asistencia.funcionario.get_cargo_display }}
+                            </span>
+                    </td>
+
+                    <td>
+                        {% if asistencia.presente %}
+                        <span class="la-badge la-badge-success">
+                                    <i class="bi bi-check-circle"></i> Presente
+                                </span>
+                        {% else %}
+                        <span class="la-badge la-badge-danger">
+                                    <i class="bi bi-x-circle"></i> Ausente
+                                </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if asistencia.observaciones %}
+                        <div class="la-observaciones">
+                            {{ asistencia.observaciones }}
+                        </div>
+                        {% else %}
+                        <div class="la-observaciones empty">
+                            <i class="bi bi-dash"></i> Sin observaciones
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">
+                        <div class="la-empty">
+                            <div class="la-empty-illustration">
+                                <i class="bi bi-calendar-x"></i>
+                            </div>
+                            <h3>No hay asistencias registradas</h3>
+                            <p>No se encontraron registros de asistencias con los filtros aplicados.</p>
+                            <div class="la-empty-actions">
+                                <a href="{% url 'lista_asistencias' %}" class="la-btn la-btn-outline">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                    Limpiar filtros
+                                </a>
+                                <a href="{% url 'registrar_asistencia' %}" class="la-btn la-btn-primary">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Registrar asistencia
+                                </a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if asistencias|length == 50 %}
+        <div class="la-alert">
+            <i class="bi bi-info-circle-fill"></i>
+            <div>
+                <strong>Mostrando las últimas 50 asistencias.</strong>
+                Usa los filtros para buscar registros específicos o ver un período determinado.
+            </div>
+        </div>
+        {% endif %}
+
+        {% if asistencias %}
+        <div class="la-table-footer">
+            <span>
+                <i class="bi bi-info-circle me-1"></i>
+                Hacé clic en una fila para ver más detalles
+            </span>
+            <span>
+                <i class="bi bi-arrow-down me-1"></i>
+                Ordenado por fecha (más reciente)
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- FAB móvil -->
+    <a href="{% url 'registrar_asistencia' %}" class="la-fab d-lg-none">
+        <i class="bi bi-plus-lg"></i>
+        <span class="la-fab-tooltip">Nueva asistencia</span>
+    </a>
 </div>
 
-<!-- Lista de Asistencias -->
-<div class="row">
-    <div class="col-md-12">
-        <div class="stat-card">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Funcionario</th>
-                            <th>Cargo</th>
-                            <th>Estado</th>
-                            <th>Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for asistencia in asistencias %}
-                        <tr>
-                            <td><strong>{{ asistencia.fecha|date:"d/m/Y" }}</strong></td>
-                            <td>{{ asistencia.funcionario.nombre_completo }}</td>
-                            <td>
-                                <span class="badge bg-secondary">
-                                    {{ asistencia.funcionario.get_cargo_display }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if asistencia.presente %}
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle"></i> Presente
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-danger">
-                                        <i class="bi bi-x-circle"></i> Ausente
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if asistencia.observaciones %}
-                                    {{ asistencia.observaciones }}
-                                {% else %}
-                                    <span class="text-muted">—</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox" style="font-size: 3rem;"></i><br>
-                                No se encontraron asistencias registradas
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% if asistencias|length == 50 %}
-                <div class="alert alert-info mt-3">
-                    <i class="bi bi-info-circle"></i> Mostrando las últimas 50 asistencias. Usa los filtros para buscar registros específicos.
-                </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
+<script>
+    // Toggle filtros
+    function toggleFilters() {
+        const card = document.getElementById('filtersCard');
+        card.classList.toggle('collapsed');
+    }
+
+    // Inicializar estado de filtros
+    (function() {
+        const params = new URLSearchParams(window.location.search);
+        const hasFilters = params.get('funcionario') || params.get('fecha');
+        const filtersCard = document.getElementById('filtersCard');
+
+        if (!hasFilters && filtersCard) {
+            filtersCard.classList.add('collapsed');
+        }
+    })();
+
+    // Animaciones
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.la-stat').forEach((stat, index) => {
+            stat.style.animationDelay = `${index * 0.05}s`;
+        });
+    });
+</script>
 {% endblock %}

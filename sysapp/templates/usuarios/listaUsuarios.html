@@ -1,318 +1,337 @@
 {% extends 'base.html' %}
 
 {% block title %}Usuarios - ITS CEP{% endblock %}
-{% block page_title %}Gestión de Usuarios{% endblock %}
 
 {% block content %}
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    /* ─── Tokens consistentes ─────────────────────────────── */
     :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        --lu-bg:        #f8fafc;
+        --lu-surface:   #ffffff;
+        --lu-ink:       #0f1825;
+        --lu-muted:     #5e6f88;
+        --lu-border:    #e1e9f0;
+        --lu-primary:   #6366f1;
+        --lu-primary-dk: #4f52e0;
+        --lu-primary-lt: #e9eafe;
+        --lu-success:   #10b981;
+        --lu-success-lt: #e4f9f0;
+        --lu-warning:   #f59e0b;
+        --lu-warning-lt: #fef5e5;
+        --lu-danger:    #ef4444;
+        --lu-danger-lt: #fee9e9;
+        --lu-purple:    #8b5cf6;
+        --lu-purple-lt: #ede9fe;
+        --lu-gray-lt:   #f1f5f9;
+        --lu-r:         16px;
+        --lu-sh-sm:     0 2px 8px rgba(0,0,0,.04);
+        --lu-sh-md:     0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.03);
+        --lu-sh-lg:     0 12px 32px rgba(0,0,0,.08);
+        --lu-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Header Section */
-    .page-header {
-        background: var(--primary-gradient);
-        border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: var(--card-shadow);
-        color: white;
+    [data-theme="dark"] {
+        --lu-bg:        #0e121b;
+        --lu-surface:   #161c26;
+        --lu-ink:       #edf2f9;
+        --lu-muted:     #8f9fb2;
+        --lu-border:    #232b36;
+        --lu-primary-lt: #1e1f3a;
+        --lu-success-lt: #12352d;
+        --lu-warning-lt: #302010;
+        --lu-danger-lt: #2f1518;
+        --lu-purple-lt: #281c42;
+        --lu-gray-lt:   #1e2630;
     }
 
-    .page-header h2 {
-        margin: 0;
-        font-weight: 700;
-        font-size: 2rem;
+    .lu {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--lu-ink);
+        min-height: 100vh;
+        padding: 1.5rem;
     }
 
-    .page-header p {
-        margin: 0.5rem 0 0 0;
-        opacity: 0.9;
-        font-size: 1rem;
-    }
+    .lu * { box-sizing: border-box; }
 
-    /* Action Bar */
-    .action-bar {
+    /* ─── Header mejorado ───────────────────────────────── */
+    .lu-head {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        gap: 1rem;
+        justify-content: space-between;
         margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .lu-head-left {
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+    }
+
+    .lu-head-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--lu-ink);
+        margin: 0;
+        letter-spacing: -0.75px;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+    }
+
+    .lu-head-title i {
+        font-size: 1.8rem;
+        color: var(--lu-primary);
+        background: var(--lu-primary-lt);
+        padding: .5rem;
+        border-radius: 14px;
+    }
+
+    .lu-head-breadcrumb {
+        font-size: .85rem;
+        color: var(--lu-muted);
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .lu-head-breadcrumb a {
+        color: var(--lu-primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .lu-head-breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .lu-head-actions {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
         flex-wrap: wrap;
     }
 
-    .search-box {
-        flex: 1;
-        min-width: 250px;
-        max-width: 400px;
-    }
-
-    .search-box input {
-        border-radius: 12px;
-        padding: 0.75rem 1.25rem;
-        border: 2px solid #e0e0e0;
-        transition: all 0.3s ease;
-    }
-
-    .search-box input:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .btn-create {
-        background: linear-gradient(135deg, #26425d 0%, #264B5DFF 100%) !important;
-        border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 12px;
-        font-weight: 600;
-        color: white;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-create:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        color: white;
-    }
-
-    .table-header h3 {
-        margin: 0;
-        font-weight: 700;
-        color: #2d3748;
-        font-size: 1.25rem;
-    }
-
-    .table-responsive {
-        padding: 0;
-    }
-
-    .table {
-        margin: 0;
-    }
-
-    .table thead th {
-        background: #f8f9fa;
-        border-bottom: 2px solid #dee2e6;
-        color: #495057;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.5px;
-        padding: 1rem 1.5rem;
-        white-space: nowrap;
-    }
-
-    .table tbody tr {
-        transition: all 0.2s ease;
-        border-bottom: 1px solid #f0f0f0;
-    }
-
-    .table tbody tr:hover {
-        background-color: #f8f9ff;
-        transform: scale(1.01);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .table tbody td {
-        padding: 1.25rem 1.5rem;
-        vertical-align: middle;
-    }
-
-    /* User Avatar */
-    .user-avatar {
-        width: 45px;
-        height: 45px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #26425d 0%, #264B5DFF 100%) !important;
-        color: white;
+    /* ─── Botones mejorados ─────────────────────────────── */
+    .lu-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        gap: .5rem;
+        padding: .7rem 1.4rem;
+        border-radius: 12px;
+        font-size: .9rem;
         font-weight: 700;
-        font-size: 1.1rem;
-        margin-right: 0.75rem;
-        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
-    }
-
-    .user-info {
-        display: inline-flex;
-        align-items: center;
-    }
-
-    .user-details {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .user-name {
-        font-weight: 600;
-        color: #2d3748;
-        font-size: 0.95rem;
-    }
-
-    .user-username {
-        font-size: 0.8rem;
-        color: #718096;
-    }
-
-    /* Badges */
-    .badge {
-        padding: 0.4rem 0.8rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.75rem;
-        letter-spacing: 0.3px;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-
-    .badge.bg-danger {
-        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%) !important;
-    }
-
-    .badge.bg-primary {
-        background: linear-gradient(135deg, #667eea 0%, #264B5DFF 100%) !important;
-    }
-
-    .badge.bg-secondary {
-        background: linear-gradient(135deg, #8e9eab 0%, #c8d0d7 100%) !important;
-    }
-
-    .badge.bg-success {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
-    }
-
-    .badge.bg-warning {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
-    }
-
-    /* Action Buttons */
-    .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .btn-sm {
-        padding: 0.5rem 0.75rem;
-        border-radius: 8px;
-        transition: all 0.2s ease;
         border: none;
-        font-weight: 600;
+        cursor: pointer;
+        transition: var(--lu-transition);
+        text-decoration: none;
+        white-space: nowrap;
+        letter-spacing: .02em;
+        position: relative;
+        overflow: hidden;
     }
 
-    .btn-sm:hover {
+    .lu-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255,255,255,.2);
+        transform: translate(-50%, -50%);
+        transition: width .4s, height .4s;
+    }
+
+    .lu-btn:active::after {
+        width: 200px;
+        height: 200px;
+    }
+
+    .lu-btn i { font-size: 1.1rem; }
+
+    .lu-btn-primary {
+        background: linear-gradient(135deg, var(--lu-primary) 0%, var(--lu-primary-dk) 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(99,102,241,.25);
+    }
+    .lu-btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 20px rgba(99,102,241,.35);
+        color: #fff;
     }
 
-    .btn-warning {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
+    .lu-btn-purple {
+        background: linear-gradient(135deg, var(--lu-purple) 0%, #7c3aed 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(139,92,246,.25);
+    }
+    .lu-btn-purple:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(139,92,246,.35);
+        color: #fff;
     }
 
-    .btn-danger {
-        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    .lu-btn-outline {
+        background: var(--lu-surface);
+        color: var(--lu-ink);
+        border: 1.5px solid var(--lu-border);
+    }
+    .lu-btn-outline:hover {
+        background: var(--lu-gray-lt);
+        border-color: var(--lu-primary);
+        color: var(--lu-primary);
+        transform: translateY(-2px);
     }
 
-    .btn-success {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    /* ─── Stats mejoradas ───────────────────────────────── */
+    .lu-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
     }
 
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
+    .lu-stat {
+        background: var(--lu-surface);
+        border: 1px solid var(--lu-border);
+        border-radius: 20px;
+        padding: 1.25rem;
+        box-shadow: var(--lu-sh-md);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: var(--lu-transition);
+        position: relative;
+        overflow: hidden;
     }
 
-    .empty-state i {
-        font-size: 4rem;
-        color: #cbd5e0;
-        margin-bottom: 1rem;
+    .lu-stat::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--stat-color), transparent);
     }
 
-    .empty-state h4 {
-        color: #4a5568;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
+    .lu-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--lu-sh-lg);
     }
 
-    .empty-state p {
-        color: #718096;
+    .lu-stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+        transition: var(--lu-transition);
     }
 
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .page-header {
-            padding: 1.5rem;
-        }
-
-        .page-header h2 {
-            font-size: 1.5rem;
-        }
-
-        .action-bar {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .search-box {
-            max-width: 100%;
-        }
-
-        .btn-create {
-            width: 100%;
-            justify-content: center;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .stats-container {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .table thead {
-            display: none;
-        }
-
-        .table tbody tr {
-            display: block;
-            margin-bottom: 1rem;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 1rem;
-        }
-
-        .table tbody td {
-            display: block;
-            padding: 0.5rem 0;
-            text-align: left;
-            border: none;
-        }
-
-        .table tbody td::before {
-            content: attr(data-label);
-            font-weight: 600;
-            display: block;
-            margin-bottom: 0.25rem;
-            color: #4a5568;
-            font-size: 0.8rem;
-        }
-
-        .action-buttons {
-            justify-content: flex-start;
-            flex-wrap: wrap;
-        }
+    .lu-stat:hover .lu-stat-icon {
+        transform: scale(1.1) rotate(5deg);
     }
 
-    /* Loading Animation */
-    @keyframes fadeIn {
+    .lu-stat-icon.primary { background: var(--lu-primary-lt); color: var(--lu-primary); --stat-color: var(--lu-primary); }
+    .lu-stat-icon.success { background: var(--lu-success-lt); color: var(--lu-success); --stat-color: var(--lu-success); }
+    .lu-stat-icon.warning { background: var(--lu-warning-lt); color: var(--lu-warning); --stat-color: var(--lu-warning); }
+    .lu-stat-icon.danger  { background: var(--lu-danger-lt);  color: var(--lu-danger); --stat-color: var(--lu-danger); }
+    .lu-stat-icon.purple  { background: var(--lu-purple-lt);  color: var(--lu-purple); --stat-color: var(--lu-purple); }
+
+    .lu-stat-content {
+        flex: 1;
+    }
+
+    .lu-stat-label {
+        font-size: .75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--lu-muted);
+        margin-bottom: .25rem;
+    }
+
+    .lu-stat-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--lu-ink);
+        letter-spacing: -0.5px;
+    }
+
+    .lu-stat-sub {
+        font-size: .7rem;
+        color: var(--lu-muted);
+        margin-top: .25rem;
+        display: flex;
+        align-items: center;
+        gap: .25rem;
+    }
+
+    /* ─── Search Box ────────────────────────────────────── */
+    .lu-search-container {
+        margin-bottom: 1.75rem;
+    }
+
+    .lu-search {
+        position: relative;
+        max-width: 400px;
+    }
+
+    .lu-search i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--lu-muted);
+        font-size: 1rem;
+    }
+
+    .lu-search input {
+        width: 100%;
+        height: 48px;
+        padding: 0 1rem 0 2.8rem;
+        border: 1.5px solid var(--lu-border);
+        border-radius: 14px;
+        background: var(--lu-surface);
+        font-size: .95rem;
+        font-family: inherit;
+        color: var(--lu-ink);
+        transition: var(--lu-transition);
+    }
+
+    .lu-search input:focus {
+        outline: none;
+        border-color: var(--lu-primary);
+        box-shadow: 0 0 0 4px rgba(99,102,241,.1);
+    }
+
+    .lu-search input::placeholder {
+        color: var(--lu-muted);
+        opacity: .6;
+    }
+
+    /* ─── Tabla mejorada ────────────────────────────────── */
+    .lu-table-container {
+        background: var(--lu-surface);
+        border: 1px solid var(--lu-border);
+        border-radius: 20px;
+        box-shadow: var(--lu-sh-lg);
+        overflow: hidden;
+        animation: slideIn .4s ease both;
+    }
+
+    @keyframes slideIn {
         from {
             opacity: 0;
             transform: translateY(20px);
@@ -323,181 +342,722 @@
         }
     }
 
-    .stat-card, .stat-card-mini {
-        animation: fadeIn 0.5s ease-out;
+    .lu-table-header {
+        padding: 1.25rem 1.5rem;
+        background: var(--lu-gray-lt);
+        border-bottom: 1px solid var(--lu-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
-    /* Scroll Behavior */
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+    .lu-table-title {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
     }
 
-    .table-responsive::-webkit-scrollbar {
-        height: 8px;
-    }
-
-    .table-responsive::-webkit-scrollbar-track {
-        background: #f1f1f1;
+    .lu-table-title i {
+        font-size: 1.1rem;
+        color: var(--lu-primary);
+        background: var(--lu-primary-lt);
+        padding: .5rem;
         border-radius: 10px;
     }
 
-    .table-responsive::-webkit-scrollbar-thumb {
-        background: var(--body-bg);
-        border-radius: 10px;
+    .lu-table-title h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--lu-ink);
     }
 
-    .table-responsive::-webkit-scrollbar-thumb:hover {
-        background: var(--body-bg);
+    .lu-table-count {
+        background: var(--lu-surface);
+        border: 1px solid var(--lu-border);
+        border-radius: 999px;
+        padding: .3rem 1rem;
+        font-size: .8rem;
+        font-weight: 600;
+        color: var(--lu-muted);
+        display: flex;
+        align-items: center;
+        gap: .4rem;
     }
+
+    .lu-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .lu-table thead th {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        font-size: .75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--lu-muted);
+        background: var(--lu-gray-lt);
+        border-bottom: 2px solid var(--lu-border);
+        white-space: nowrap;
+    }
+
+    .lu-table tbody tr {
+        border-bottom: 1px solid var(--lu-border);
+        transition: var(--lu-transition);
+    }
+
+    .lu-table tbody tr:hover {
+        background: var(--lu-primary-lt);
+        transform: scale(1.002);
+    }
+
+    .lu-table tbody td {
+        padding: 1.25rem 1.5rem;
+        font-size: .9rem;
+        color: var(--lu-ink);
+        vertical-align: middle;
+    }
+
+    /* Avatar de usuario mejorado */
+    .lu-user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .lu-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--lu-primary) 0%, var(--lu-primary-dk) 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 8px rgba(99,102,241,.25);
+        text-transform: uppercase;
+    }
+
+    .lu-user-details {
+        display: flex;
+        flex-direction: column;
+        gap: .2rem;
+    }
+
+    .lu-user-name {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--lu-ink);
+    }
+
+    .lu-user-username {
+        font-size: .8rem;
+        color: var(--lu-muted);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+    }
+
+    .lu-user-username i {
+        font-size: .75rem;
+    }
+
+    /* Badges mejorados */
+    .lu-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .4rem 1rem;
+        border-radius: 999px;
+        font-size: .8rem;
+        font-weight: 700;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        transition: var(--lu-transition);
+    }
+
+    .lu-badge i { font-size: .75rem; }
+
+    .lu-badge-danger {
+        background: var(--lu-danger-lt);
+        color: var(--lu-danger);
+        border-color: rgba(239,68,68,.2);
+    }
+
+    .lu-badge-primary {
+        background: var(--lu-primary-lt);
+        color: var(--lu-primary);
+        border-color: rgba(99,102,241,.2);
+    }
+
+    .lu-badge-purple {
+        background: var(--lu-purple-lt);
+        color: var(--lu-purple);
+        border-color: rgba(139,92,246,.2);
+    }
+
+    .lu-badge-success {
+        background: var(--lu-success-lt);
+        color: var(--lu-success);
+        border-color: rgba(16,185,129,.2);
+    }
+
+    .lu-badge-warning {
+        background: var(--lu-warning-lt);
+        color: var(--lu-warning);
+        border-color: rgba(245,158,11,.2);
+    }
+
+    .lu-badge-secondary {
+        background: var(--lu-gray-lt);
+        color: var(--lu-muted);
+        border-color: var(--lu-border);
+    }
+
+    /* Email */
+    .lu-email {
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        color: var(--lu-ink);
+        font-size: .9rem;
+    }
+
+    .lu-email i {
+        color: var(--lu-muted);
+        font-size: .85rem;
+    }
+
+    .lu-email-empty {
+        color: var(--lu-muted);
+        font-style: italic;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+    }
+
+    /* Último acceso */
+    .lu-last-access {
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .85rem;
+    }
+
+    .lu-last-access i {
+        color: var(--lu-muted);
+        font-size: .8rem;
+    }
+
+    .lu-last-access-empty {
+        color: var(--lu-muted);
+        font-style: italic;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+    }
+
+    /* Acciones mejoradas */
+    .lu-row-actions {
+        display: flex;
+        gap: .35rem;
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: var(--lu-transition);
+    }
+
+    tr:hover .lu-row-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .lu-row-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1.5px solid var(--lu-border);
+        background: var(--lu-surface);
+        color: var(--lu-muted);
+        text-decoration: none;
+        font-size: 1rem;
+        transition: var(--lu-transition);
+    }
+
+    .lu-row-action:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: var(--lu-sh-md);
+    }
+
+    .lu-row-action.edit:hover {
+        background: var(--lu-warning);
+        border-color: var(--lu-warning);
+        color: white;
+    }
+
+    .lu-row-action.activate:hover {
+        background: var(--lu-success);
+        border-color: var(--lu-success);
+        color: white;
+    }
+
+    .lu-row-action.deactivate:hover {
+        background: var(--lu-danger);
+        border-color: var(--lu-danger);
+        color: white;
+    }
+
+    /* Empty state mejorado */
+    .lu-empty {
+        padding: 5rem 2rem;
+        text-align: center;
+        color: var(--lu-muted);
+    }
+
+    .lu-empty-illustration {
+        font-size: 5rem;
+        color: var(--lu-primary);
+        opacity: .2;
+        margin-bottom: 1rem;
+    }
+
+    .lu-empty h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--lu-ink);
+        margin-bottom: .5rem;
+    }
+
+    .lu-empty p {
+        margin: 0 0 1.5rem;
+        font-size: .95rem;
+    }
+
+    .lu-empty-actions {
+        display: flex;
+        gap: .75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Footer */
+    .lu-table-footer {
+        padding: 1rem 1.5rem;
+        background: var(--lu-gray-lt);
+        border-top: 1px solid var(--lu-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: .85rem;
+        color: var(--lu-muted);
+    }
+
+    /* FAB móvil */
+    .lu-fab {
+        position: fixed;
+        right: 2rem;
+        bottom: 2rem;
+        z-index: 1100;
+        width: 60px;
+        height: 60px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, var(--lu-primary) 0%, var(--lu-primary-dk) 100%);
+        color: #fff;
+        border: none;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 24px rgba(99,102,241,.4);
+        cursor: pointer;
+        transition: var(--lu-transition);
+        text-decoration: none;
+    }
+
+    .lu-fab:hover {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 12px 32px rgba(99,102,241,.5);
+        border-radius: 30px;
+        color: #fff;
+    }
+
+    .lu-fab-tooltip {
+        position: absolute;
+        right: calc(100% + 1rem);
+        background: var(--lu-ink);
+        color: var(--lu-surface);
+        padding: .5rem 1rem;
+        border-radius: 12px;
+        font-size: .85rem;
+        font-weight: 600;
+        white-space: nowrap;
+        opacity: 0;
+        transform: translateX(10px);
+        transition: var(--lu-transition);
+        pointer-events: none;
+    }
+
+    .lu-fab:hover .lu-fab-tooltip {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .lu {
+            padding: 1rem;
+        }
+
+        .lu-head {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .lu-head-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+
+        .lu-head-actions .lu-btn {
+            width: 100%;
+        }
+
+        .lu-stats-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .lu-stat {
+            padding: 1rem;
+        }
+
+        .lu-stat-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+        }
+
+        .lu-stat-value {
+            font-size: 1.4rem;
+        }
+
+        .lu-table thead {
+            display: none;
+        }
+
+        .lu-table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid var(--lu-border);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .lu-table tbody td {
+            display: block;
+            padding: .5rem 0;
+            text-align: left;
+            border: none;
+        }
+
+        .lu-table tbody td::before {
+            content: attr(data-label);
+            font-weight: 700;
+            font-size: .7rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--lu-muted);
+            display: block;
+            margin-bottom: .25rem;
+        }
+
+        .lu-row-actions {
+            opacity: 1;
+            transform: none;
+            justify-content: flex-start;
+        }
+
+        .lu-fab {
+            display: flex;
+        }
+
+        .lu-table-footer span:last-child {
+            display: none;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .lu-stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .lu-table-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .lu-table-count {
+            align-self: flex-start;
+        }
+
+        .lu-user-info {
+            flex-wrap: wrap;
+        }
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .lu-stat {
+        animation: fadeIn .3s ease forwards;
+    }
+
+    .lu-stat:nth-child(1) { animation-delay: .05s; }
+    .lu-stat:nth-child(2) { animation-delay: .1s; }
+    .lu-stat:nth-child(3) { animation-delay: .15s; }
+    .lu-stat:nth-child(4) { animation-delay: .2s; }
 </style>
 
-<!-- Action Bar -->
-<div class="action-bar mt-5">
-    <a href="{% url 'crear_usuario' %}" class="btn btn-create">
-        <i class="bi bi-plus-circle"></i> Crear Nuevo Usuario
+<div class="lu mt-5">
+    <!-- ─── Header mejorado ─────────────────────────────── -->
+    <div class="lu-head">
+        <div class="lu-head-left">
+            <div class="lu-head-title">
+                <i class="bi bi-people-fill"></i>
+                Usuarios
+            </div>
+            <div class="lu-head-breadcrumb">
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <i class="bi bi-chevron-right"></i>
+                <span>Gestión de Usuarios</span>
+            </div>
+        </div>
+
+        <div class="lu-head-actions">
+            <a href="{% url 'crear_usuario' %}" class="lu-btn lu-btn-purple">
+                <i class="bi bi-plus-circle"></i>
+                Nuevo Usuario
+            </a>
+        </div>
+    </div>
+
+    <!-- ─── Search Box ───────────────────────────────────── -->
+    <div class="lu-search-container">
+        <div class="lu-search">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" placeholder="Buscar por nombre, usuario o email...">
+        </div>
+    </div>
+
+    <!-- ─── Tabla de usuarios ────────────────────────────── -->
+    <div class="lu-table-container">
+        <div class="lu-table-header">
+            <div class="lu-table-title">
+                <i class="bi bi-table"></i>
+                <h2>Listado de usuarios del sistema</h2>
+            </div>
+            <div class="lu-table-count">
+                <i class="bi bi-people"></i>
+                {{ usuarios|length }} usuario{{ usuarios|length|pluralize }}
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="lu-table">
+                <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Tipo</th>
+                    <th>Último acceso</th>
+                    <th>Estado</th>
+                    <th style="text-align:center;">Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="userTableBody">
+                {% for usuario in usuarios %}
+                <tr>
+                    <td data-label="Usuario">
+                        <div class="lu-user-info">
+                            <div class="lu-avatar">
+                                {{ usuario.first_name.0|default:usuario.username.0|upper }}{{ usuario.last_name.0|default:''|upper }}
+                            </div>
+                            <div class="lu-user-details">
+                                    <span class="lu-user-name">
+                                        {% if usuario.first_name or usuario.last_name %}
+                                            {{ usuario.first_name }} {{ usuario.last_name }}
+                                        {% else %}
+                                            {{ usuario.username }}
+                                        {% endif %}
+                                    </span>
+                                <span class="lu-user-username">
+                                        <i class="bi bi-at"></i>
+                                        {{ usuario.username }}
+                                    </span>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td data-label="Email">
+                        {% if usuario.email %}
+                        <span class="lu-email">
+                                    <i class="bi bi-envelope"></i>
+                                    {{ usuario.email }}
+                                </span>
+                        {% else %}
+                        <span class="lu-email-empty">
+                                    <i class="bi bi-envelope-x"></i>
+                                    Sin email
+                                </span>
+                        {% endif %}
+                    </td>
+
+                    <td data-label="Tipo">
+                        {% if usuario.is_superuser %}
+                        <span class="lu-badge lu-badge-danger">
+                                    <i class="bi bi-star-fill"></i> Superusuario
+                                </span>
+                        {% elif usuario.is_staff %}
+                        <span class="lu-badge lu-badge-purple">
+                                    <i class="bi bi-shield-check"></i> Administrador
+                                </span>
+                        {% else %}
+                        <span class="lu-badge lu-badge-secondary">
+                                    <i class="bi bi-person"></i> Estándar
+                                </span>
+                        {% endif %}
+                    </td>
+
+                    <td data-label="Último acceso">
+                        {% if usuario.last_login %}
+                        <span class="lu-last-access">
+                                    <i class="bi bi-clock-history"></i>
+                                    {{ usuario.last_login|date:"d/m/Y H:i" }}
+                                </span>
+                        {% else %}
+                        <span class="lu-last-access-empty">
+                                    <i class="bi bi-clock"></i>
+                                    Nunca
+                                </span>
+                        {% endif %}
+                    </td>
+
+                    <td data-label="Estado">
+                        {% if usuario.is_active %}
+                        <span class="lu-badge lu-badge-success">
+                                    <i class="bi bi-check-circle-fill"></i> Activo
+                                </span>
+                        {% else %}
+                        <span class="lu-badge lu-badge-danger">
+                                    <i class="bi bi-x-circle-fill"></i> Inactivo
+                                </span>
+                        {% endif %}
+                    </td>
+
+                    <td data-label="Acciones" style="text-align:center;">
+                        <div class="lu-row-actions">
+                            <a href="{% url 'editar_usuario' usuario.id %}"
+                               class="lu-row-action edit"
+                               title="Editar usuario">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% if not usuario.is_superuser %}
+                            <a href="{% url 'cambiar_estado_usuario' usuario.id %}"
+                               class="lu-row-action {% if usuario.is_active %}deactivate{% else %}activate{% endif %}"
+                               title="{% if usuario.is_active %}Desactivar{% else %}Activar{% endif %} usuario"
+                               onclick="return confirm('¿Estás seguro de {% if usuario.is_active %}desactivar{% else %}activar{% endif %} este usuario?')">
+                                <i class="bi bi-{% if usuario.is_active %}x-circle{% else %}check-circle{% endif %}"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="lu-empty">
+                            <div class="lu-empty-illustration">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <h3>No hay usuarios registrados</h3>
+                            <p>Comienza creando tu primer usuario en el sistema.</p>
+                            <div class="lu-empty-actions">
+                                <a href="{% url 'crear_usuario' %}" class="lu-btn lu-btn-primary">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Crear usuario
+                                </a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if usuarios %}
+        <div class="lu-table-footer">
+            <span>
+                <i class="bi bi-info-circle me-1"></i>
+                Los superusuarios no pueden ser desactivados
+            </span>
+            <span>
+                <i class="bi bi-arrow-up me-1"></i>
+                Ordenado por fecha de registro
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- FAB móvil -->
+    <a href="{% url 'crear_usuario' %}" class="lu-fab d-lg-none">
+        <i class="bi bi-plus-lg"></i>
+        <span class="lu-fab-tooltip">Nuevo usuario</span>
     </a>
 </div>
 
-<!-- Users Table -->
-<div class="row">
-    <div class="col-12">
-        <div class="stat-card">
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Email</th>
-                            <th>Tipo</th>
-                            <th>Último Acceso</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody">
-                        {% for usuario in usuarios %}
-                        <tr>
-                            <td data-label="Usuario">
-                                <div class="user-info">
-                                    <div class="user-avatar">
-                                        {{ usuario.first_name.0|default:usuario.username.0|upper }}{{ usuario.last_name.0|default:''|upper }}
-                                    </div>
-                                    <div class="user-details">
-                                        <span class="user-name">
-                                            {% if usuario.first_name or usuario.last_name %}
-                                                {{ usuario.first_name }} {{ usuario.last_name }}
-                                            {% else %}
-                                                {{ usuario.username }}
-                                            {% endif %}
-                                        </span>
-                                        <span class="user-username">@{{ usuario.username }}</span>
-                                    </div>
-                                </div>
-                                {% if usuario.is_superuser %}
-                                    <span class="badge bg-danger ms-2">
-                                        <i class="bi bi-star-fill"></i> Super
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td data-label="Email">
-                                {% if usuario.email %}
-                                    <i class="bi bi-envelope"></i> {{ usuario.email }}
-                                {% else %}
-                                    <span class="text-muted"><i class="bi bi-envelope-x"></i> Sin email</span>
-                                {% endif %}
-                            </td>
-                            <td data-label="Tipo">
-                                {% if usuario.is_superuser %}
-                                    <span class="badge bg-danger">
-                                        <i class="bi bi-star-fill"></i> Superusuario
-                                    </span>
-                                {% elif usuario.is_staff %}
-                                    <span class="badge bg-primary">
-                                        <i class="bi bi-shield-check"></i> Administrador
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary">
-                                        <i class="bi bi-person"></i> Estándar
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td data-label="Último Acceso">
-                                {% if usuario.last_login %}
-                                    <i class="bi bi-clock-history"></i> {{ usuario.last_login|date:"d/m/Y H:i" }}
-                                {% else %}
-                                    <span class="text-muted"><i class="bi bi-clock"></i> Nunca</span>
-                                {% endif %}
-                            </td>
-                            <td data-label="Estado">
-                                {% if usuario.is_active %}
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle-fill"></i> Activo
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-danger">
-                                        <i class="bi bi-x-circle-fill"></i> Inactivo
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td data-label="Acciones">
-                                <div class="action-buttons">
-                                    <a href="{% url 'editar_usuario' usuario.id %}"
-                                       class="btn btn-sm btn-warning"
-                                       title="Editar usuario">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                    {% if not usuario.is_superuser %}
-                                        <a href="{% url 'cambiar_estado_usuario' usuario.id %}"
-                                           class="btn btn-sm {% if usuario.is_active %}btn-danger{% else %}btn-success{% endif %}"
-                                           title="{% if usuario.is_active %}Desactivar{% else %}Activar{% endif %}"
-                                           onclick="return confirm('¿Estás seguro de {% if usuario.is_active %}desactivar{% else %}activar{% endif %} este usuario?')">
-                                            <i class="bi bi-{% if usuario.is_active %}x-circle-fill{% else %}check-circle-fill{% endif %}"></i>
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6">
-                                <div class="empty-state">
-                                    <i class="bi bi-inbox"></i>
-                                    <h4>No hay usuarios registrados</h4>
-                                    <p>Comienza creando tu primer usuario</p>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-// Search functionality
-document.getElementById('searchInput').addEventListener('keyup', function() {
-    const searchValue = this.value.toLowerCase();
-    const tableRows = document.querySelectorAll('#userTableBody tr');
+    // Función de búsqueda mejorada
+    document.getElementById('searchInput')?.addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase().trim();
+        const tableRows = document.querySelectorAll('#userTableBody tr');
+        let visibleCount = 0;
 
-    tableRows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(searchValue) ? '' : 'none';
-    });
-});
+        tableRows.forEach(row => {
+            if (row.querySelector('td[colspan]')) return; // Ignorar fila de empty state
 
-// Add smooth scroll behavior
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const text = row.textContent.toLowerCase();
+            const isVisible = text.includes(searchValue);
+            row.style.display = isVisible ? '' : 'none';
+
+            if (isVisible) visibleCount++;
+        });
+
+        // Actualizar contador de resultados visibles
+        const countElement = document.querySelector('.lu-table-count');
+        if (countElement) {
+            const total = tableRows.length - (document.querySelector('td[colspan]') ? 1 : 0);
+            countElement.innerHTML = `<i class="bi bi-people"></i> ${visibleCount} de ${total} usuario${total !== 1 ? 's' : ''}`;
         }
     });
-});
-</script>
 
+    // Inicializar animaciones
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.lu-stat').forEach((stat, index) => {
+            stat.style.animationDelay = `${index * 0.05}s`;
+        });
+    });
+</script>
 {% endblock %}

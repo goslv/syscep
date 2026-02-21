@@ -1,130 +1,847 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ titulo }} - ITS CEP{% endblock %}
-{% block page_title %}{{ titulo }}{% endblock %}
 
 {% block content %}
-<div class="row mt-5">
-    <div class="col-md-8 mx-auto">
-        <div class="stat-card">
-            <form method="post">
-                {% csrf_token %}
-                
-                <!-- Información de Acceso -->
-                <h5 class="mb-3">
-                    Información de Acceso
-                </h5>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label">Nombre de Usuario *</label>
-                        {{ form.username }}
-                        {% if form.username.errors %}
-                            <div class="text-danger">{{ form.username.errors }}</div>
-                        {% endif %}
-                        <small class="text-muted">Único, sin espacios ni caracteres especiales</small>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    /* ─── Tokens consistentes ─────────────────────────────── */
+    :root {
+        --fu-bg:        #f8fafc;
+        --fu-surface:   #ffffff;
+        --fu-ink:       #0f1825;
+        --fu-muted:     #5e6f88;
+        --fu-border:    #e1e9f0;
+        --fu-primary:   #8b5cf6;
+        --fu-primary-dk: #7c3aed;
+        --fu-primary-lt: #ede9fe;
+        --fu-success:   #10b981;
+        --fu-success-lt: #e4f9f0;
+        --fu-warning:   #f59e0b;
+        --fu-warning-lt: #fef5e5;
+        --fu-danger:    #ef4444;
+        --fu-danger-lt: #fee9e9;
+        --fu-info:      #0ea5e9;
+        --fu-info-lt:   #e0f2fe;
+        --fu-gray-lt:   #f1f5f9;
+        --fu-r:         16px;
+        --fu-sh-sm:     0 2px 8px rgba(0,0,0,.04);
+        --fu-sh-md:     0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.03);
+        --fu-sh-lg:     0 12px 32px rgba(0,0,0,.08);
+        --fu-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+        --fu-bg:        #0e121b;
+        --fu-surface:   #161c26;
+        --fu-ink:       #edf2f9;
+        --fu-muted:     #8f9fb2;
+        --fu-border:    #232b36;
+        --fu-primary-lt: #281c42;
+        --fu-success-lt: #12352d;
+        --fu-warning-lt: #302010;
+        --fu-danger-lt: #2f1518;
+        --fu-info-lt:   #0c2a3a;
+        --fu-gray-lt:   #1e2630;
+    }
+
+    .fu {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--fu-ink);
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
+    }
+
+    .fu * { box-sizing: border-box; }
+
+    /* ─── Header mejorado ───────────────────────────────── */
+    .fu-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .fu-head-left {
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+    }
+
+    .fu-head-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--fu-ink);
+        margin: 0;
+        letter-spacing: -0.75px;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+    }
+
+    .fu-head-title i {
+        font-size: 1.8rem;
+        color: var(--fu-primary);
+        background: var(--fu-primary-lt);
+        padding: .5rem;
+        border-radius: 14px;
+    }
+
+    .fu-head-breadcrumb {
+        font-size: .85rem;
+        color: var(--fu-muted);
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .fu-head-breadcrumb a {
+        color: var(--fu-primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .fu-head-breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    /* ─── Contenedor del formulario ─────────────────────── */
+    .fu-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .fu-card {
+        background: var(--fu-surface);
+        border: 1px solid var(--fu-border);
+        border-radius: 24px;
+        box-shadow: var(--fu-sh-lg);
+        overflow: hidden;
+        animation: slideIn .4s ease both;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ─── Header de la card ─────────────────────────────── */
+    .fu-card-header {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, var(--fu-primary) 0%, var(--fu-primary-dk) 100%);
+        color: white;
+    }
+
+    .fu-card-header h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 0 .25rem;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .fu-card-header p {
+        font-size: .85rem;
+        opacity: .9;
+        margin: 0;
+    }
+
+    .fu-card-header i {
+        font-size: 1.4rem;
+    }
+
+    /* ─── Cuerpo del formulario ─────────────────────────── */
+    .fu-card-body {
+        padding: 2rem;
+    }
+
+    /* ─── Secciones del formulario ──────────────────────── */
+    .fu-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid var(--fu-border);
+    }
+
+    .fu-section:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .fu-section-title {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .fu-section-title i {
+        font-size: 1.2rem;
+        color: var(--fu-primary);
+        background: var(--fu-primary-lt);
+        padding: .5rem;
+        border-radius: 12px;
+    }
+
+    .fu-section-title h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--fu-ink);
+    }
+
+    .fu-section-title p {
+        font-size: .85rem;
+        color: var(--fu-muted);
+        margin: .25rem 0 0;
+    }
+
+    /* ─── Grid del formulario ───────────────────────────── */
+    .fu-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+        .fu-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ─── Campos del formulario ─────────────────────────── */
+    .fu-field {
+        display: flex;
+        flex-direction: column;
+        gap: .4rem;
+    }
+
+    .fu-field.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .fu-label {
+        font-size: .8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--fu-muted);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+    }
+
+    .fu-label i {
+        font-size: .85rem;
+        color: var(--fu-primary);
+    }
+
+    .fu-label-required::after {
+        content: '*';
+        color: var(--fu-danger);
+        margin-left: .2rem;
+    }
+
+    .fu-input {
+        width: 100%;
+        padding: .75rem 1rem;
+        border: 1.5px solid var(--fu-border);
+        border-radius: 12px;
+        background: var(--fu-bg);
+        font-size: .95rem;
+        font-family: inherit;
+        color: var(--fu-ink);
+        transition: var(--fu-transition);
+    }
+
+    .fu-input:focus {
+        outline: none;
+        border-color: var(--fu-primary);
+        background: var(--fu-surface);
+        box-shadow: 0 0 0 4px rgba(139,92,246,.1);
+    }
+
+    .fu-input:hover {
+        border-color: var(--fu-primary);
+    }
+
+    .fu-input::placeholder {
+        color: var(--fu-muted);
+        opacity: .5;
+    }
+
+    /* Mensajes de error */
+    .fu-error {
+        font-size: .8rem;
+        color: var(--fu-danger);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        margin-top: .25rem;
+    }
+
+    .fu-error i {
+        font-size: .8rem;
+    }
+
+    /* Hint o ayuda */
+    .fu-hint {
+        font-size: .75rem;
+        color: var(--fu-muted);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        margin-top: .5rem;
+    }
+
+    .fu-hint i {
+        font-size: .75rem;
+        color: var(--fu-primary);
+    }
+
+    /* ─── Switches mejorados (toggles) ──────────────────── */
+    .fu-switches {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+        .fu-switches {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .fu-switch-card {
+        background: var(--fu-gray-lt);
+        border: 1.5px solid var(--fu-border);
+        border-radius: 16px;
+        padding: 1.25rem;
+        transition: var(--fu-transition);
+        cursor: pointer;
+    }
+
+    .fu-switch-card:hover {
+        border-color: var(--fu-primary);
+        background: var(--fu-primary-lt);
+        transform: translateY(-2px);
+    }
+
+    .fu-switch-card input[type="checkbox"] {
+        display: none;
+    }
+
+    .fu-switch-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: .75rem;
+    }
+
+    .fu-switch-header i {
+        font-size: 1.2rem;
+        color: var(--fu-primary);
+        background: var(--fu-surface);
+        padding: .5rem;
+        border-radius: 10px;
+    }
+
+    .fu-switch-toggle {
+        width: 48px;
+        height: 24px;
+        background: var(--fu-muted);
+        border-radius: 999px;
+        position: relative;
+        transition: var(--fu-transition);
+    }
+
+    .fu-switch-toggle::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        transition: var(--fu-transition);
+        box-shadow: var(--fu-sh-sm);
+    }
+
+    input:checked + .fu-switch-card .fu-switch-toggle {
+        background: var(--fu-success);
+    }
+
+    input:checked + .fu-switch-card .fu-switch-toggle::after {
+        transform: translateX(24px);
+    }
+
+    input:checked + .fu-switch-card {
+        border-color: var(--fu-success);
+        background: var(--fu-success-lt);
+    }
+
+    .fu-switch-title {
+        font-weight: 700;
+        font-size: .95rem;
+        color: var(--fu-ink);
+        margin-bottom: .25rem;
+    }
+
+    .fu-switch-description {
+        font-size: .8rem;
+        color: var(--fu-muted);
+        line-height: 1.4;
+    }
+
+    /* ─── Alerta de información ──────────────────────────── */
+    .fu-alert {
+        padding: 1rem 1.25rem;
+        background: var(--fu-info-lt);
+        border: 1px solid var(--fu-info);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        margin: 1.5rem 0;
+    }
+
+    .fu-alert i {
+        font-size: 1.2rem;
+        color: var(--fu-info);
+    }
+
+    .fu-alert-content {
+        flex: 1;
+        font-size: .9rem;
+        color: var(--fu-ink);
+    }
+
+    .fu-alert-content a {
+        color: var(--fu-info);
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .fu-alert-content a:hover {
+        text-decoration: underline;
+    }
+
+    /* ─── Acciones del formulario ───────────────────────── */
+    .fu-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--fu-border);
+    }
+
+    .fu-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        padding: .8rem 1.8rem;
+        border-radius: 12px;
+        font-size: .95rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: var(--fu-transition);
+        text-decoration: none;
+        white-space: nowrap;
+        letter-spacing: .02em;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .fu-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255,255,255,.2);
+        transform: translate(-50%, -50%);
+        transition: width .4s, height .4s;
+    }
+
+    .fu-btn:active::after {
+        width: 200px;
+        height: 200px;
+    }
+
+    .fu-btn i { font-size: 1.1rem; }
+
+    .fu-btn-primary {
+        background: linear-gradient(135deg, var(--fu-primary) 0%, var(--fu-primary-dk) 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(139,92,246,.25);
+    }
+    .fu-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(139,92,246,.35);
+        color: #fff;
+    }
+
+    .fu-btn-success {
+        background: linear-gradient(135deg, var(--fu-success) 0%, #0b9e6e 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(16,185,129,.25);
+    }
+    .fu-btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16,185,129,.35);
+        color: #fff;
+    }
+
+    .fu-btn-secondary {
+        background: var(--fu-surface);
+        color: var(--fu-ink);
+        border: 1.5px solid var(--fu-border);
+    }
+    .fu-btn-secondary:hover {
+        background: var(--fu-gray-lt);
+        border-color: var(--fu-primary);
+        color: var(--fu-primary);
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .fu {
+            padding: 1rem;
+        }
+
+        .fu-head {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .fu-card-body {
+            padding: 1.5rem;
+        }
+
+        .fu-actions {
+            flex-direction: column-reverse;
+        }
+
+        .fu-btn {
+            width: 100%;
+        }
+    }
+
+    /* Animaciones de campos */
+    .fu-field {
+        animation: fadeIn .3s ease forwards;
+        opacity: 0;
+    }
+
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+        }
+    }
+
+    .fu-field:nth-child(1) { animation-delay: .05s; }
+    .fu-field:nth-child(2) { animation-delay: .1s; }
+    .fu-field:nth-child(3) { animation-delay: .15s; }
+    .fu-field:nth-child(4) { animation-delay: .2s; }
+    .fu-field:nth-child(5) { animation-delay: .25s; }
+</style>
+
+<div class="fu mt-5">
+    <div class="fu-container">
+        <!-- Header -->
+        <div class="fu-head">
+            <div class="fu-head-left">
+                <div class="fu-head-title">
+                    <i class="bi bi-person-badge-fill"></i>
+                    {{ titulo }}
+                </div>
+                <div class="fu-head-breadcrumb">
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <a href="{% url 'lista_usuarios' %}">Usuarios</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span>{{ titulo }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="fu-card">
+            <div class="fu-card-header">
+                <h2>
+                    <i class="bi bi-person-plus-fill"></i>
+                    {% if usuario %}
+                    Editar: {{ usuario.username }}
+                    {% else %}
+                    Nuevo usuario
+                    {% endif %}
+                </h2>
+                <p>Complete los datos del usuario. Los campos marcados con * son obligatorios.</p>
+            </div>
+
+            <div class="fu-card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Sección: Información de Acceso -->
+                    <div class="fu-section">
+                        <div class="fu-section-title">
+                            <i class="bi bi-key-fill"></i>
+                            <div>
+                                <h3>Información de Acceso</h3>
+                                <p>Credenciales para iniciar sesión</p>
+                            </div>
+                        </div>
+
+                        <div class="fu-grid">
+                            <div class="fu-field">
+                                <label class="fu-label fu-label-required">
+                                    <i class="bi bi-person"></i>
+                                    Nombre de usuario
+                                    <span class="fu-tooltip" data-tooltip="Único, sin espacios ni caracteres especiales">
+                                        <i class="bi bi-question-circle"></i>
+                                    </span>
+                                </label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                <div class="fu-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.username.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <div class="fu-hint">
+                                    <i class="bi bi-info-circle"></i>
+                                    Ej: jperez, maria_garcia
+                                </div>
+                            </div>
+
+                            <div class="fu-field">
+                                <label class="fu-label">
+                                    <i class="bi bi-envelope"></i>
+                                    Email
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="fu-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.email.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            {% if not usuario %}
+                            <div class="fu-field">
+                                <label class="fu-label fu-label-required">
+                                    <i class="bi bi-lock"></i>
+                                    Contraseña
+                                </label>
+                                {{ form.password }}
+                                {% if form.password.errors %}
+                                <div class="fu-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.password.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <div class="fu-hint">
+                                    <i class="bi bi-shield-check"></i>
+                                    Mínimo 8 caracteres
+                                </div>
+                            </div>
+
+                            <div class="fu-field">
+                                <label class="fu-label fu-label-required">
+                                    <i class="bi bi-lock-fill"></i>
+                                    Confirmar contraseña
+                                </label>
+                                {{ form.password_confirm }}
+                                {% if form.password_confirm.errors %}
+                                <div class="fu-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.password_confirm.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Email</label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <div class="text-danger">{{ form.email.errors }}</div>
+
+                    <!-- Sección: Información Personal -->
+                    <div class="fu-section">
+                        <div class="fu-section-title">
+                            <i class="bi bi-person-badge"></i>
+                            <div>
+                                <h3>Información Personal</h3>
+                                <p>Datos adicionales del usuario (opcional)</p>
+                            </div>
+                        </div>
+
+                        <div class="fu-grid">
+                            <div class="fu-field">
+                                <label class="fu-label">
+                                    <i class="bi bi-person"></i>
+                                    Nombre
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                <div class="fu-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.first_name.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="fu-field">
+                                <label class="fu-label">
+                                    <i class="bi bi-person"></i>
+                                    Apellido
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                <div class="fu-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.last_name.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Permisos y Estado -->
+                    <div class="fu-section">
+                        <div class="fu-section-title">
+                            <i class="bi bi-shield-lock-fill"></i>
+                            <div>
+                                <h3>Permisos y Estado</h3>
+                                <p>Configuración de accesos y permisos</p>
+                            </div>
+                        </div>
+
+                        <div class="fu-switches">
+                            <!-- Switch Administrador -->
+                            <label class="fu-switch-card">
+                                {{ form.is_staff }}
+                                <div>
+                                    <div class="fu-switch-header">
+                                        <i class="bi bi-shield-check"></i>
+                                        <span class="fu-switch-toggle"></span>
+                                    </div>
+                                    <div class="fu-switch-title">Administrador (Staff)</div>
+                                    <div class="fu-switch-description">
+                                        Permite acceso a todos los módulos del sistema
+                                    </div>
+                                </div>
+                            </label>
+
+                            <!-- Switch Activo -->
+                            <label class="fu-switch-card">
+                                {{ form.is_active }}
+                                <div>
+                                    <div class="fu-switch-header">
+                                        <i class="bi bi-check-circle"></i>
+                                        <span class="fu-switch-toggle"></span>
+                                    </div>
+                                    <div class="fu-switch-title">Usuario Activo</div>
+                                    <div class="fu-switch-description">
+                                        Puede iniciar sesión en el sistema
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        {% if form.is_staff.errors or form.is_active.errors %}
+                        <div class="fu-error" style="margin-top: 1rem;">
+                            {{ form.is_staff.errors.0 }}
+                            {{ form.is_active.errors.0 }}
+                        </div>
                         {% endif %}
                     </div>
-                    {% if not usuario %}
-                    <div class="col-md-6">
-                        <label class="form-label">Contraseña *</label>
-                        {{ form.password }}
-                        {% if form.password.errors %}
-                            <div class="text-danger">{{ form.password.errors }}</div>
-                        {% endif %}
-                        <small class="text-muted">Mínimo 8 caracteres</small>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Confirmar Contraseña *</label>
-                        {{ form.password_confirm }}
-                        {% if form.password_confirm.errors %}
-                            <div class="text-danger">{{ form.password_confirm.errors }}</div>
-                        {% endif %}
+
+                    {% if usuario %}
+                    <!-- Sección: Cambio de contraseña (solo edición) -->
+                    <div class="fu-alert">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <div class="fu-alert-content">
+                            <strong>¿Necesitas cambiar la contraseña?</strong><br>
+                            Para cambiar la contraseña de este usuario, utiliza el
+                            <a href="/admin/auth/user/{{ usuario.id }}/password/" target="_blank">
+                                panel de administración <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
                     {% endif %}
-                </div>
 
-                <!-- Información Personal -->
-                <h5 class="mb-3">
-                    Información Personal
-                </h5>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label">Nombre</label>
-                        {{ form.first_name }}
-                        {% if form.first_name.errors %}
-                            <div class="text-danger">{{ form.first_name.errors }}</div>
-                        {% endif %}
+                    <!-- Errores generales -->
+                    {% if form.non_field_errors %}
+                    <div class="fu-error" style="justify-content: center; margin: 1rem 0;">
+                        {% for error in form.non_field_errors %}
+                        <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+                        {% endfor %}
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Apellido</label>
-                        {{ form.last_name }}
-                        {% if form.last_name.errors %}
-                            <div class="text-danger">{{ form.last_name.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
+                    {% endif %}
 
-                <!-- Permisos y Estado -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <div class="form-check form-switch">
-                            {{ form.is_staff }}
-                            <label class="form-check-label" for="{{ form.is_staff.id_for_label }}">
-                                <strong>Administrador (Staff)</strong>
-                            </label>
-                            {% if form.is_staff.errors %}
-                                <div class="text-danger">{{ form.is_staff.errors }}</div>
-                            {% endif %}
-                        </div>
-                        <small class="text-muted">Permite acceso a todos los módulos</small>
+                    <!-- Acciones -->
+                    <div class="fu-actions">
+                        <a href="{% url 'lista_usuarios' %}" class="fu-btn fu-btn-secondary">
+                            <i class="bi bi-x-lg"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="fu-btn fu-btn-success">
+                            <i class="bi bi-check-lg"></i>
+                            {{ boton }}
+                        </button>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-check form-switch">
-                            {{ form.is_active }}
-                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                                <strong>Usuario Activo</strong>
-                            </label>
-                            {% if form.is_active.errors %}
-                                <div class="text-danger">{{ form.is_active.errors }}</div>
-                            {% endif %}
-                        </div>
-                        <small class="text-muted">Usuario puede iniciar sesión</small>
-                    </div>
-                </div>
-
-                {% if usuario %}
-                <!-- Cambio de contraseña (solo en edición) -->
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> 
-                    Para cambiar la contraseña de este usuario, ve al 
-                    <a href="/admin/auth/user/{{ usuario.id }}/password/" target="_blank">panel de administración</a>.
-                </div>
-                {% endif %}
-
-                <!-- Errores generales -->
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {{ form.non_field_errors }}
-                    </div>
-                {% endif %}
-
-                <!-- Botones -->
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </a>
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-circle"></i> {{ boton }}
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Validación de contraseña en tiempo real (opcional)
+    document.addEventListener('DOMContentLoaded', function() {
+        const password = document.querySelector('input[name="password"]');
+        const passwordConfirm = document.querySelector('input[name="password_confirm"]');
+
+        if (password && passwordConfirm) {
+            const validatePassword = function() {
+                if (password.value && passwordConfirm.value) {
+                    if (password.value !== passwordConfirm.value) {
+                        passwordConfirm.classList.add('is-invalid');
+                        if (!passwordConfirm.nextElementSibling?.classList.contains('fu-error')) {
+                            const error = document.createElement('div');
+                            error.className = 'fu-error';
+                            error.innerHTML = '<i class="bi bi-exclamation-circle"></i> Las contraseñas no coinciden';
+                            passwordConfirm.parentNode.appendChild(error);
+                        }
+                    } else {
+                        passwordConfirm.classList.remove('is-invalid');
+                        const error = passwordConfirm.parentNode.querySelector('.fu-error');
+                        if (error) error.remove();
+                    }
+                }
+            };
+
+            password.addEventListener('keyup', validatePassword);
+            passwordConfirm.addEventListener('keyup', validatePassword);
+        }
+    });
+</script>
 {% endblock %}

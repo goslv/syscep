@@ -1,211 +1,725 @@
 {% extends 'base.html' %}
 
 {% block title %}Funcionarios - ITS CEP{% endblock %}
-{% block page_title %}Gestión de Funcionarios{% endblock %}
 
 {% block content %}
 <style>
-    .stat-card {
-        border-radius: 18px;
-        border: 1px solid var(--border-color);
-        background: var(--card-bg);
-        box-shadow: var(--shadow-md);
-    }
-    .table thead th {
-        background: rgba(239, 239, 239, 0.05);
-        border-bottom: 2px solid var(--border-color);
-    }
-    .table tbody td {
-        border-bottom: 1px solid var(--border-color);
-    }
-    .table tbody tr:hover {
-        background: rgba(102, 126, 234, 0.05);
-    }
-    .form-control, .form-select {
-        background-color: var(--body-bg) !important;
-        border-color: var(--border-color) !important;
-        color: var(--text-main) !important;
-    }
-    .form-label {
-        color: var(--text-main);
-    }
-    .text-muted {
-        color: var(--text-muted) !important;
-    }
-    .btn-info{
-        color: #0a58ca;
-    }
-    [data-theme="dark"] .badge.bg-warning.text-dark,
-    [data-theme="dark"] .badge.bg-info.text-dark {
-        color: #0f172a !important;
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    :root {
+        --lf-bg:        #f8fafc;
+        --lf-surface:   #ffffff;
+        --lf-ink:       #0f1825;
+        --lf-muted:     #5e6f88;
+        --lf-border:    #e1e9f0;
+        --lf-primary: rgba(68, 138, 168, 0.6);
+        --lf-primary-dk: #1f4047;
+        --lf-primary-lt: #e9eafe;
+        --lf-success:   #10b981;
+        --lf-success-lt: #e4f9f0;
+        --lf-warning:   #f59e0b;
+        --lf-warning-lt: #fef5e5;
+        --lf-info:      #0ea5e9;
+        --lf-info-lt:   #e0f2fe;
+        --lf-danger:    #ef4444;
+        --lf-danger-lt: #fee9e9;
+        --lf-gray-lt:   #f1f5f9;
+        --lf-r:         16px;
+        --lf-sh-sm:     0 2px 8px rgba(0,0,0,.04);
+        --lf-sh-md:     0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.03);
+        --lf-sh-lg:     0 12px 32px rgba(0,0,0,.08);
+        --lf-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    @media (max-width: 768px) {
-        .stat-card form.row {
-            --bs-gutter-y: 0.5rem;
+    [data-theme="dark"] {
+        --lf-bg: #0e121b; --lf-surface: #161c26; --lf-ink: #edf2f9; --lf-muted: #8f9fb2;
+        --lf-border: #232b36; --lf-primary-lt: #1e333a; --lf-success-lt: #12352d;
+        --lf-warning-lt: #302010; --lf-info-lt: #0c2a3a; --lf-danger-lt: #2f1518; --lf-gray-lt: #1e2630;
+    }
+
+    .lf { font-family:'Plus Jakarta Sans',sans-serif; color:var(--lf-ink); background:rgba(11,18,32,0); min-height:100vh; padding:1.5rem; }
+    .lf * { box-sizing:border-box; }
+
+    .lf-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem; }
+    .lf-head-title { font-size:2rem; font-weight:800; color:var(--lf-ink); margin:0; letter-spacing:-0.75px; display:flex; align-items:center; gap:.75rem; }
+    .lf-head-title i { font-size:1.8rem; color:var(--lf-primary); background:var(--lf-primary-lt); padding:.5rem; border-radius:14px; }
+    .lf-head-breadcrumb { font-size:.85rem; color:var(--lf-muted); display:flex; align-items:center; gap:.5rem; }
+    .lf-head-breadcrumb a { color:var(--lf-primary); text-decoration:none; font-weight:600; }
+    .lf-head-breadcrumb a:hover { text-decoration:underline; }
+
+    .lf-btn {
+        display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+        padding:.7rem 1.4rem; border-radius:12px; font-size:.9rem; font-weight:700;
+        border:none; cursor:pointer; transition:var(--lf-transition); text-decoration:none;
+        white-space:nowrap; letter-spacing:.02em; position:relative; overflow:hidden;
+    }
+    .lf-btn i { font-size:1.1rem; }
+    .lf-btn-primary  { background:linear-gradient(135deg,var(--lf-primary) 0%,var(--lf-primary-dk) 100%); color:#fff; box-shadow:0 4px 12px rgba(99,102,241,.25); }
+    .lf-btn-primary:hover  { transform:translateY(-2px); box-shadow:0 8px 20px rgba(99,102,241,.35); color:#fff; }
+    .lf-btn-success  { background:linear-gradient(135deg,var(--lf-success) 0%,#0b9e6e 100%); color:#fff; box-shadow:0 4px 12px rgba(16,185,129,.25); }
+    .lf-btn-success:hover  { transform:translateY(-2px); box-shadow:0 8px 20px rgba(16,185,129,.35); color:#fff; }
+    .lf-btn-info     { background:linear-gradient(135deg,var(--lf-info) 0%,#0284c7 100%); color:#fff; box-shadow:0 4px 12px rgba(14,165,233,.25); }
+    .lf-btn-info:hover     { transform:translateY(-2px); box-shadow:0 8px 20px rgba(14,165,233,.35); color:#fff; }
+    .lf-btn-outline  { background:transparent; color:var(--lf-ink); border:1.5px solid var(--lf-border); }
+    .lf-btn-outline:hover  { background:var(--lf-gray-lt); border-color:var(--lf-primary); color:var(--lf-primary); }
+    .lf-btn-ghost    { background:var(--lf-surface); color:var(--lf-ink); border:1.5px solid var(--lf-border); }
+    .lf-btn-ghost:hover    { background:var(--lf-gray-lt); border-color:var(--lf-primary); color:var(--lf-primary); }
+
+    /* Stats */
+    .lf-stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.25rem; margin-bottom:2rem; }
+    .lf-stat {
+        background:var(--lf-surface); border:1px solid var(--lf-border); border-radius:20px;
+        padding:1.25rem; box-shadow:var(--lf-sh-md); display:flex; align-items:center; gap:1rem;
+        transition:var(--lf-transition); text-decoration:none; position:relative; overflow:hidden;
+        cursor: pointer;
+    }
+    .lf-stat::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--stat-color),transparent); opacity:0; transition:opacity .2s; }
+    .lf-stat:hover { transform:translateY(-3px); box-shadow:var(--lf-sh-lg); }
+    .lf-stat:hover::before { opacity:1; }
+    .lf-stat-icon { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; transition:var(--lf-transition); }
+    .lf-stat:hover .lf-stat-icon { transform:scale(1.1) rotate(5deg); }
+    .lf-stat-icon.primary { background:var(--lf-primary-lt); color:var(--lf-primary); --stat-color:var(--lf-primary); }
+    .lf-stat-icon.success { background:var(--lf-success-lt); color:var(--lf-success); --stat-color:var(--lf-success); }
+    .lf-stat-icon.info    { background:var(--lf-info-lt);    color:var(--lf-info);    --stat-color:var(--lf-info); }
+    .lf-stat-icon.warning { background:var(--lf-warning-lt); color:var(--lf-warning); --stat-color:var(--lf-warning); }
+    .lf-stat-content { flex:1; }
+    .lf-stat-label { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--lf-muted); margin-bottom:.25rem; }
+    .lf-stat-value { font-size:1.8rem; font-weight:800; line-height:1; color:var(--lf-ink); }
+    .lf-stat-trend { font-size:.7rem; color:var(--lf-muted); margin-top:.25rem; display:flex; align-items:center; gap:.25rem; }
+
+    /* ─── Search Box (NUEVO) ─────────────────────────────── */
+    .lf-search-container {
+        margin-bottom: 1.75rem;
+    }
+
+    .lf-search {
+        position: relative;
+        max-width: 400px;
+    }
+
+    .lf-search i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--lf-muted);
+        font-size: 1rem;
+    }
+
+    .lf-search input {
+        width: 100%;
+        height: 48px;
+        padding: 0 1rem 0 2.8rem;
+        border: 1.5px solid var(--lf-border);
+        border-radius: 14px;
+        background: var(--lf-surface);
+        font-size: .95rem;
+        font-family: inherit;
+        color: var(--lf-ink);
+        transition: var(--lf-transition);
+    }
+
+    .lf-search input:focus {
+        outline: none;
+        border-color: var(--lf-primary);
+        box-shadow: 0 0 0 4px rgba(68, 138, 168, 0.1);
+    }
+
+    .lf-search input::placeholder {
+        color: var(--lf-muted);
+        opacity: .6;
+    }
+
+    /* Filtros (ahora colapsables como en listaAlumnos) */
+    .lf-filters-card {
+        background: var(--lf-surface); border: 1px solid var(--lf-border);
+        border-radius: 20px; box-shadow: var(--lf-sh-md);
+        margin-bottom: 1.75rem; overflow: hidden;
+    }
+    .lf-filters-header {
+        padding: 1rem 1.5rem; background: var(--lf-gray-lt);
+        border-bottom: 1px solid var(--lf-border);
+        display: flex; align-items: center; justify-content: space-between;
+        cursor: pointer; user-select: none;
+    }
+    .lf-filters-header-left { display: flex; align-items: center; gap: .75rem; }
+    .lf-filters-header-left i {
+        font-size: 1.1rem; color: var(--lf-primary);
+        background: var(--lf-primary-lt); padding: .5rem; border-radius: 10px;
+    }
+    .lf-filters-header-left h3 { font-size: .95rem; font-weight: 700; margin: 0; color: var(--lf-ink); }
+    .lf-filters-badge {
+        background: var(--lf-primary); color: white;
+        font-size: .7rem; font-weight: 700; padding: .15rem .45rem; border-radius: 20px;
+        margin-left: .5rem;
+    }
+    .lf-filters-header-right { display: flex; align-items: center; gap: 1rem; }
+    .lf-filters-clear {
+        font-size: .8rem; color: var(--lf-primary); text-decoration: none; font-weight: 600;
+    }
+    .lf-filters-toggle { transition: transform .3s ease; color: var(--lf-muted); }
+    .lf-filters-card.collapsed .lf-filters-toggle { transform: rotate(180deg); }
+    .lf-filters-body { padding: 1.5rem; }
+    .lf-filters-card.collapsed .lf-filters-body { display: none; }
+
+    .lf-filters-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .lf-field { display: flex; flex-direction: column; gap: .35rem; }
+    .lf-field label {
+        font-size: .75rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .05em; color: var(--lf-muted);
+    }
+
+    .lf-input, .lf-select {
+        width: 100%; height: 44px; padding: 0 1rem;
+        border: 1.5px solid var(--lf-border); border-radius: 12px;
+        background: var(--lf-bg); font-size: .9rem; font-family: inherit;
+        color: var(--lf-ink); transition: var(--lf-transition);
+    }
+
+    .lf-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235e6f88' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px;
+        padding-right: 2.5rem;
+    }
+
+    .lf-input:focus, .lf-select:focus {
+        outline: none;
+        border-color: var(--lf-primary);
+        background: var(--lf-surface);
+        box-shadow: 0 0 0 4px rgba(68, 138, 168, 0.1);
+    }
+
+    .lf-filters-actions {
+        display: flex;
+        gap: .5rem;
+        align-self: flex-end;
+    }
+
+    /* Acciones rápidas */
+    .lf-actions {
+        display: flex;
+        gap: .75rem;
+        margin-bottom: 1.75rem;
+        flex-wrap: wrap;
+    }
+
+    /* Tabla */
+    .lf-table-container {
+        background: var(--lf-surface); border: 1px solid var(--lf-border);
+        border-radius: 20px; box-shadow: var(--lf-sh-md); overflow: hidden;
+    }
+    .lf-table-header {
+        padding: 1.25rem 1.5rem; background: var(--lf-gray-lt);
+        border-bottom: 1px solid var(--lf-border);
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .lf-table-title { display: flex; align-items: center; gap: .75rem; }
+    .lf-table-title i {
+        font-size: 1.1rem; color: var(--lf-primary);
+        background: var(--lf-primary-lt); padding: .5rem; border-radius: 10px;
+    }
+    .lf-table-title h2 { font-size: 1rem; font-weight: 700; margin: 0; color: var(--lf-ink); }
+    .lf-table-count {
+        background: var(--lf-surface); border: 1px solid var(--lf-border);
+        border-radius: 999px; padding: .3rem 1rem; font-size: .8rem; font-weight: 600;
+        color: var(--lf-muted); display: flex; align-items: center; gap: .4rem;
+    }
+
+    .lf-table { width:100%; border-collapse:collapse; }
+    .lf-table thead th {
+        padding:1rem 1.5rem; text-align:left; font-size:.75rem; font-weight:700;
+        text-transform:uppercase; letter-spacing:.08em; color:var(--lf-muted);
+        background:var(--lf-gray-lt); border-bottom:2px solid var(--lf-border); white-space:nowrap;
+    }
+    .lf-table tbody tr { border-bottom:1px solid var(--lf-border); transition:var(--lf-transition); cursor:pointer; }
+    .lf-table tbody tr:hover { background:var(--lf-primary-lt); }
+    .lf-table tbody td { padding:1rem 1.5rem; font-size:.9rem; color:var(--lf-ink); vertical-align:middle; }
+
+    .lf-avatar {
+        width:42px; height:42px; border-radius:14px;
+        background:linear-gradient(135deg,var(--lf-primary) 0%,var(--lf-primary-dk) 100%);
+        color:#fff; display:flex; align-items:center; justify-content:center;
+        font-weight:800; font-size:1rem; flex-shrink:0;
+        box-shadow:0 4px 8px rgba(99,102,241,.25);
+        text-transform: uppercase;
+    }
+    .lf-name-cell { display:flex; align-items:center; gap:1rem; }
+    .lf-name-info { display:flex; flex-direction:column; gap:.25rem; }
+    .lf-name-primary { font-weight:700; font-size:.95rem; color:var(--lf-ink); }
+    .lf-name-secondary { font-size:.8rem; color:var(--lf-muted); display:flex; align-items:center; gap:.35rem; }
+
+    .lf-badge {
+        display:inline-flex; align-items:center; gap:.4rem; padding:.4rem 1rem;
+        border-radius:999px; font-size:.8rem; font-weight:700;
+        border:1px solid transparent; white-space:nowrap;
+    }
+    .lf-badge i { font-size:.75rem; }
+    .lf-badge-primary  { background:var(--lf-primary-lt); color:var(--lf-primary); border-color:rgba(99,102,241,.2); }
+    .lf-badge-info     { background:var(--lf-info-lt);    color:var(--lf-info);    border-color:rgba(14,165,233,.2); }
+    .lf-badge-warning  { background:var(--lf-warning-lt); color:var(--lf-warning); border-color:rgba(245,158,11,.2); }
+    .lf-badge-success  { background:var(--lf-success-lt); color:var(--lf-success); border-color:rgba(16,185,129,.2); }
+    .lf-badge-danger   { background:var(--lf-danger-lt);  color:var(--lf-danger);  border-color:rgba(239,68,68,.2); }
+    .lf-badge-secondary{ background:var(--lf-gray-lt);    color:var(--lf-muted);   border-color:var(--lf-border); }
+
+    .lf-phone { display:flex; flex-direction:column; gap:.2rem; }
+    .lf-phone-item { display:flex; align-items:center; gap:.35rem; font-size:.85rem; color:var(--lf-ink); }
+    .lf-phone-item i { color:var(--lf-muted); font-size:.8rem; }
+
+    /* Acciones de fila */
+    .lf-row-actions {
+        display: flex;
+        gap: .35rem;
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: var(--lf-transition);
+        justify-content: center;
+    }
+    tr:hover .lf-row-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    .lf-row-action {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 36px; height: 36px; border-radius: 10px;
+        border: 1px solid var(--lf-border); background: var(--lf-surface);
+        color: var(--lf-muted); text-decoration: none;
+        font-size: 1rem; transition: var(--lf-transition);
+    }
+    .lf-row-action:hover {
+        background: var(--lf-primary); border-color: var(--lf-primary);
+        color: #fff; transform: scale(1.1);
+    }
+    .lf-row-action.edit:hover  { background: var(--lf-warning); border-color: var(--lf-warning); }
+    .lf-row-action.asist:hover { background: var(--lf-success); border-color: var(--lf-success); }
+
+    .lf-empty {
+        padding:5rem 2rem; text-align:center; color:var(--lf-muted);
+    }
+    .lf-empty-illustration { font-size:5rem; color:var(--lf-primary); opacity:.2; margin-bottom:1rem; }
+    .lf-empty h3 { font-size:1.25rem; font-weight:700; color:var(--lf-ink); margin-bottom:.5rem; }
+    .lf-empty p { margin:0 0 1.5rem; font-size:.95rem; }
+    .lf-empty-actions { display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap; }
+
+    .lf-table-footer {
+        padding:1rem 1.5rem; background:var(--lf-gray-lt); border-top:1px solid var(--lf-border);
+        display:flex; align-items:center; justify-content:space-between;
+        font-size:.85rem; color:var(--lf-muted);
+    }
+
+    .lf-fab {
+        position:fixed; right:2rem; bottom:2rem; z-index:1100;
+        width:60px; height:60px; border-radius:20px;
+        background:linear-gradient(135deg,var(--lf-primary) 0%,var(--lf-primary-dk) 100%);
+        color:#fff; border:none; display:none; align-items:center; justify-content:center;
+        font-size:1.5rem; box-shadow:0 8px 24px rgba(99,102,241,.4);
+        cursor:pointer; transition:var(--lf-transition); text-decoration:none;
+    }
+    .lf-fab:hover { transform:translateY(-4px) scale(1.05); color:#fff; }
+
+    .lf-fab-tooltip {
+        position: absolute;
+        right: calc(100% + 1rem);
+        background: var(--lf-ink);
+        color: var(--lf-surface);
+        padding: .5rem 1rem;
+        border-radius: 12px;
+        font-size: .85rem;
+        font-weight: 600;
+        white-space: nowrap;
+        opacity: 0;
+        transform: translateX(10px);
+        transition: var(--lf-transition);
+        pointer-events: none;
+    }
+
+    .lf-fab:hover .lf-fab-tooltip {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    @keyframes slideIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+    .lf-stat { animation:slideIn .3s ease forwards; }
+    .lf-stat:nth-child(1) { animation-delay:.05s; }
+    .lf-stat:nth-child(2) { animation-delay:.1s; }
+    .lf-stat:nth-child(3) { animation-delay:.15s; }
+    .lf-stat:nth-child(4) { animation-delay:.2s; }
+
+    /* Responsive */
+    @media(max-width:1024px) {
+        .lf-filters-grid { grid-template-columns:1fr 1fr; }
+        .lf-filters-actions { grid-column:span 2; justify-content:flex-end; }
+    }
+    @media(max-width:768px) {
+        .lf { padding:1rem; }
+        .lf-head { flex-direction: column; align-items: stretch; }
+        .lf-head-actions { display: grid; grid-template-columns: 1fr; }
+        .lf-head-actions .lf-btn { width: 100%; }
+        .lf-stats-grid { grid-template-columns:1fr 1fr; gap:1rem; }
+        .lf-actions { flex-direction:column; }
+        .lf-actions .lf-btn { width:100%; }
+
+        /* Versión móvil de tabla */
+        .lf-table thead { display: none; }
+        .lf-table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid var(--lf-border);
+            border-radius: 12px;
+            padding: 1rem;
         }
-
-        .stat-card .form-label {
-            margin-bottom: 0.1rem;
-            font-size: 0.85rem;
+        .lf-table tbody td {
+            display: block;
+            padding: .5rem 0;
+            text-align: left;
+            border: none;
         }
-
-        .row.mb-4:has(.btn-primary) {
-            margin-bottom: 1rem !important;
+        .lf-table tbody td::before {
+            content: attr(data-label);
+            font-weight: 700;
+            font-size: .7rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--lf-muted);
+            display: block;
+            margin-bottom: .25rem;
         }
-
-        .row.mb-4 .col-md-12 {
+        .lf-row-actions {
+            opacity: 1;
+            transform: none;
+            justify-content: flex-start;
+        }
+        .lf-fab {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
         }
-
-        .row.mb-4 .btn {
-            flex: 1 1 calc(50% - 0.5rem);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.6rem;
-            font-size: 0.9rem;
-        }
-
-        /* Botón de búsqueda ocupa el 100% en móvil */
-        form .col-md-12 .btn-primary {
-            flex: 1 1 100%;
-        }
-        
-        form .col-md-12 .btn-secondary,
-        form .col-md-12 .btn-outline-info {
-            flex: 1 1 calc(50% - 0.5rem);
-        }
+        .lf-table-footer span:last-child { display: none; }
+    }
+    @media(max-width:480px) {
+        .lf-stats-grid { grid-template-columns:1fr; }
+        .lf-filters-grid { grid-template-columns:1fr; }
+        .lf-filters-actions { grid-column: span 1; }
     }
 </style>
 
-<!-- Filtros -->
-<div class="row mb-4 mt-5">
-        <div class="col-md-12">
-            <div class="stat-card">
-                <form method="get" class="row g-3">
-                    <div class="col-md-5">
-                        <label class="form-label">Cargo</label>
-                        <select name="cargo" class="form-select">
+<div class="lf mt-5">
+    <!-- Header -->
+    <div class="lf-head">
+        <div class="lf-head-left">
+            <div class="lf-head-title">
+                <i class="bi bi-people-fill"></i>
+                Funcionarios
+            </div>
+            <div class="lf-head-breadcrumb">
+                <a href="{% url 'dashboard' %}">Inicio</a>
+                <i class="bi bi-chevron-right"></i>
+                <span>Gestión de Funcionarios</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="lf-stats-grid">
+        <div class="lf-stat" onclick="applyFilter('cargo', 'DOCENCIA')">
+            <div class="lf-stat-icon primary"><i class="bi bi-person-video3"></i></div>
+            <div class="lf-stat-content">
+                <div class="lf-stat-label">Docencia</div>
+                <div class="lf-stat-value">{{ total_docencia|default:"0" }}</div>
+                <div class="lf-stat-trend"><i class="bi bi-graph-up-arrow"></i> Plantel principal</div>
+            </div>
+        </div>
+        <div class="lf-stat" onclick="applyFilter('cargo', 'ADMINISTRATIVO')">
+            <div class="lf-stat-icon info"><i class="bi bi-briefcase"></i></div>
+            <div class="lf-stat-content">
+                <div class="lf-stat-label">Administrativo</div>
+                <div class="lf-stat-value">{{ total_administrativo|default:"0" }}</div>
+                <div class="lf-stat-trend"><i class="bi bi-building"></i> Staff</div>
+            </div>
+        </div>
+        <div class="lf-stat" onclick="applyFilter('cargo', 'DIRECCION')">
+            <div class="lf-stat-icon warning"><i class="bi bi-star"></i></div>
+            <div class="lf-stat-content">
+                <div class="lf-stat-label">Dirección</div>
+                <div class="lf-stat-value">{{ total_direccion|default:"0" }}</div>
+                <div class="lf-stat-trend"><i class="bi bi-shield-shaded"></i> Staff</div>
+            </div>
+        </div>
+        <div class="lf-stat" onclick="applyFilter('activo', 'true')">
+            <div class="lf-stat-icon success"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="lf-stat-content">
+                <div class="lf-stat-label">Activos</div>
+                <div class="lf-stat-value">{{ total_activos|default:"0" }}</div>
+                <div class="lf-stat-trend"><i class="bi bi-calendar-check"></i> En ejercicio</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Search Box (NUEVO) ───────────────────────────── -->
+    <div class="lf-search-container">
+        <div class="lf-search">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" placeholder="Buscar por nombre, cargo, sede o teléfono...">
+        </div>
+    </div>
+
+    <!-- Filtros (colapsables) -->
+    <div class="lf-filters-card" id="filtersCard">
+        <div class="lf-filters-header" onclick="toggleFilters()">
+            <div class="lf-filters-header-left">
+                <i class="bi bi-funnel-fill"></i>
+                <h3>Filtros avanzados</h3>
+                {% if request.GET.cargo or request.GET.sede %}<span class="lf-filters-badge">{{ request.GET|length }}</span>{% endif %}
+            </div>
+            <div class="lf-filters-header-right">
+                <a href="{% url 'lista_funcionarios' %}" class="lf-filters-clear" onclick="event.stopPropagation()">
+                    <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                </a>
+                <i class="bi bi-chevron-up lf-filters-toggle"></i>
+            </div>
+        </div>
+        <div class="lf-filters-body">
+            <form method="get" id="filterForm">
+                <div class="lf-filters-grid">
+                    <div class="lf-field">
+                        <label>Cargo</label>
+                        <select name="cargo" class="lf-select" id="cargoSelect">
                             <option value="">Todos los cargos</option>
                             {% for cargo_key, cargo_nombre in cargos %}
-                                <option value="{{ cargo_key }}">{{ cargo_nombre }}</option>
+                            <option value="{{ cargo_key }}" {% if request.GET.cargo == cargo_key %}selected{% endif %}>{{ cargo_nombre }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-5">
-                        <label class="form-label">Sede</label>
-                        <select name="sede" class="form-select">
+                    <div class="lf-field">
+                        <label>Sede</label>
+                        <select name="sede" class="lf-select" id="sedeSelect">
                             <option value="">Todas las sedes</option>
                             {% for sede in sedes %}
-                                <option value="{{ sede.id }}">{{ sede.nombre }}</option>
+                            <option value="{{ sede.id }}" {% if request.GET.sede == sede.id|stringformat:"s" %}selected{% endif %}>{{ sede.nombre }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search"></i> Buscar
-                        </button>
+                    <div class="lf-filters-actions">
+                        <button type="submit" class="lf-btn lf-btn-primary"><i class="bi bi-search"></i> Filtrar</button>
                     </div>
-                    <div class="col-md-12 d-flex gap-2 pt-2">
-                        <a href="{% url 'lista_funcionarios' %}" class="btn btn-secondary flex-grow-1">
-                            <i class="bi bi-x-circle"></i> Limpiar Filtros
-                        </a>
-                        <a href="{% url 'lista_asistencias' %}" class="btn btn-outline-info flex-grow-1">
-                            <i class="bi bi-list-check"></i> Ver Asistencias
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-</div>
-
-<div class="row mb-4">
-    <div class="col-md-12 mt-1">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <a href="{% url 'registrar_asistencia' %}" class="btn btn-outline-info me-2">
-                    <i class="bi bi-calendar-check"></i> Registrar Asistencia
-                </a>
-                <a href="{% url 'crear_funcionario' %}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Registrar Funcionario
-                </a>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
-</div>
 
-<!-- Lista de Funcionarios -->
-<div class="row">
-    <div class="col-md-12">
-        <div class="stat-card">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Cédula</th>
-                            <th>Cargo</th>
-                            <th>Sede</th>
-                            <th>Teléfonos</th>
-                            <th>Fecha de Ingreso</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for funcionario in funcionarios %}
-                        <tr>
-                            <td>
-                                <strong>{{ funcionario.nombre_completo }}</strong>
-                            </td>
-                            <td>{{ funcionario.cedula }}</td>
-                            <td>
-                                {% if funcionario.cargo == 'DOCENCIA' %}
-                                    <span class="badge bg-primary">
-                                        <i class="bi bi-person-video3"></i> {{ funcionario.get_cargo_display }}
-                                    </span>
-                                {% elif funcionario.cargo == 'ADMINISTRATIVO' %}
-                                    <span class="badge bg-info">
-                                        <i class="bi bi-briefcase"></i> {{ funcionario.get_cargo_display }}
-                                    </span>
-                                {% elif funcionario.cargo == 'DIRECCION' %}
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="bi bi-star"></i> {{ funcionario.get_cargo_display }}
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary">{{ funcionario.get_cargo_display }}</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ funcionario.sede.nombre }}</td>
-                            <td>
-                                <i class="bi bi-telephone"></i> {{ funcionario.telefono_principal }}<br>
-                            </td>
-                            <td>{{ funcionario.fecha_ingreso|date:"d/m/Y" }}</td>
-                            <td>
-                                {% if funcionario.activo %}
-                                    <span class="badge bg-success">Activo</span>
-                                {% else %}
-                                    <span class="badge bg-danger">Inactivo</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox" style="font-size: 3rem;"></i><br>
-                                No se encontraron funcionarios
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <!-- Acciones rápidas -->
+    <div class="lf-actions">
+        <a href="{% url 'registrar_asistencia' %}" class="lf-btn lf-btn-info">
+            <i class="bi bi-calendar-check"></i> Registrar Asistencia
+        </a>
+        <a href="{% url 'lista_asistencias' %}" class="lf-btn lf-btn-outline">
+            <i class="bi bi-list-check"></i> Ver Asistencias
+        </a>
+        <a href="{% url 'crear_funcionario' %}" class="lf-btn lf-btn-success">
+            <i class="bi bi-plus-circle"></i> Nuevo Funcionario
+        </a>
+    </div>
+
+    <!-- Tabla -->
+    <div class="lf-table-container">
+        <div class="lf-table-header">
+            <div class="lf-table-title">
+                <i class="bi bi-table"></i>
+                <h2>Listado de funcionarios</h2>
             </div>
-            <div class="mt-3">
-                <p class="text-muted mb-0">Total: {{ funcionarios|length }} funcionario{{ funcionarios|length|pluralize }}</p>
+            <div class="lf-table-count">
+                <i class="bi bi-people"></i>
+                <span id="visibleCount">{{ funcionarios|length }}</span> de {{ total_funcionarios }} funcionario{{ total_funcionarios|pluralize }}
             </div>
         </div>
+
+        <div class="table-responsive">
+            <table class="lf-table">
+                <thead>
+                <tr>
+                    <th>Funcionario</th>
+                    <th>Cargo</th>
+                    <th>Sede</th>
+                    <th>Teléfonos</th>
+                    <th>Estado</th>
+                    <th style="text-align:center;">Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="funcionarioTableBody">
+                {% for funcionario in funcionarios %}
+                <tr onclick="window.location.href='{% url 'detalle_funcionario' funcionario.id %}'">
+                    <td data-label="Funcionario">
+                        <div class="lf-name-cell">
+                            <div class="lf-avatar">{{ funcionario.nombre_completo|first|upper }}</div>
+                            <div class="lf-name-info">
+                                <div class="lf-name-primary">{{ funcionario.nombre_completo }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Cargo">
+                        {% if funcionario.cargo == 'DOCENCIA' %}
+                        <span class="lf-badge lf-badge-primary"><i class="bi bi-person-video3"></i> {{ funcionario.get_cargo_display }}</span>
+                        {% elif funcionario.cargo == 'ADMINISTRATIVO' %}
+                        <span class="lf-badge lf-badge-info"><i class="bi bi-briefcase"></i> {{ funcionario.get_cargo_display }}</span>
+                        {% elif funcionario.cargo == 'DIRECCION' %}
+                        <span class="lf-badge lf-badge-warning"><i class="bi bi-star"></i> {{ funcionario.get_cargo_display }}</span>
+                        {% else %}
+                        <span class="lf-badge lf-badge-secondary">{{ funcionario.get_cargo_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Sede"><span class="lf-name-secondary"><i class="bi bi-building"></i> {{ funcionario.sede.nombre }}</span></td>
+                    <td data-label="Teléfonos">
+                        <div class="lf-phone">
+                            <span class="lf-phone-item"><i class="bi bi-telephone"></i> {{ funcionario.telefono_principal }}</span>
+                            {% if funcionario.telefono_secundario %}
+                            <span class="lf-phone-item"><i class="bi bi-telephone"></i> {{ funcionario.telefono_secundario }}</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td data-label="Estado">
+                        {% if funcionario.activo %}
+                        <span class="lf-badge lf-badge-success"><i class="bi bi-check-circle-fill"></i> Activo</span>
+                        {% else %}
+                        <span class="lf-badge lf-badge-danger"><i class="bi bi-x-circle-fill"></i> Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Acciones" style="text-align:center;">
+                        <div class="lf-row-actions">
+                            <a href="{% url 'detalle_funcionario' funcionario.id %}"
+                               class="lf-row-action" title="Ver perfil"
+                               onclick="event.stopPropagation()">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'editar_funcionario' funcionario.id %}"
+                               class="lf-row-action edit" title="Editar"
+                               onclick="event.stopPropagation()">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'registrar_asistencia' %}?funcionario={{ funcionario.id }}"
+                               class="lf-row-action asist" title="Registrar asistencia"
+                               onclick="event.stopPropagation()">
+                                <i class="bi bi-calendar-check"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr id="emptyRow">
+                    <td colspan="8">
+                        <div class="lf-empty">
+                            <div class="lf-empty-illustration"><i class="bi bi-emoji-frown"></i></div>
+                            <h3>No hay funcionarios que mostrar</h3>
+                            <p>No se encontraron funcionarios con los filtros aplicados.</p>
+                            <div class="lf-empty-actions">
+                                <a href="{% url 'lista_funcionarios' %}" class="lf-btn lf-btn-outline"><i class="bi bi-arrow-counterclockwise"></i> Limpiar filtros</a>
+                                <a href="{% url 'crear_funcionario' %}" class="lf-btn lf-btn-primary"><i class="bi bi-plus-circle"></i> Nuevo funcionario</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if funcionarios %}
+        <div class="lf-table-footer">
+            <span><i class="bi bi-info-circle me-1"></i> Hacé clic en cualquier fila para ver el detalle completo</span>
+            <span><i class="bi bi-arrow-up me-1"></i> Ordenado por apellido</span>
+        </div>
+        {% endif %}
     </div>
+
+    <!-- FAB móvil -->
+    <a href="{% url 'crear_funcionario' %}" class="lf-fab d-lg-none">
+        <i class="bi bi-plus-lg"></i>
+        <span class="lf-fab-tooltip">Nuevo funcionario</span>
+    </a>
 </div>
+
+<script>
+    // Función para aplicar filtro desde las cards
+    function applyFilter(filterName, filterValue) {
+        const url = new URL(window.location.href);
+        url.searchParams.set(filterName, filterValue);
+        window.location.href = url.toString();
+    }
+
+    // Función para colapsar/expandir filtros
+    function toggleFilters() {
+        document.getElementById('filtersCard').classList.toggle('collapsed');
+    }
+
+    // Función de búsqueda en tiempo real
+    document.getElementById('searchInput')?.addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase().trim();
+        const tableRows = document.querySelectorAll('#funcionarioTableBody tr');
+        let visibleCount = 0;
+
+        tableRows.forEach(row => {
+            // Ignorar la fila de empty state si existe
+            if (row.id === 'emptyRow') return;
+
+            const text = row.textContent.toLowerCase();
+            const isVisible = text.includes(searchValue);
+            row.style.display = isVisible ? '' : 'none';
+
+            if (isVisible) visibleCount++;
+        });
+
+        // Actualizar contador de resultados visibles
+        const countElement = document.getElementById('visibleCount');
+        if (countElement) {
+            countElement.textContent = visibleCount;
+        }
+
+        // Mostrar mensaje si no hay resultados
+        const emptyRow = document.getElementById('emptyRow');
+        const hasVisibleRows = visibleCount > 0;
+
+        if (!hasVisibleRows && !emptyRow) {
+            // Crear fila de "no resultados" si no existe
+            const tbody = document.getElementById('funcionarioTableBody');
+            const noResultsRow = document.createElement('tr');
+            noResultsRow.id = 'noResultsRow';
+            noResultsRow.innerHTML = `
+                <td colspan="8">
+                    <div class="lf-empty">
+                        <div class="lf-empty-illustration">
+                            <i class="bi bi-search"></i>
+                        </div>
+                        <h3>No se encontraron resultados</h3>
+                        <p>No hay funcionarios que coincidan con "${searchValue}"</p>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(noResultsRow);
+        } else if (hasVisibleRows) {
+            // Eliminar fila de "no resultados" si existe
+            const noResultsRow = document.getElementById('noResultsRow');
+            if (noResultsRow) noResultsRow.remove();
+        }
+    });
+
+    // Inicializar contador y estado de filtros
+    document.addEventListener('DOMContentLoaded', function() {
+        const totalRows = document.querySelectorAll('#funcionarioTableBody tr:not(#emptyRow)').length;
+        const countElement = document.getElementById('visibleCount');
+        if (countElement) {
+            countElement.textContent = totalRows;
+        }
+
+        // Colapsar filtros si no hay parámetros activos
+        const params = new URLSearchParams(window.location.search);
+        if (!params.get('cargo') && !params.get('sede') && !params.get('activo')) {
+            document.getElementById('filtersCard')?.classList.add('collapsed');
+        }
+    });
+</script>
 {% endblock %}

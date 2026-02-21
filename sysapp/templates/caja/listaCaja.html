@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
 {% block title %}Caja — Movimientos{% endblock %}
+{% block page_title %}Caja{% endblock %}
 
 {% block content %}
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-    /* ─── Tokens ─────────────────────────────────────────── */
     :root {
         --lc-bg:       #f8faf9;
         --lc-surface:  #ffffff;
@@ -17,386 +17,425 @@
         --lc-green-lt: #d1fae5;
         --lc-red:      #dc2626;
         --lc-red-lt:   #fee2e2;
-        --lc-blue:     #2563eb;
-        --lc-blue-lt:  #dbeafe;
-        --lc-amber:    #f59e0b;
-        --lc-r:        14px;
+        --lc-blue:     #0756a3;
+        --lc-blue-dk:  #071e60;
+        --lc-blue-lt:  #e9f0fe;
         --lc-sh:       0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.06);
-        --lc-display:  'Space Grotesk', sans-serif;
-        --lc-body:     'Inter', sans-serif;
+        --lc-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     [data-theme="dark"] {
-        --lc-bg:       #0a0e12;
+        --lc-bg:       #0d1117;
         --lc-surface:  #13171d;
-        --lc-ink:      #e8eef3;
-        --lc-muted:    #8b9daf;
-        --lc-border:   #1f2937;
-        --lc-green-lt: #064e3b;
-        --lc-red-lt:   #7f1d1d;
-        --lc-blue-lt:  #1e3a8a;
+        --lc-ink:      #e8ecf0;
+        --lc-muted:    #6e7d8f;
+        --lc-border:   #2a2f38;
+        --lc-green-lt: #0a2118;
+        --lc-red-lt:   #220d0d;
+        --lc-blue-lt:  #0d1e35;
         --lc-sh:       0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.5);
     }
 
-    .lc { font-family: var(--lc-body); color: var(--lc-ink); }
+    .lc { font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif; color: var(--lc-ink); }
     .lc * { box-sizing: border-box; }
 
     /* ─── Header ─────────────────────────────────────────── */
     .lc-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-        gap: 1rem;
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
     }
+    .lc-head-left { display: flex; flex-direction: column; gap: .25rem; }
 
     .lc-head-title {
-        font-family: var(--lc-display);
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--lc-ink);
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: .7rem;
+        font-family: 'Sora', 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.9rem; font-weight: 800; color: var(--lc-ink);
+        margin: 0; letter-spacing: -.6px;
+        display: flex; align-items: center; gap: .7rem; line-height: 1.1;
     }
-    .lc-head-title i { color: var(--lc-blue); font-size: 1.6rem; }
-
-    .lc-head-actions {
-        display: flex;
-        align-items: center;
-        gap: .7rem;
-        flex-wrap: wrap;
+    .lc-head-title-icon {
+        width: 48px; height: 48px; border-radius: 14px;
+        background: var(--lc-green-lt);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.35rem; color: var(--lc-green); flex-shrink: 0;
     }
+    .lc-breadcrumb {
+        font-size: .83rem; color: var(--lc-muted);
+        display: flex; align-items: center; gap: .4rem; margin-top: .15rem;
+    }
+    .lc-breadcrumb a { color: var(--lc-blue); text-decoration: none; font-weight: 600; }
+    .lc-breadcrumb a:hover { text-decoration: underline; }
+    .lc-breadcrumb i { font-size: .55rem; opacity: .7; }
 
-    /* Botones */
+    .lc-head-actions { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+
+    /* ─── Botones ─────────────────────────────────────────── */
     .lc-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: .45rem;
-        padding: .6rem 1.2rem;
-        border-radius: 999px;
-        font-size: .85rem;
-        font-weight: 600;
-        font-family: var(--lc-body);
-        border: none;
-        cursor: pointer;
-        transition: all .2s;
-        text-decoration: none;
-        white-space: nowrap;
+        display: inline-flex; align-items: center; gap: .45rem;
+        padding: .65rem 1.2rem; border-radius: 12px;
+        font-size: .88rem; font-weight: 700; font-family: 'Outfit', sans-serif;
+        border: none; cursor: pointer; transition: var(--lc-transition);
+        text-decoration: none; white-space: nowrap;
     }
-    .lc-btn-primary { background: var(--lc-blue); color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.25); }
-    .lc-btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); color: #fff; }
-    .lc-btn-success { background: var(--lc-green); color: #fff; box-shadow: 0 4px 12px rgba(5,150,105,.25); }
-    .lc-btn-success:hover { background: #047857; transform: translateY(-1px); color: #fff; }
-    .lc-btn-danger { background: var(--lc-red); color: #fff; box-shadow: 0 4px 12px rgba(220,38,38,.25); }
-    .lc-btn-danger:hover { background: #b91c1c; transform: translateY(-1px); color: #fff; }
     .lc-btn i { font-size: 1rem; }
+    .lc-btn-primary {
+        background: linear-gradient(135deg, var(--lc-blue), var(--lc-blue-dk));
+        color: #fff; box-shadow: 0 4px 12px rgba(7,86,163,.25);
+    }
+    .lc-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(7,86,163,.35); color: #fff; }
+    .lc-btn-success {
+        background: linear-gradient(135deg, var(--lc-green), #047857);
+        color: #fff; box-shadow: 0 4px 12px rgba(5,150,105,.25);
+    }
+    .lc-btn-success:hover { transform: translateY(-1px); color: #fff; }
+    .lc-btn-danger {
+        background: linear-gradient(135deg, var(--lc-red), #b91c1c);
+        color: #fff; box-shadow: 0 4px 12px rgba(220,38,38,.25);
+    }
+    .lc-btn-danger:hover { transform: translateY(-1px); color: #fff; }
 
-    /* ─── Stats cards ────────────────────────────────────── */
+    /* ─── Stats ───────────────────────────────────────────── */
     .lc-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1rem;
-        margin-bottom: 1.5rem;
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem; margin-bottom: 1.5rem;
     }
-
     .lc-stat-card {
-        background: var(--lc-surface);
-        border: 1px solid var(--lc-border);
-        border-radius: var(--lc-r);
-        padding: 1.3rem 1.5rem;
-        box-shadow: var(--lc-sh);
-        display: flex;
-        flex-direction: column;
-        gap: .5rem;
-        transition: transform .2s;
+        background: var(--lc-surface); border: 1px solid var(--lc-border);
+        border-radius: 20px; padding: 1.3rem 1.5rem;
+        box-shadow: var(--lc-sh); display: flex; flex-direction: column; gap: .5rem;
+        transition: var(--lc-transition); position: relative; overflow: hidden;
+        text-decoration: none;
     }
-    .lc-stat-card:hover { transform: translateY(-2px); }
+    .lc-stat-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .lc-stat-card.green::before { background: linear-gradient(90deg, var(--lc-green), transparent); }
+    .lc-stat-card.red::before   { background: linear-gradient(90deg, var(--lc-red),   transparent); }
+    .lc-stat-card.blue::before  { background: linear-gradient(90deg, var(--lc-blue),  transparent); }
+    .lc-stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,.1); }
 
     .lc-stat-label {
-        font-size: .73rem;
+        font-size: .73rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .08em; color: var(--lc-muted);
+        display: flex; align-items: center; gap: .35rem;
+    }
+    .lc-stat-label i { font-size: .95rem; }
+    .lc-stat-value {
+        font-family: 'Sora', sans-serif;
+        font-size: 1.75rem; font-weight: 700; line-height: 1.2;
+    }
+    .lc-stat-value small { font-size: 1.1rem; font-weight: 500; opacity: .8; margin-right: .25rem; }
+    .lc-stat-card.green .lc-stat-value { color: var(--lc-green); }
+    .lc-stat-card.red   .lc-stat-value { color: var(--lc-red); }
+    .lc-stat-card.blue  .lc-stat-value { color: var(--lc-blue); }
+    .lc-stat-sub { font-size: .75rem; color: var(--lc-muted); display: flex; align-items: center; gap: .3rem; }
+
+    /* ─── Links ───────────────────────────────────────────── */
+    .lc-links { display: flex; justify-content: center; gap: 2rem; margin: 1.25rem 0; flex-wrap: wrap; }
+    .lc-link { font-size: .85rem; font-weight: 600; color: var(--lc-blue); text-decoration: none; transition: color .2s; }
+    .lc-link:hover { text-decoration: underline; }
+    .lc-link.danger { color: var(--lc-red); }
+
+    /* ─── Card con tabs ───────────────────────────────────── */
+    .lc-card {
+        background: var(--lc-surface); border: 1px solid var(--lc-border);
+        border-radius: 20px; box-shadow: var(--lc-sh); overflow: hidden;
+        animation: lc-fade .3s ease both;
+    }
+    @keyframes lc-fade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .lc-tabs { display: flex; border-bottom: 2px solid var(--lc-border); background: var(--lc-bg); }
+    .lc-tab {
+        flex: 1; padding: 1.1rem 1rem;
+        border: none; background: transparent;
+        font-family: 'Sora', sans-serif;
+        font-size: .82rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+        color: var(--lc-muted); cursor: pointer; transition: all .2s;
+        display: flex; align-items: center; justify-content: center; gap: .5rem;
+        border-bottom: 3px solid transparent; margin-bottom: -2px;
+    }
+    .lc-tab:hover { color: var(--lc-ink); background: rgba(0,0,0,.02); }
+    [data-theme="dark"] .lc-tab:hover { background: rgba(255,255,255,.04); }
+    .lc-tab.active           { color: var(--lc-blue); border-bottom-color: var(--lc-blue); background: var(--lc-surface); }
+    .lc-tab.ingresos.active  { color: var(--lc-green); border-bottom-color: var(--lc-green); }
+    .lc-tab.egresos.active   { color: var(--lc-red);   border-bottom-color: var(--lc-red); }
+    .lc-tab i { font-size: 1.1rem; }
+
+    .lc-tab-content { display: none; }
+    .lc-tab-content.active { display: block; }
+
+    /* ===== ESTILO DE TABLA COPIADO DE listaAlumnos.html ===== */
+    .lc-table-container {
+        background: var(--lc-surface); border: 1px solid var(--lc-border);
+        border-radius: 20px; box-shadow: var(--lc-sh); overflow: hidden;
+    }
+
+    .lc-table-header {
+        padding: 1.25rem 1.5rem; background: var(--lc-gray-lt);
+        border-bottom: 1px solid var(--lc-border);
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+
+    .lc-table-title { display: flex; align-items: center; gap: .75rem; }
+    .lc-table-title-icon {
+        width: 34px; height: 34px; border-radius: 10px;
+        background: var(--lc-blue-lt); color: var(--lc-blue); font-size: 1rem;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .lc-table-title h2 { font-size: 1rem; font-weight: 700; margin: 0; color: var(--lc-ink); }
+    .lc-table-count {
+        background: var(--lc-surface); border: 1px solid var(--lc-border);
+        border-radius: 999px; padding: .3rem 1rem; font-size: .8rem; font-weight: 600; color: var(--lc-muted);
+    }
+
+    .lc-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .lc-table thead th {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        font-size: .75rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: .08em;
+        color: var(--lc-muted);
+        background: var(--lc-gray-lt);
+        border-bottom: 2px solid var(--lc-border);
+        white-space: nowrap;
+    }
+
+    .lc-table thead th.text-right { text-align: right; }
+    .lc-table thead th.text-center { text-align: center; }
+
+    .lc-table tbody tr {
+        border-bottom: 1px solid var(--lc-border);
+        transition: var(--lc-transition);
+        cursor: pointer;
+    }
+    .lc-table tbody tr:last-child { border-bottom: none; }
+    .lc-table tbody tr:hover { background: var(--lc-blue-lt); }
+    .lc-table tbody td {
+        padding: 1rem 1.5rem;
+        font-size: .9rem;
+        color: var(--lc-ink);
+        vertical-align: middle;
+    }
+
+    .lc-alumno-cell, .lc-concepto-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .lc-alumno-primary, .lc-concepto-primary {
+        font-weight: 600;
+        font-size: .95rem;
+        color: var(--lc-ink);
+    }
+
+    .lc-alumno-secondary, .lc-concepto-secondary {
+        font-size: .8rem;
         color: var(--lc-muted);
         display: flex;
         align-items: center;
         gap: .35rem;
     }
-    .lc-stat-label i { font-size: .95rem; }
 
-    .lc-stat-value {
-        font-family: var(--lc-display);
-        font-size: 1.75rem;
-        font-weight: 700;
-        line-height: 1.2;
-    }
-    .lc-stat-value small { font-size: 1.1rem; font-weight: 500; opacity: .8; margin-right: .25rem; }
+    .lc-concepto-secondary i { font-size: .7rem; }
 
-    .lc-stat-card.green .lc-stat-value { color: var(--lc-green); }
-    .lc-stat-card.red   .lc-stat-value { color: var(--lc-red); }
-    .lc-stat-card.blue  .lc-stat-value { color: var(--lc-blue); }
-
-    /* ─── Sede badge (usuarios normales) ────────────────── */
-    .lc-sede-notice {
-        background: var(--lc-blue-lt);
-        border: 1px solid var(--lc-blue);
-        border-radius: var(--lc-r);
-        padding: .8rem 1.2rem;
-        margin-bottom: 1.5rem;
-        display: flex;
+    /* Badges */
+    .lc-badge {
+        display: inline-flex;
         align-items: center;
-        gap: .7rem;
-        font-size: .86rem;
-        color: #1e3a8a;
-    }
-    [data-theme="dark"] .lc-sede-notice { background: #1e3a8a; color: #dbeafe; }
-    .lc-sede-notice i { font-size: 1.3rem; }
-    .lc-sede-notice strong { font-weight: 700; }
-
-    /* ─── Tabs ───────────────────────────────────────────── */
-    .lc-card {
-        background: var(--lc-surface);
-        border: 1px solid var(--lc-border);
-        border-radius: var(--lc-r);
-        box-shadow: var(--lc-sh);
-        overflow: hidden;
-        animation: lc-fade .3s ease both;
-    }
-    @keyframes lc-fade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-
-    .lc-tabs {
-        display: flex;
-        border-bottom: 2px solid var(--lc-border);
-        background: var(--lc-bg);
-    }
-    .lc-tab {
-        flex: 1;
-        padding: 1.1rem 1rem;
-        border: none;
-        background: transparent;
-        font-family: var(--lc-display);
-        font-size: .9rem;
-        font-weight: 600;
-        letter-spacing: .05em;
-        text-transform: uppercase;
-        color: var(--lc-muted);
-        cursor: pointer;
-        transition: all .2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: .5rem;
-        border-bottom: 3px solid transparent;
-    }
-    .lc-tab:hover { color: var(--lc-ink); background: rgba(0,0,0,.02); }
-    [data-theme="dark"] .lc-tab:hover { background: rgba(255,255,255,.04); }
-    .lc-tab.active {
-        color: var(--lc-blue);
-        border-bottom-color: var(--lc-blue);
-        background: var(--lc-surface);
-    }
-    .lc-tab i { font-size: 1.15rem; }
-    .lc-tab.ingresos.active { color: var(--lc-green); border-bottom-color: var(--lc-green); }
-    .lc-tab.egresos.active { color: var(--lc-red); border-bottom-color: var(--lc-red); }
-
-    /* ─── Contenido tabs ─────────────────────────────────── */
-    .lc-tab-content {
-        display: none;
-        padding: 0;
-    }
-    .lc-tab-content.active { display: block; }
-
-    /* ─── Tabla ──────────────────────────────────────────── */
-    .lc-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .lc-table thead th {
-        padding: 1rem 1.2rem;
-        text-align: left;
-        font-size: .72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        color: var(--lc-muted);
-        background: var(--lc-bg);
-        border-bottom: 2px solid var(--lc-border);
-    }
-    .lc-table tbody tr {
-        border-bottom: 1px solid var(--lc-border);
-        transition: background .15s;
-        cursor: pointer;
-    }
-    .lc-table tbody tr:hover { background: var(--lc-bg); }
-    .lc-table tbody td {
-        padding: 1rem 1.2rem;
-        font-size: .88rem;
-        color: var(--lc-ink);
-    }
-
-    /* Columnas específicas */
-    .lc-table .col-date { color: var(--lc-muted); font-size: .84rem; }
-    .lc-table .col-badge {
-        display: inline-block;
-        padding: .3rem .7rem;
+        gap: .4rem;
+        padding: .4rem 1rem;
         border-radius: 999px;
-        font-size: .75rem;
-        font-weight: 600;
-        border: 1px solid;
-        background: var(--lc-surface);
+        font-size: .8rem;
+        font-weight: 700;
+        border: 1px solid transparent;
+        white-space: nowrap;
     }
-    .lc-table .badge-recibo { border-color: var(--lc-blue); color: var(--lc-blue); }
-    .lc-table .badge-comp   { border-color: var(--lc-muted); color: var(--lc-muted); }
-    .lc-table .badge-none   { border-color: var(--lc-border); color: var(--lc-muted); opacity: .6; }
+    .lc-badge i { font-size: .75rem; }
+    .lc-badge-success { background: var(--lc-green-lt); color: var(--lc-green); border-color: rgba(16,185,129,.2); }
+    .lc-badge-warning { background: var(--lc-amber-lt); color: var(--lc-amber); border-color: rgba(245,158,11,.2); }
+    .lc-badge-danger  { background: var(--lc-red-lt);   color: var(--lc-red);   border-color: rgba(239,68,68,.2); }
+    .lc-badge-secondary { background: var(--lc-gray-lt); color: var(--lc-muted); border-color: var(--lc-border); }
 
-    .lc-table .col-nombre { font-weight: 600; }
-    .lc-table .col-sub { font-size: .82rem; color: var(--lc-muted); margin-top: .15rem; }
+    /* Fecha */
+    .lc-date {
+        color: var(--lc-muted);
+        font-size: .84rem;
+        font-family: monospace;
+    }
 
-    .lc-table .col-monto {
+    /* Monto */
+    .lc-monto {
         text-align: right;
-        font-family: var(--lc-display);
+        font-family: 'Sora', sans-serif;
         font-size: .95rem;
         font-weight: 700;
+        white-space: nowrap;
     }
-    .lc-table .monto-ingreso { color: var(--lc-green); }
-    .lc-table .monto-egreso  { color: var(--lc-red); }
+    .monto-ingreso { color: var(--lc-green); }
+    .monto-egreso  { color: var(--lc-red); }
 
-    .lc-table .col-actions {
-        text-align: center;
+    /* Acciones - MISMO ESTILO QUE listaAlumnos */
+    .lc-row-actions {
+        display: flex;
+        gap: .35rem;
         opacity: 0;
-        transition: opacity .2s;
+        transform: translateX(-10px);
+        transition: var(--lc-transition);
+        justify-content: center;
     }
-    .lc-table tbody tr:hover .col-actions { opacity: 1; }
 
-    .lc-table .btn-group { display: inline-flex; gap: .35rem; }
-    .lc-table .btn-action {
-        padding: .4rem .8rem;
-        font-size: .78rem;
-        font-weight: 600;
-        border-radius: 8px;
+    tr:hover .lc-row-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .lc-row-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
         border: 1px solid var(--lc-border);
         background: var(--lc-surface);
-        color: var(--lc-ink);
+        color: var(--lc-muted);
         text-decoration: none;
-        transition: all .15s;
+        font-size: 1rem;
+        transition: var(--lc-transition);
     }
-    .lc-table .btn-action:hover { background: var(--lc-bg); border-color: var(--lc-ink); color: var(--lc-ink); }
+
+    .lc-row-action:hover {
+        background: var(--lc-blue);
+        border-color: var(--lc-blue);
+        color: #fff;
+        transform: scale(1.1);
+    }
 
     /* Empty state */
     .lc-empty {
-        padding: 4rem 2rem;
+        padding: 5rem 2rem;
         text-align: center;
         color: var(--lc-muted);
     }
-    .lc-empty i { font-size: 3.5rem; opacity: .2; margin-bottom: 1rem; display: block; }
-    .lc-empty p { margin: 0; font-size: .92rem; }
-
-    /* ─── Links adicionales ──────────────────────────────── */
-    .lc-links {
-        display: flex;
-        justify-content: center;
-        gap: 2rem;
-        margin: 1.5rem 0;
-        flex-wrap: wrap;
-    }
-    .lc-link {
-        font-size: .85rem;
-        font-weight: 600;
+    .lc-empty-illustration {
+        font-size: 5rem;
         color: var(--lc-blue);
-        text-decoration: none;
-        transition: color .2s;
+        opacity: .2;
+        margin-bottom: 1rem;
     }
-    .lc-link:hover { color: #1d4ed8; text-decoration: underline; }
-    .lc-link.danger { color: var(--lc-red); }
-    .lc-link.danger:hover { color: #b91c1c; }
+    .lc-empty h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--lc-ink);
+        margin-bottom: .5rem;
+    }
+    .lc-empty p {
+        margin: 0 0 1.5rem;
+        font-size: .95rem;
+    }
 
-    /* ─── Responsive ─────────────────────────────────────── */
-    @media(max-width:768px) {
+    /* Footer */
+    .lc-table-footer {
+        padding: 1rem 1.5rem;
+        background: var(--lc-gray-lt);
+        border-top: 1px solid var(--lc-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: .85rem;
+        color: var(--lc-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .lc-table thead th { padding: 1rem; }
+        .lc-table tbody td { padding: 1rem; }
+    }
+
+    @media (max-width: 768px) {
         .lc-head { flex-direction: column; align-items: stretch; }
-        .lc-head-actions { justify-content: center; }
+        .lc-head-actions { flex-wrap: wrap; }
         .lc-stats { grid-template-columns: 1fr; }
-        .lc-tab { font-size: .8rem; padding: .9rem .5rem; }
-        .lc-table thead th { padding: .8rem .8rem; font-size: .68rem; }
-        .lc-table tbody td { padding: .8rem .8rem; font-size: .82rem; }
-        /* Ocultar columna concepto y acciones */
-        .lc-table .col-concepto,
-        .lc-table .col-actions,
-        .lc-table th:nth-child(4),
-        .lc-table th:last-child { display: none; }
+        .lc-tab { font-size: .78rem; padding: .9rem .5rem; }
+
+        /* En móvil, ocultar columnas menos importantes */
+        .lc-table thead th:nth-child(3),
+        .lc-table tbody td:nth-child(3) { display: none; }
     }
 </style>
 
-<div class="lc container-fluid mt-5">
+<div class="lc mt-5">
 
-    <!-- Header -->
+    <!-- ── Header ───────────────────────────────── -->
     <div class="lc-head">
+        <div class="lc-head-left">
+            <div class="lc-head-title">
+                <div class="lc-head-title-icon">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                Caja
+            </div>
+            <div class="lc-breadcrumb">
+                <a href="{% url 'dashboard' %}">Inicio</a>
+                <i class="bi bi-chevron-right"></i>
+                <span>Movimientos de Caja</span>
+            </div>
+        </div>
         <div class="lc-head-actions">
             <a href="{% url 'informe_caja' %}" class="lc-btn lc-btn-primary">
-                <i class="bi bi-file-earmark-bar-graph"></i>
-                Informe
+                <i class="bi bi-file-earmark-bar-graph"></i> Informe
             </a>
             <a href="{% url 'registrar_pago' %}" class="lc-btn lc-btn-success">
-                <i class="bi bi-plus-circle"></i>
-                Ingreso
+                <i class="bi bi-plus-circle"></i> Ingreso
             </a>
             <a href="{% url 'registrar_egreso' %}" class="lc-btn lc-btn-danger">
-                <i class="bi bi-dash-circle"></i>
-                Egreso
+                <i class="bi bi-dash-circle"></i> Egreso
             </a>
         </div>
     </div>
 
-    <!-- Stats cards con links -->
+    <!--Stats-->
     <div class="lc-stats">
-        <!-- Ingresos hoy - link a lista_pagos con filtro fecha=hoy -->
         <a href="{% url 'lista_pagos' %}?fecha_desde={{ fecha_hoy_param }}&fecha_hasta={{ fecha_hoy_param }}"
-           class="lc-stat-card green"
-           style="text-decoration: none; cursor: pointer;">
+           class="lc-stat-card green">
             <div class="lc-stat-label">
-                <i class="bi bi-arrow-up-circle-fill"></i>
-                Ingresos hoy
+                <i class="bi bi-arrow-up-circle-fill"></i> Ingresos hoy
             </div>
             <div class="lc-stat-value">
                 <small>Gs.</small>{{ total_ingresos_hoy|formato_guaranies }}
             </div>
-            <div class="lc-stat-sub" style="font-size:0.75rem; color:var(--lc-muted); margin-top:0.25rem;">
+            <div class="lc-stat-sub">
                 <i class="bi bi-calendar-day"></i> {{ fecha_hoy }}
             </div>
         </a>
 
-        <!-- Egresos hoy - link a lista_egresos con filtro fecha=hoy -->
         <a href="{% url 'lista_egresos' %}?fecha_desde={{ fecha_hoy_param }}&fecha_hasta={{ fecha_hoy_param }}"
-           class="lc-stat-card red"
-           style="text-decoration: none; cursor: pointer;">
+           class="lc-stat-card red">
             <div class="lc-stat-label">
-                <i class="bi bi-arrow-down-circle-fill"></i>
-                Egresos hoy
+                <i class="bi bi-arrow-down-circle-fill"></i> Egresos hoy
             </div>
             <div class="lc-stat-value">
                 <small>Gs.</small>{{ total_egresos_hoy|formato_guaranies }}
             </div>
-            <div class="lc-stat-sub" style="font-size:0.75rem; color:var(--lc-muted); margin-top:0.25rem;">
+            <div class="lc-stat-sub">
                 <i class="bi bi-calendar-day"></i> {{ fecha_hoy }}
             </div>
         </a>
 
-        <!-- Balance hoy - podría ir a lista_caja con filtro, o a una vista de resumen -->
         <div class="lc-stat-card {% if balance_hoy >= 0 %}blue{% else %}red{% endif %}">
             <div class="lc-stat-label">
-                <i class="bi bi-calculator-fill"></i>
-                Balance {{ fecha_hoy }}
+                <i class="bi bi-calculator-fill"></i> Balance {{ fecha_hoy }}
             </div>
             <div class="lc-stat-value">
                 <small>Gs.</small>{{ balance_hoy|formato_guaranies }}
             </div>
-            <div class="lc-stat-sub" style="font-size:0.75rem; color:var(--lc-muted); margin-top:0.25rem;">
-                {% if balance_hoy >= 0 %}
-                <span class="text-success"><i class="bi bi-arrow-up"></i> Positivo</span>
-                {% else %}
-                <span class="text-danger"><i class="bi bi-arrow-down"></i> Negativo</span>
-                {% endif %}
+            <div class="lc-stat-sub">
+                <i class="bi bi-arrow-left-right"></i> Ingresos − Egresos
             </div>
         </div>
     </div>
@@ -406,122 +445,182 @@
         <a href="{% url 'lista_egresos' %}" class="lc-link danger">Ver todos los egresos</a>
     </div>
 
-    <!-- Card con tabs -->
+    <!-- ── Card con tabs ────────────────────────── -->
     <div class="lc-card">
-        <!-- Tabs -->
         <div class="lc-tabs">
             <button class="lc-tab ingresos active" data-tab="ingresos">
-                <i class="bi bi-arrow-up-circle-fill"></i>
-                Ingresos
+                <i class="bi bi-arrow-up-circle-fill"></i> Ingresos
             </button>
             <button class="lc-tab egresos" data-tab="egresos">
-                <i class="bi bi-arrow-down-circle-fill"></i>
-                Egresos
+                <i class="bi bi-arrow-down-circle-fill"></i> Egresos
             </button>
         </div>
 
-        <!-- Tab: Ingresos -->
+        <!-- Tab Ingresos -->
         <div class="lc-tab-content active" id="tab-ingresos">
-            <table class="lc-table">
-                <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Recibo</th>
-                    <th>Alumno/Cliente</th>
-                    <th class="col-concepto">Concepto</th>
-                    <th style="text-align:right;">Monto</th>
-                    <th style="text-align:center;">Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for pago in ingresos %}
-                <tr onclick="window.location.href='{% url 'detalle_pago' pago.uuid %}'">
-                    <td class="col-date">{{ pago.fecha|date:"d/m/Y" }}</td>
-                    <td>
-            <span class="col-badge {% if pago.numero_recibo %}badge-recibo{% else %}badge-none{% endif %}">
-              {% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}
-            </span>
-                    </td>
-                    <td>
-                        <div class="col-nombre">
-                            {% if pago.alumno %}{{ pago.alumno.nombre_completo }}{% else %}{{ pago.nombre_cliente }}{% endif %}
-                        </div>
-                        <div class="col-sub">{{ pago.sede.nombre }}</div>
-                    </td>
-                    <td class="col-concepto">{{ pago.concepto|truncatewords:8 }}</td>
-                    <td class="col-monto monto-ingreso">Gs. {{ pago.importe_total|formato_guaranies }}</td>
-                    <td class="col-actions">
-                        <div class="btn-group">
-                            <a href="{% url 'detalle_pago' pago.uuid %}" class="btn-action">Detalle</a>
-                            <a href="{% url 'editar_pago' pago.uuid %}" class="btn-action">Editar</a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6">
-                        <div class="lc-empty">
-                            <i class="bi bi-inbox"></i>
-                            <p>No hay ingresos registrados con los filtros aplicados.</p>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+            <div class="lc-table-container">
+                <div class="table-responsive">
+                    <table class="lc-table">
+                        <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Recibo</th>
+                            <th>Alumno / Cliente</th>
+                            <th>Concepto</th>
+                            <th class="text-right">Monto</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for pago in ingresos %}
+                        <tr onclick="window.location.href='{% url 'detalle_pago' pago.uuid %}'">
+                            <td class="lc-date">{{ pago.fecha|date:"d/m/y" }}</td>
+                            <td>
+                                <span class="lc-badge {% if pago.numero_recibo %}lc-badge-success{% else %}lc-badge-secondary{% endif %}">
+                                    {% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}—{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="lc-alumno-cell">
+                                    <span class="lc-alumno-primary">
+                                        {% if pago.alumno %}{{ pago.alumno.nombre_completo }}{% else %}{{ pago.nombre_cliente }}{% endif %}
+                                    </span>
+                                    <span class="lc-alumno-secondary">
+                                        <i class="bi bi-building"></i> {{ pago.sede.nombre }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="lc-concepto-cell">
+                                    <span class="lc-concepto-primary">{{ pago.concepto|truncatechars:40 }}</span>
+                                </div>
+                            </td>
+                            <td class="lc-monto monto-ingreso text-right">
+                                Gs. {{ pago.importe_total|formato_guaranies }}
+                            </td>
+                            <td class="text-center">
+                                <div class="lc-row-actions">
+                                    <a href="{% url 'detalle_pago' pago.uuid %}" class="lc-row-action"
+                                       title="Ver detalle" onclick="event.stopPropagation()">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'editar_pago' pago.uuid %}" class="lc-row-action"
+                                       title="Editar" onclick="event.stopPropagation()">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                <div class="lc-empty">
+                                    <div class="lc-empty-illustration">
+                                        <i class="bi bi-cash-stack"></i>
+                                    </div>
+                                    <h3>No hay ingresos registrados</h3>
+                                    <p>Comienza registrando un nuevo ingreso desde el botón superior.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if ingresos %}
+                <div class="lc-table-footer">
+                    <div class="lc-table-count">
+                        <i class="bi bi-cash me-1"></i>
+                        {{ ingresos|length }} Registro{{ ingresos|length|pluralize }}
+                    </div>
+                    <span><i class="bi bi-calendar me-1"></i>Ordenado por fecha</span>
+                </div>
+                {% endif %}
+            </div>
         </div>
 
-        <!-- Tab: Egresos -->
+        <!-- Tab Egresos -->
         <div class="lc-tab-content" id="tab-egresos">
-            <table class="lc-table">
-                <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Comprobante</th>
-                    <th class="col-concepto">Categoría / Concepto</th>
-                    <th style="text-align:right;">Monto</th>
-                    <th style="text-align:center;">Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for egreso in egresos %}
-                <tr onclick="window.location.href='{% url 'detalle_egreso' egreso.uuid %}'">
-                    <td class="col-date">{{ egreso.fecha|date:"d/m/Y" }}</td>
-                    <td>
-                        <span class="col-badge badge-comp">{{ egreso.numero_comprobante }}</span>
-                    </td>
-                    <td class="col-concepto">
-                        <div class="col-nombre">{{ egreso.get_categoria_display }}</div>
-                        <div class="col-sub">{{ egreso.concepto|truncatewords:8 }}</div>
-                        <div class="col-sub" style="font-style:italic;">{{ egreso.sede.nombre }}</div>
-                    </td>
-                    <td class="col-monto monto-egreso">Gs. {{ egreso.monto|formato_guaranies }}</td>
-                    <td class="col-actions">
-                        <div class="btn-group">
-                            <a href="{% url 'detalle_egreso' egreso.uuid %}" class="btn-action">Detalle</a>
-                            <a href="{% url 'editar_egreso' egreso.uuid %}" class="btn-action">Editar</a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5">
-                        <div class="lc-empty">
-                            <i class="bi bi-inbox"></i>
-                            <p>No hay egresos registrados con los filtros aplicados.</p>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div><!-- /lc-card -->
+            <div class="lc-table-container">
+                <div class="table-responsive">
+                    <table class="lc-table">
+                        <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Comp.</th>
+                            <th>Categoría / Concepto</th>
+                            <th class="text-right">Monto</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for egreso in egresos %}
+                        <tr onclick="window.location.href='{% url 'detalle_egreso' egreso.uuid %}'">
+                            <td class="lc-date">{{ egreso.fecha|date:"d/m/y" }}</td>
+                            <td>
+                                <span class="lc-badge lc-badge-secondary">{{ egreso.numero_comprobante|truncatechars:8 }}</span>
+                            </td>
+                            <td>
+                                <div class="lc-concepto-cell">
+                                    <span class="lc-concepto-primary">{{ egreso.get_categoria_display }}</span>
+                                    <span class="lc-concepto-secondary">
+                                        <i class="bi bi-chat"></i> {{ egreso.concepto|truncatechars:30 }}
+                                    </span>
+                                    <span class="lc-concepto-secondary">
+                                        <i class="bi bi-building"></i> {{ egreso.sede.nombre }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="lc-monto monto-egreso text-right">
+                                Gs. {{ egreso.monto|formato_guaranies }}
+                            </td>
+                            <td class="text-center">
+                                <div class="lc-row-actions">
+                                    <a href="{% url 'detalle_egreso' egreso.uuid %}" class="lc-row-action"
+                                       title="Ver detalle" onclick="event.stopPropagation()">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'editar_egreso' egreso.uuid %}" class="lc-row-action"
+                                       title="Editar" onclick="event.stopPropagation()">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="lc-empty">
+                                    <div class="lc-empty-illustration">
+                                        <i class="bi bi-cash-stack"></i>
+                                    </div>
+                                    <h3>No hay egresos registrados</h3>
+                                    <p>Comienza registrando un nuevo egreso desde el botón superior.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
 
-</div><!-- /lc -->
+                {% if egresos %}
+                <div class="lc-table-footer">
+                    <div class="lc-table-count">
+                        <i class="bi bi-cash me-1"></i>
+                        {{ egresos|length }} egreso{{ egresos|length|pluralize }}
+                    </div>
+                    <span><i class="bi bi-calendar me-1"></i>Ordenado por fecha</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
 
 <script>
-    /* ── Tabs interactivos ────────────────────────────── */
     document.querySelectorAll('.lc-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const target = tab.dataset.tab;

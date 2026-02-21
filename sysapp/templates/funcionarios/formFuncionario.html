@@ -1,96 +1,730 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ titulo }} - ITS CEP{% endblock %}
-{% block page_title %}{{ titulo }}{% endblock %}
 
 {% block content %}
-<div class="row mt-5">
-    <div class="col-md-10 mx-auto">
-        <div class="stat-card">
-            <form method="post">
-                {% csrf_token %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label">Nombre *</label>
-                        {{ form.nombre }}
-                        {% if form.nombre.errors %}
-                            <div class="text-danger">{{ form.nombre.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Apellido *</label>
-                        {{ form.apellido }}
-                        {% if form.apellido.errors %}
-                            <div class="text-danger">{{ form.apellido.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Cédula *</label>
-                        {{ form.cedula }}
-                        {% if form.cedula.errors %}
-                            <div class="text-danger">{{ form.cedula.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Teléfono Principal</label>
-                        {{ form.telefono_principal }}
-                        {% if form.telefono_principal.errors %}
-                            <div class="text-danger">{{ form.telefono_principal.errors }}</div>
-                        {% endif %}
-                    </div>
+    /* ─── Tokens consistentes ─────────────────────────────── */
+    :root {
+        --ff-bg:        #f8fafc;
+        --ff-surface:   #ffffff;
+        --ff-ink:       #0f1825;
+        --ff-muted:     #5e6f88;
+        --ff-border:    #e1e9f0;
+        --ff-primary: #1e1f22;
+        --ff-primary-dk: rgba(24, 35, 80, 0.34);
+        --ff-primary-lt: #e9eafe;
+        --ff-success:   #10b981;
+        --ff-success-lt: #e4f9f0;
+        --ff-danger:    #ef4444;
+        --ff-danger-lt: #fee9e9;
+        --ff-gray-lt:   #f1f5f9;
+        --ff-r:         16px;
+        --ff-sh-sm:     0 2px 8px rgba(0,0,0,.04);
+        --ff-sh-md:     0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.03);
+        --ff-sh-lg:     0 12px 32px rgba(0,0,0,.08);
+        --ff-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+        --ff-bg:        #0e121b;
+        --ff-surface:   #161c26;
+        --ff-ink:       #edf2f9;
+        --ff-muted:     #8f9fb2;
+        --ff-border:    #232b36;
+        --ff-primary-lt: #1e1f3a;
+        --ff-success-lt: #12352d;
+        --ff-danger-lt: #2f1518;
+        --ff-gray-lt:   #1e2630;
+    }
+
+    .ff {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--ff-ink);
+        background: var(--ff-bg);
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
+    }
+
+    .ff * { box-sizing: border-box; }
+
+    /* ─── Header mejorado ───────────────────────────────── */
+    .ff-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .ff-head-left {
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+    }
+
+    .ff-head-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--ff-ink);
+        margin: 0;
+        letter-spacing: -0.75px;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+    }
+
+    .ff-head-title i {
+        font-size: 1.8rem;
+        color: var(--ff-primary);
+        background: var(--ff-primary-lt);
+        padding: .5rem;
+        border-radius: 14px;
+    }
+
+    .ff-head-breadcrumb {
+        font-size: .85rem;
+        color: var(--ff-muted);
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .ff-head-breadcrumb a {
+        color: var(--ff-primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .ff-head-breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    /* ─── Contenedor del formulario ─────────────────────── */
+    .ff-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .ff-card {
+        background: var(--ff-surface);
+        border: 1px solid var(--ff-border);
+        border-radius: 24px;
+        box-shadow: var(--ff-sh-lg);
+        overflow: hidden;
+        animation: slideIn .4s ease both;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ─── Header de la card ─────────────────────────────── */
+    .ff-card-header {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, var(--ff-primary) 0%, var(--ff-primary-dk) 100%);
+        color: white;
+    }
+
+    .ff-card-header h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 0 .25rem;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .ff-card-header p {
+        font-size: .85rem;
+        opacity: .9;
+        margin: 0;
+    }
+
+    .ff-card-header i {
+        font-size: 1.4rem;
+    }
+
+    /* ─── Cuerpo del formulario ─────────────────────────── */
+    .ff-card-body {
+        padding: 2rem;
+    }
+
+    /* ─── Secciones del formulario ──────────────────────── */
+    .ff-section {
+        margin-bottom: 2rem;
+    }
+
+    .ff-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .ff-section-title {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: .5rem;
+        border-bottom: 2px solid var(--ff-border);
+    }
+
+    .ff-section-title i {
+        font-size: 1.1rem;
+        color: var(--ff-primary);
+        background: #c6e3f4;
+        padding: .4rem;
+        border-radius: 10px;
+    }
+
+    .ff-section-title h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--ff-ink);
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    /* ─── Grid del formulario ───────────────────────────── */
+    .ff-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+        .ff-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ─── Campos del formulario ─────────────────────────── */
+    .ff-field {
+        display: flex;
+        flex-direction: column;
+        gap: .4rem;
+    }
+
+    .ff-field.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .ff-label {
+        font-size: .8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--ff-muted);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+    }
+
+    .ff-label i {
+        font-size: .85rem;
+        color: var(--ff-primary);
+    }
+
+    .ff-label-required::after {
+        content: '*';
+        color: var(--ff-danger);
+        margin-left: .2rem;
+    }
+
+    .ff-input,
+    .ff-select,
+    .ff-textarea {
+        width: 100%;
+        padding: .75rem 1rem;
+        border: 1.5px solid var(--ff-border);
+        border-radius: 12px;
+        background: var(--ff-bg);
+        font-size: .95rem;
+        font-family: inherit;
+        color: var(--ff-ink);
+        transition: var(--ff-transition);
+    }
+
+    .ff-input:focus,
+    .ff-select:focus,
+    .ff-textarea:focus {
+        outline: none;
+        border-color: var(--ff-primary);
+        background: var(--ff-surface);
+        box-shadow: 0 0 0 4px rgba(99,102,241,.1);
+    }
+
+    .ff-input:hover,
+    .ff-select:hover,
+    .ff-textarea:hover {
+        border-color: var(--ff-primary);
+    }
+
+    /* Select personalizado */
+    .ff-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235e6f88' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px;
+        padding-right: 2.5rem;
+    }
+
+    /* Textarea */
+    .ff-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    /* Mensajes de error */
+    .ff-error {
+        font-size: .8rem;
+        color: var(--ff-danger);
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        margin-top: .25rem;
+    }
+
+    .ff-error i {
+        font-size: .8rem;
+    }
+
+    /* ─── Checkbox personalizado ────────────────────────── */
+    .ff-checkbox {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        padding: .75rem 1rem;
+        background: var(--ff-gray-lt);
+        border: 1.5px solid var(--ff-border);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: var(--ff-transition);
+    }
+
+    .ff-checkbox:hover {
+        border-color: var(--ff-primary);
+        background: var(--ff-primary-lt);
+    }
+
+    .ff-checkbox input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--ff-primary);
+        cursor: pointer;
+    }
+
+    .ff-checkbox label {
+        font-size: .95rem;
+        font-weight: 600;
+        color: var(--ff-ink);
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .ff-checkbox small {
+        font-size: .8rem;
+        color: var(--ff-muted);
+    }
+
+    /* ─── Acciones del formulario ───────────────────────── */
+    .ff-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--ff-border);
+    }
+
+    .ff-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        padding: .8rem 1.8rem;
+        border-radius: 12px;
+        font-size: .95rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: var(--ff-transition);
+        text-decoration: none;
+        white-space: nowrap;
+        letter-spacing: .02em;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ff-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255,255,255,.2);
+        transform: translate(-50%, -50%);
+        transition: width .4s, height .4s;
+    }
+
+    .ff-btn:active::after {
+        width: 200px;
+        height: 200px;
+    }
+
+    .ff-btn i { font-size: 1.1rem; }
+
+    .ff-btn-primary {
+        background: linear-gradient(135deg, var(--ff-primary) 10%, var(--ff-primary-dk) 40%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(99,102,241,.25);
+    }
+    .ff-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99,102,241,.35);
+        color: #fff;
+    }
+
+    .ff-btn-success {
+        background: linear-gradient(135deg, var(--ff-success) 0%, #0b9e6e 100%);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(16,185,129,.25);
+    }
+    .ff-btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16,185,129,.35);
+        color: #fff;
+    }
+
+    .ff-btn-secondary {
+        background: var(--ff-surface);
+        color: var(--ff-ink);
+        border: 1.5px solid var(--ff-border);
+    }
+    .ff-btn-secondary:hover {
+        background: var(--ff-gray-lt);
+        border-color: var(--ff-primary);
+        color: var(--ff-primary);
+        transform: translateY(-2px);
+    }
+
+    /* Tooltips */
+    .ff-tooltip {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        margin-left: .35rem;
+        color: var(--ff-muted);
+        cursor: help;
+    }
+
+    .ff-tooltip:hover::before {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: .35rem .75rem;
+        background: var(--ff-ink);
+        color: var(--ff-surface);
+        font-size: .75rem;
+        font-weight: 500;
+        border-radius: 8px;
+        white-space: nowrap;
+        z-index: 1000;
+        margin-bottom: .5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .ff {
+            padding: 1rem;
+        }
+
+        .ff-head {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .ff-card-body {
+            padding: 1.5rem;
+        }
+
+        .ff-actions {
+            flex-direction: column-reverse;
+        }
+
+        .ff-btn {
+            width: 100%;
+        }
+
+        .ff-checkbox {
+            padding: .6rem 1rem;
+        }
+    }
+
+    /* Animaciones de campos */
+    .ff-field {
+        animation: fadeIn .3s ease forwards;
+        opacity: 0;
+    }
+
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+        }
+    }
+
+    .ff-field:nth-child(1) { animation-delay: .05s; }
+    .ff-field:nth-child(2) { animation-delay: .1s; }
+    .ff-field:nth-child(3) { animation-delay: .15s; }
+    .ff-field:nth-child(4) { animation-delay: .2s; }
+    .ff-field:nth-child(5) { animation-delay: .25s; }
+    .ff-field:nth-child(6) { animation-delay: .3s; }
+    .ff-field:nth-child(7) { animation-delay: .35s; }
+    .ff-field:nth-child(8) { animation-delay: .4s; }
+</style>
+
+<div class="ff mt-5">
+    <div class="ff-container">
+        <!-- Header -->
+        <div class="ff-head">
+            <div class="ff-head-left">
+                <div class="ff-head-breadcrumb">
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <a href="{% url 'lista_funcionarios' %}">Funcionarios</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span>{{ titulo }}</span>
                 </div>
+            </div>
+        </div>
 
-                <!-- Información Laboral -->
+        <!-- Formulario -->
+        <div class="ff-card">
+            <div class="ff-card-header">
+                <h2>
+                    <i class="bi bi-person-plus-fill"></i>
+                    {% if funcionario %}
+                    Editar: {{ funcionario.nombre_completo }}
+                    {% else %}
+                    Nuevo funcionario
+                    {% endif %}
+                </h2>
+                <p>Complete los datos del funcionario. Los campos marcados con * son obligatorios.</p>
+            </div>
 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label">Sede *</label>
-                        {{ form.sede }}
-                        {% if form.sede.errors %}
-                            <div class="text-danger">{{ form.sede.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Cargo *</label>
-                        {{ form.cargo }}
-                        {% if form.cargo.errors %}
-                            <div class="text-danger">{{ form.cargo.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Fecha de Ingreso *</label>
-                        {{ form.fecha_ingreso }}
-                        {% if form.fecha_ingreso.errors %}
-                            <div class="text-danger">{{ form.fecha_ingreso.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
+            <div class="ff-card-body">
+                <form method="post">
+                    {% csrf_token %}
 
+                    <!-- Sección: Datos personales -->
+                    <div class="ff-section">
+                        <div class="ff-section-title">
+                            <i class="bi bi-person-fill"></i>
+                            <h3>Datos personales</h3>
+                        </div>
 
-                <!-- Estado -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-12">
-                        <div class="form-check">
-                            {{ form.activo }}
-                            <label class="form-check-label" for="{{ form.activo.id_for_label }}">
-                                Funcionario activo
-                            </label>
+                        <div class="ff-grid">
+                            <div class="ff-field">
+                                <label class="ff-label ff-label-required">
+                                    <i class="bi bi-person"></i>
+                                    Nombre
+                                </label>
+                                {{ form.nombre }}
+                                {% if form.nombre.errors %}
+                                <div class="ff-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="ff-field">
+                                <label class="ff-label ff-label-required">
+                                    <i class="bi bi-person"></i>
+                                    Apellido
+                                </label>
+                                {{ form.apellido }}
+                                {% if form.apellido.errors %}
+                                <div class="ff-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.apellido.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="ff-field">
+                                <label class="ff-label ff-label-required">
+                                    <i class="bi bi-person-badge"></i>
+                                    Cédula
+                                    <span class="ff-tooltip" data-tooltip="Número de identificación sin puntos ni guiones">
+                                        <i class="bi bi-question-circle"></i>
+                                    </span>
+                                </label>
+                                {{ form.cedula }}
+                                {% if form.cedula.errors %}
+                                <div class="ff-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.cedula.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="ff-field">
+                                <label class="ff-label">
+                                    <i class="bi bi-telephone"></i>
+                                    Teléfono principal
+                                    <span class="ff-tooltip" data-tooltip="Formato: (XXX) XXX-XXXX">
+                                        <i class="bi bi-question-circle"></i>
+                                    </span>
+                                </label>
+                                {{ form.telefono_principal }}
+                                {% if form.telefono_principal.errors %}
+                                <div class="ff-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.telefono_principal.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Botones -->
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'lista_funcionarios' %}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </a>
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-circle"></i> {{ boton }}
-                    </button>
-                </div>
-            </form>
+                    <!-- Sección: Información laboral -->
+                    <div class="ff-section">
+                        <div class="ff-section-title">
+                            <i class="bi bi-briefcase-fill"></i>
+                            <h3>Información laboral</h3>
+                        </div>
+
+                        <div class="ff-grid">
+                            <div class="ff-field full-width">
+                                <label class="ff-label ff-label-required">
+                                    <i class="bi bi-building"></i>
+                                    Sede
+                                </label>
+                                {{ form.sede }}
+                                {% if form.sede.errors %}
+                                <div class="ff-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.sede.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="ff-field">
+                                <label class="ff-label ff-label-required">
+                                    <i class="bi bi-tag"></i>
+                                    Cargo
+                                </label>
+                                {{ form.cargo }}
+                                {% if form.cargo.errors %}
+                                <div class="ff-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.cargo.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="ff-field">
+                                <label class="ff-label ff-label-required">
+                                    <i class="bi bi-calendar-event"></i>
+                                    Fecha de ingreso
+                                </label>
+                                {{ form.fecha_ingreso }}
+                                {% if form.fecha_ingreso.errors %}
+                                <div class="ff-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.fecha_ingreso.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Estado -->
+                    <div class="ff-section">
+                        <div class="ff-section-title">
+                            <i class="bi bi-toggle-on"></i>
+                            <h3>Estado del funcionario</h3>
+                        </div>
+
+                        <div class="ff-checkbox">
+                            {{ form.activo }}
+                            <label for="{{ form.activo.id_for_label }}">
+                                Funcionario activo
+                            </label>
+                            <small>Desmarcar para dar de baja</small>
+                        </div>
+                        {% if form.activo.errors %}
+                        <div class="ff-error" style="margin-top: .5rem;">
+                            <i class="bi bi-exclamation-circle"></i>
+                            {{ form.activo.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="ff-actions">
+                        <a href="{% url 'lista_funcionarios' %}" class="ff-btn ff-btn-secondary">
+                            <i class="bi bi-x-lg"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="ff-btn ff-btn-success">
+                            <i class="bi bi-check-lg"></i>
+                            {{ boton }}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Formateo automático de teléfono (opcional)
+    document.addEventListener('DOMContentLoaded', function() {
+        const telefonoInput = document.querySelector('input[name="telefono_principal"]');
+
+        if (telefonoInput) {
+            telefonoInput.addEventListener('input', function(e) {
+                // Solo números
+                let value = this.value.replace(/\D/g, '');
+
+                // Formato: (XXX) XXX-XXXX para 10 dígitos
+                if (value.length > 0) {
+                    if (value.length <= 3) {
+                        this.value = value;
+                    } else if (value.length <= 6) {
+                        this.value = '(' + value.slice(0, 3) + ') ' + value.slice(3);
+                    } else {
+                        this.value = '(' + value.slice(0, 3) + ') ' + value.slice(3, 6) + '-' + value.slice(6, 10);
+                    }
+                }
+            });
+        }
+
+        // Formato de cédula (solo números)
+        const cedulaInput = document.querySelector('input[name="cedula"]');
+        if (cedulaInput) {
+            cedulaInput.addEventListener('input', function(e) {
+                this.value = this.value.replace(/\D/g, '');
+            });
+        }
+    });
+</script>
 {% endblock %}

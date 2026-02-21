@@ -1,246 +1,182 @@
-<!-- ARCHIVO 1: sysapp/templates/sedes/listaCarreras.html -->
-<!-- ============================================ -->
 {% extends 'base.html' %}
 {% load custom_filters %}
 
-{% block title %}Sedes - ITS CEP{% endblock %}
-{% block page_title %}Rendiciones por Sede{% endblock %}
-{% block breadcrumb_current %}Sedes{% endblock %}
+{% block title %}Sedes — ITS CEP{% endblock %}
+{% block page_title %}Sedes{% endblock %}
 
 {% block extra_css %}
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
     :root {
-        --card-bg: #ffffff;
-        --card-border: rgba(0, 0, 0, 0.05);
-        --text-main: #1e293b;
-        --text-muted: #64748b;
-        --stat-bg: #f8fafc;
-        --accent-color: #0ea5e9;
-        --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+        --ls-surface:   #ffffff;
+        --ls-ink:       #0f1825;
+        --ls-muted:     #64748b;
+        --ls-border:    rgba(0,0,0,.05);
+        --ls-bg:        #f8fafc;
+        --ls-blue:      #0756a3;
+        --ls-blue-dk:   #071e60;
+        --ls-blue-lt:   #e9f0fe;
+        --ls-accent:    #0ea5e9;
+        --ls-accent-grad: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
     }
-
     [data-theme="dark"] {
-        --card-bg: #1e293b;
-        --card-border: rgba(255, 255, 255, 0.05);
-        --text-main: #f1f5f9;
-        --text-muted: #94a3b8;
-        --stat-bg: #0f172a;
+        --ls-surface:  #13171d;
+        --ls-ink:      #e8ecf0;
+        --ls-muted:    #6e7d8f;
+        --ls-border:   rgba(255,255,255,.05);
+        --ls-bg:       #0d1117;
+        --ls-blue-lt:  #0d1e35;
     }
 
+    .ls { font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif; color: var(--ls-ink); }
+    .ls * { box-sizing: border-box; }
+
+    /* ─── Header — mismo patrón que listaAlumnos ──────────── */
+    .ls-head {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .ls-head-left { display: flex; flex-direction: column; gap: .25rem; }
+
+    .ls-head-title {
+        font-family: 'Sora', 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.9rem; font-weight: 800; color: var(--ls-ink);
+        margin: 0; letter-spacing: -.6px;
+        display: flex; align-items: center; gap: .7rem; line-height: 1.1;
+    }
+    .ls-head-title-icon {
+        width: 48px; height: 48px; border-radius: 14px;
+        background: var(--ls-blue-lt);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.35rem; color: var(--ls-blue); flex-shrink: 0;
+    }
+    .ls-breadcrumb {
+        font-size: .83rem; color: var(--ls-muted);
+        display: flex; align-items: center; gap: .4rem; margin-top: .15rem;
+    }
+    .ls-breadcrumb a { color: var(--ls-blue); text-decoration: none; font-weight: 600; }
+    .ls-breadcrumb a:hover { text-decoration: underline; }
+    .ls-breadcrumb i { font-size: .55rem; opacity: .7; }
+
+    /* Date badge */
+    .ls-date-badge {
+        background: var(--ls-bg); padding: .6rem 1.2rem;
+        border-radius: 50px; font-weight: 600; color: var(--ls-ink);
+        border: 1px solid var(--ls-border); display: flex; align-items: center; gap: .6rem;
+        font-size: .9rem;
+    }
+
+    /* ─── Sede cards (CSS original preservado) ────────────── */
     .sede-card {
-        background: var(--card-bg);
-        border-radius: 20px;
-        padding: 0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        border: 1px solid var(--card-border);
+        background: var(--ls-surface);
+        border-radius: 20px; padding: 0;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
+        border: 1px solid var(--ls-border);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        min-height: 250px;
+        position: relative; overflow: hidden;
+        display: flex; flex-direction: column; height: 100%; min-height: 250px;
     }
-
     .sede-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        border-color: var(--accent-color);
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,.1), 0 10px 10px -5px rgba(0,0,0,.04);
+        border-color: var(--ls-accent);
     }
+    .card-accent-bar { height: 6px; background: var(--ls-accent-grad); width: 100%; }
 
-    .card-accent-bar {
-        height: 6px;
-        background: var(--accent-gradient);
-        width: 100%;
-    }
+    .sede-card-content { padding: 1.75rem; flex-grow: 1; display: flex; flex-direction: column; }
 
-    .sede-card-content {
-        padding: 1.75rem;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .sede-header {
-        display: flex;
-        align-items: center;
-        gap: 1.25rem;
-        margin-bottom: 1.5rem;
-    }
+    .sede-header { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem; }
 
     .sede-icon-wrapper {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
-        background: var(--stat-bg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: var(--accent-color);
-        transition: all 0.3s;
-        border: 1px solid var(--card-border);
+        width: 56px; height: 56px; border-radius: 16px;
+        background: var(--ls-bg); display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; color: var(--ls-accent);
+        transition: all 0.3s; border: 1px solid var(--ls-border); flex-shrink: 0;
     }
-
     .sede-card:hover .sede-icon-wrapper {
-        background: var(--accent-gradient);
-        color: white;
-        transform: scale(1.1) rotate(5deg);
+        background: var(--ls-accent-grad); color: white; transform: scale(1.1) rotate(5deg);
     }
 
     .sede-info h4 {
-        font-size: 1.35rem;
-        font-weight: 800;
-        color: var(--text-main);
-        margin: 0;
-        letter-spacing: -0.025em;
+        font-size: 1.35rem; font-weight: 800; color: var(--ls-ink);
+        margin: 0; letter-spacing: -.025em;
     }
-
     .sede-info p {
-        color: var(--text-muted);
-        margin: 0.25rem 0 0 0;
-        font-size: 0.875rem;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
+        color: var(--ls-muted); margin: .25rem 0 0; font-size: .875rem;
+        display: flex; align-items: center; gap: .4rem;
     }
 
     .ingresos-container {
-        background: var(--stat-bg);
-        border-radius: 16px;
-        padding: 1.25rem;
-        margin-top: auto;
-        border: 1px solid var(--card-border);
-        position: relative;
-        overflow: hidden;
+        background: var(--ls-bg); border-radius: 16px; padding: 1.25rem;
+        margin-top: auto; border: 1px solid var(--ls-border);
+        position: relative; overflow: hidden;
     }
-
     .ingresos-container::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 64px;
-        height: 64px;
-        background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent);
+        content: ''; position: absolute; top: 0; right: 0;
+        width: 64px; height: 64px;
+        background: radial-gradient(circle at top right, rgba(16,185,129,.1), transparent);
     }
-
     .ingresos-label {
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 700;
-        display: block;
-        margin-bottom: 0.5rem;
+        font-size: .75rem; color: var(--ls-muted); text-transform: uppercase;
+        letter-spacing: .05em; font-weight: 700; display: block; margin-bottom: .5rem;
     }
-
-    .ingresos-value-wrapper {
-        display: flex;
-        align-items: baseline;
-        gap: 0.5rem;
-    }
-
-    .ingresos-currency {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #10b981;
-    }
-
+    .ingresos-value-wrapper { display: flex; align-items: baseline; gap: .5rem; }
+    .ingresos-currency { font-size: 1rem; font-weight: 600; color: #10b981; }
     .ingresos-value {
-        font-size: 2rem;
-        font-weight: 800;
-        color: #10b981;
-        line-height: 1;
+        font-family: 'Sora', sans-serif;
+        font-size: 2rem; font-weight: 800; color: #10b981; line-height: 1;
     }
 
-    .sede-footer {
-        padding: 1rem 1.75rem 1.75rem;
-    }
-
+    .sede-footer { padding: 0 1.75rem 1.75rem; }
     .btn-action {
-        background: var(--accent-gradient);
-        color: white !important;
-        padding: 0.8rem 1.5rem;
-        border-radius: 12px;
-        text-decoration: none;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-        transition: all 0.3s;
-        border: none;
-        width: 100%;
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+        background: var(--ls-accent-grad); color: white !important;
+        padding: .8rem 1.5rem; border-radius: 12px; text-decoration: none;
+        font-weight: 700; display: flex; align-items: center; justify-content: center; gap: .75rem;
+        transition: all 0.3s; border: none; width: 100%;
+        box-shadow: 0 4px 12px rgba(14,165,233,.25); font-family: 'Outfit', sans-serif;
     }
+    .btn-action:hover { box-shadow: 0 8px 20px rgba(14,165,233,.4); transform: translateY(-2px); }
 
-    .btn-action:hover {
-        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
-        transform: translateY(-2px);
+    /* Empty */
+    .ls-empty {
+        background: var(--ls-surface); border: 1px solid var(--ls-border);
+        border-radius: 20px; padding: 4rem 2rem; text-align: center; color: var(--ls-muted);
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
     }
+    .ls-empty i { font-size: 4rem; opacity: .18; display: block; margin-bottom: 1rem; color: var(--ls-blue); }
+    .ls-empty h5 { font-size: 1.2rem; font-weight: 700; color: var(--ls-ink); margin-bottom: .5rem; }
 
-    .header-section {
-        background: var(--card-bg);
-        padding: 1.5rem 2rem;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 2.5rem;
-        border: 1px solid var(--card-border);
-        box-shadow: var(--shadow-sm);
-    }
-
-    .header-title {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .header-title i {
-        font-size: 2rem;
-        color: var(--accent-color);
-    }
-
-    .header-title h2 {
-        margin: 0;
-        font-weight: 800;
-        font-size: 1.5rem;
-        color: var(--text-main);
-    }
-
-    .date-badge {
-        background: var(--stat-bg);
-        padding: 0.6rem 1.2rem;
-        border-radius: 50px;
-        font-weight: 600;
-        color: var(--text-main);
-        border: 1px solid var(--card-border);
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-    }
-
-    @media (max-width: 768px) {
-        .header-section {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-    }
+    @media(max-width:768px) { .ls-head { flex-direction: column; align-items: stretch; } }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="header-section mt-5">
-    <div class="date-badge">
-        <i class="bi bi-calendar3"></i>
-        <span>{{ fecha|date:"l, d \d\e F Y"|capfirst }}</span>
-    </div>
-</div>
+<div class="ls mt-5">
 
-{% if sedes_data %}
+    <!-- ── Header — mismo patrón que listaAlumnos ─────────── -->
+    <div class="ls-head">
+        <div class="ls-head-left">
+            <div class="ls-head-title">
+                <div class="ls-head-title-icon">
+                    <i class="bi bi-building-fill"></i>
+                </div>
+                Sedes
+            </div>
+            <div class="ls-breadcrumb">
+                <a href="{% url 'dashboard' %}">Inicio</a>
+                <i class="bi bi-chevron-right"></i>
+                <span>Rendiciones por Sede</span>
+            </div>
+        </div>
+        <div class="ls-date-badge">
+            <i class="bi bi-calendar3"></i>
+            <span>{{ fecha|date:"l, d \d\e F Y"|capfirst }}</span>
+        </div>
+    </div>
+
+    <!-- ── Sede cards (HTML original preservado) ───────────── -->
+    {% if sedes_data %}
     <div class="row g-4">
         {% for item in sedes_data %}
         <div class="col-lg-6 col-xl-4">
@@ -256,7 +192,6 @@
                             <p><i class="bi bi-telephone-fill"></i>{{ item.sede.telefono }}</p>
                         </div>
                     </div>
-
                     <div class="ingresos-container">
                         <span class="ingresos-label">Recaudación del Día</span>
                         <div class="ingresos-value-wrapper">
@@ -265,7 +200,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="sede-footer">
                     <a href="{% url 'rendicion_sede' item.sede.id %}" class="btn-action">
                         <span>Ver Detalle de Rendición</span>
@@ -276,11 +210,13 @@
         </div>
         {% endfor %}
     </div>
-{% else %}
-    <div class="stat-card">
-        <div class="empty-state">
-            <h5>No hay sedes registradas</h5>
-        </div>
+    {% else %}
+    <div class="ls-empty">
+        <i class="bi bi-building"></i>
+        <h5>No hay sedes registradas</h5>
+        <p>No se encontraron sedes en el sistema.</p>
     </div>
-{% endif %}
+    {% endif %}
+
+</div>
 {% endblock %}

@@ -1,60 +1,528 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ titulo }} - ITS CEP{% endblock %}
-{% block page_title %}{{ titulo }}{% endblock %}
 
 {% block content %}
-<div class="row mt-5">
-    <div class="col-md-8 mx-auto">
-        <div class="stat-card">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-            <form method="post">
-                {% csrf_token %}
+    :root {
+        --fa-bg:        #f8fafc; --fa-surface:   #ffffff;
+        --fa-ink:       #0f1825; --fa-muted:     #5e6f88;
+        --fa-border:    #e1e9f0; --fa-primary:   #0ea5e9;
+        --fa-primary-dk: #0284c7; --fa-primary-lt: #e0f2fe;
+        --fa-success:   #10b981; --fa-success-lt: #e4f9f0;
+        --fa-danger:    #ef4444; --fa-danger-lt: #fee9e9;
+        --fa-gray-lt:   #f1f5f9; --fa-info: #142a39; --fa-info-lt: #3757bc;
+        --fa-r:         16px;
+        --fa-sh-sm:     0 2px 8px rgba(0,0,0,.04);
+        --fa-sh-md:     0 4px 16px rgba(0,0,0,.06);
+        --fa-sh-lg:     0 12px 32px rgba(0,0,0,.08);
+        --fa-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label">Funcionario *</label>
-                        {{ form.funcionario }}
-                        {% if form.funcionario.errors %}
-                            <div class="text-danger">{{ form.funcionario.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Fecha *</label>
-                        {{ form.fecha }}
-                        {% if form.fecha.errors %}
-                            <div class="text-danger">{{ form.fecha.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-12">
-                        <div class="form-check form-switch">
-                            {{ form.presente }}
-                            <label class="form-check-label" for="{{ form.presente.id_for_label }}">
-                                <strong>¿Estuvo presente?</strong>
-                            </label>
+    [data-theme="dark"] {
+        --fa-bg: #0e121b; --fa-surface: #161c26; --fa-ink: #edf2f9; --fa-muted: #8f9fb2;
+        --fa-border: #232b36; --fa-primary-lt: #0c2a3a; --fa-success-lt: #12352d;
+        --fa-danger-lt: #2f1518; --fa-gray-lt: #1e2630; --fa-info-lt: #1e1f3a;
+    }
+
+    .fa { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--fa-ink); background: var(--fa-bg); min-height: 100vh; padding: 2rem 1.5rem; }
+    .fa * { box-sizing: border-box; }
+
+    .fa-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem; }
+    .fa-head-title { font-size:2rem; font-weight:800; color:var(--fa-ink); margin:0; letter-spacing:-.75px; display:flex; align-items:center; gap:.75rem; }
+    .fa-head-title i { font-size:1.8rem; color:var(--fa-primary); background:var(--fa-primary-lt); padding:.5rem; border-radius:14px; }
+    .fa-head-breadcrumb { font-size:.85rem; color:var(--fa-muted); display:flex; align-items:center; gap:.5rem; }
+    .fa-head-breadcrumb a { color:var(--fa-primary); text-decoration:none; font-weight:600; }
+    .fa-head-breadcrumb a:hover { text-decoration:underline; }
+
+    .fa-container { max-width:700px; margin:0 auto; }
+    .fa-card { background:var(--fa-surface); border:1px solid var(--fa-border); border-radius:24px; box-shadow:var(--fa-sh-lg); overflow:hidden; animation:slideIn .4s ease both; }
+    @keyframes slideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+    .fa-card-header { padding:1.5rem 2rem; background:linear-gradient(135deg,var(--fa-primary) 0%,var(--fa-primary-dk) 100%); color:white; }
+    .fa-card-header h2 { font-size:1.25rem; font-weight:700; margin:0 0 .25rem; display:flex; align-items:center; gap:.5rem; }
+    .fa-card-header p { font-size:.85rem; opacity:.9; margin:0; }
+
+    .fa-card-body { padding:2rem; }
+
+    .fa-section { margin-bottom:2rem; }
+    .fa-section:last-child { margin-bottom:0; }
+    .fa-section-title { display:flex; align-items:center; gap:.5rem; margin-bottom:1.25rem; padding-bottom:.5rem; border-bottom:2px solid var(--fa-border); }
+    .fa-section-title i { font-size:1.1rem; color:var(--fa-primary); background:var(--fa-primary-lt); padding:.4rem; border-radius:10px; }
+    .fa-section-title h3 { font-size:1rem; font-weight:700; margin:0; color:var(--fa-ink); text-transform:uppercase; letter-spacing:.05em; }
+
+    .fa-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.25rem; }
+    @media(max-width:640px) { .fa-grid { grid-template-columns:1fr; } }
+
+    .fa-field { display:flex; flex-direction:column; gap:.4rem; animation:fadeIn .3s ease forwards; opacity:0; }
+    .fa-field.full-width { grid-column:1 / -1; }
+    @keyframes fadeIn { to { opacity:1; } }
+    .fa-field:nth-child(1) { animation-delay:.05s; }
+    .fa-field:nth-child(2) { animation-delay:.1s; }
+    .fa-field:nth-child(3) { animation-delay:.15s; }
+    .fa-field:nth-child(4) { animation-delay:.2s; }
+
+    .fa-label { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fa-muted); display:flex; align-items:center; gap:.35rem; }
+    .fa-label i { font-size:.85rem; color:var(--fa-primary); }
+    .fa-label-required::after { content:'*'; color:var(--fa-danger); margin-left:.2rem; }
+
+    .fa-input, .fa-select, .fa-textarea {
+        width:100%; padding:.75rem 1rem; border:1.5px solid var(--fa-border);
+        border-radius:12px; background:var(--fa-bg); font-size:.95rem;
+        font-family:inherit; color:var(--fa-ink); transition:var(--fa-transition);
+    }
+    .fa-input:focus, .fa-select:focus, .fa-textarea:focus {
+        outline:none; border-color:var(--fa-primary); background:var(--fa-surface);
+        box-shadow:0 0 0 4px rgba(14,165,233,.1);
+    }
+    .fa-select {
+        appearance:none;
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235e6f88' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat:no-repeat; background-position:right 1rem center; background-size:16px; padding-right:2.5rem;
+    }
+    .fa-textarea { min-height:100px; resize:vertical; }
+
+    .fa-error { font-size:.8rem; color:var(--fa-danger); display:flex; align-items:center; gap:.35rem; margin-top:.25rem; }
+
+    /* ── Switch ────────────────────────────────────────────────── */
+    .fa-switch-container {
+        background:var(--fa-gray-lt); border:1.5px solid var(--fa-border);
+        border-radius:16px; padding:1.25rem;
+        display:flex; align-items:center; justify-content:space-between;
+        transition:var(--fa-transition);
+    }
+    .fa-switch-container:hover { border-color:var(--fa-primary); background:var(--fa-primary-lt); }
+    .fa-switch-label { display:flex; align-items:center; gap:.75rem; }
+    .fa-switch-label i { font-size:1.2rem; color:var(--fa-primary); background:var(--fa-surface); padding:.5rem; border-radius:12px; box-shadow:var(--fa-sh-sm); }
+    .fa-switch-text { display:flex; flex-direction:column; }
+    .fa-switch-text strong { font-size:1rem; color:var(--fa-ink); }
+    .fa-switch-text small { font-size:.8rem; color:var(--fa-muted); }
+    .fa-switch { position:relative; display:inline-block; width:60px; height:32px; }
+    .fa-switch input { opacity:0; width:0; height:0; }
+    .fa-slider {
+        position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0;
+        background-color:var(--fa-danger-lt); border:1.5px solid var(--fa-danger);
+        transition:var(--fa-transition); border-radius:34px;
+    }
+    .fa-slider:before {
+        position:absolute; content:""; height:24px; width:24px;
+        left:3px; bottom:3px; background-color:var(--fa-danger);
+        transition:var(--fa-transition); border-radius:50%;
+    }
+    input:checked + .fa-slider { background-color:var(--fa-success-lt); border-color:var(--fa-success); }
+    input:checked + .fa-slider:before { transform:translateX(28px); background-color:var(--fa-success); }
+
+    /* ── Horas trabajadas — card especial ─────────────────────── */
+    .fa-horas-card {
+        background: rgba(11, 18, 32, 0);
+        border: 1.5px solid var(--fa-info, #6366f1);
+        border-radius: 16px;
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        transition: var(--fa-transition);
+    }
+    .fa-horas-card.disabled {
+        opacity: 0.5;
+        background: var(--fa-gray-lt);
+        border-color: var(--fa-muted);
+    }
+    .fa-horas-icon {
+        width: 52px; height: 52px; min-width: 52px;
+        background: #0d6efd;
+        color: white;
+        border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 12px rgba(23, 54, 58, 0.3);
+    }
+    .fa-horas-content { flex: 1; }
+    .fa-horas-label { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--fa-info,#6366f1); margin-bottom:.35rem; }
+    [data-theme="dark"] .fa-horas-label { color:#91d5ff !important; }
+    .fa-horas-input-wrap { display:flex; align-items:center; gap:.5rem; }
+    .fa-horas-input {
+        width: 200px; padding: .6rem .9rem;
+        border: 1.5px solid var(--fa-border); border-radius: 10px;
+        background: var(--fa-surface); color: var(--fa-ink);
+        font-size: 1.1rem; font-weight: 700; font-family: inherit;
+        text-align: center; transition: var(--fa-transition);
+    }
+    .fa-horas-input:focus { outline:none; border-color:var(--fa-info,#6366f1); box-shadow:0 0 0 4px rgba(99,102,241,.1); }
+    .fa-horas-input:disabled {
+        background: var(--fa-gray-lt);
+        color: var(--fa-muted);
+        border-color: var(--fa-border);
+        cursor: not-allowed;
+    }
+    .fa-horas-unit { font-size:.9rem; font-weight:600; color:var(--fa-muted); }
+    .fa-horas-hint { font-size:.75rem; color:var(--fa-muted); margin-top:.25rem; }
+
+    .fa-hint { font-size:.75rem; color:var(--fa-muted); display:flex; align-items:center; gap:.35rem; margin-top:.5rem; }
+
+    /* ── Acciones ─────────────────────────────────────────────── */
+    .fa-actions { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:2rem; padding-top:1.5rem; border-top:2px solid var(--fa-border); }
+    .fa-btn {
+        display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+        padding:.8rem 1.8rem; border-radius:12px; font-size:.95rem; font-weight:700;
+        border:none; cursor:pointer; transition:var(--fa-transition); text-decoration:none;
+        white-space:nowrap; letter-spacing:.02em; position:relative; overflow:hidden;
+    }
+    .fa-btn i { font-size:1.1rem; }
+    .fa-btn-success { background:linear-gradient(135deg,var(--fa-success) 0%,#0b9e6e 100%); color:#fff; box-shadow:0 4px 12px rgba(16,185,129,.25); }
+    .fa-btn-success:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(16,185,129,.35); color:#fff; }
+    .fa-btn-secondary { background:var(--fa-surface); color:var(--fa-ink); border:1.5px solid var(--fa-border); }
+    .fa-btn-secondary:hover { background:var(--fa-gray-lt); border-color:var(--fa-primary); color:var(--fa-primary); transform:translateY(-2px); }
+
+    /* ── Botón de cálculo automático ─────────────────────────── */
+    .fa-calc-btn {
+        background: var(--fa-primary-lt);
+        border: 1px solid var(--fa-primary);
+        color: var(--fa-primary);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--fa-transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.5rem;
+    }
+    .fa-calc-btn:hover {
+        background: var(--fa-primary);
+        color: white;
+    }
+    .fa-calc-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    @media(max-width:768px) {
+        .fa { padding:1rem; }
+        .fa-switch-container { flex-direction:column; align-items:flex-start; gap:1rem; }
+        .fa-actions { flex-direction:column-reverse; }
+        .fa-btn { width:100%; }
+        .fa-horas-card { flex-direction:column; align-items:flex-start; }
+    }
+</style>
+
+<div class="fa mt-5">
+    <div class="fa-container">
+        <!-- Header -->
+        <div class="fa-head">
+            <div>
+                <div class="fa-head-breadcrumb">
+                    <a href="{% url 'dashboard' %}">Inicio</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <a href="{% url 'lista_funcionarios' %}">Funcionarios</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <a href="{% url 'lista_asistencias' %}">Asistencias</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span>{{ titulo }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card formulario -->
+        <div class="fa-card">
+            <div class="fa-card-header">
+                <h2><i class="bi bi-person-check-fill"></i> Registrar asistencia</h2>
+                <p>Complete los datos de asistencia del funcionario. Los campos con * son obligatorios.</p>
+            </div>
+
+            <div class="fa-card-body">
+                <form method="post" id="asistenciaForm">
+                    {% csrf_token %}
+
+                    <!-- DATOS DE ASISTENCIA -->
+                    <div class="fa-section">
+                        <div class="fa-section-title">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <h3>Datos de asistencia</h3>
+                        </div>
+
+                        <div class="fa-grid">
+                            <div class="fa-field full-width">
+                                <label class="fa-label fa-label-required">
+                                    <i class="bi bi-person-badge"></i> Funcionario
+                                </label>
+                                {{ form.funcionario }}
+                                {% if form.funcionario.errors %}
+                                <div class="fa-error"><i class="bi bi-exclamation-circle"></i> {{ form.funcionario.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="fa-field full-width">
+                                <label class="fa-label fa-label-required">
+                                    <i class="bi bi-calendar3"></i> Fecha
+                                </label>
+                                {{ form.fecha }}
+                                {% if form.fecha.errors %}
+                                <div class="fa-error"><i class="bi bi-exclamation-circle"></i> {{ form.fecha.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- NUEVOS CAMPOS: Hora entrada y salida -->
+                            <div class="fa-field">
+                                <label class="fa-label">
+                                    <i class="bi bi-box-arrow-in-right"></i> Hora entrada
+                                </label>
+                                <input type="time" name="hora_entrada" id="id_hora_entrada" class="fa-input" value="{{ form.hora_entrada.value|default:'' }}">
+                            </div>
+
+                            <div class="fa-field">
+                                <label class="fa-label">
+                                    <i class="bi bi-box-arrow-right"></i> Hora salida
+                                </label>
+                                <input type="time" name="hora_salida" id="id_hora_salida" class="fa-input" value="{{ form.hora_salida.value|default:'' }}">
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <label class="form-label">Observaciones</label>
-                        {{ form.observaciones }}
-                        {% if form.observaciones.errors %}
-                            <div class="text-danger">{{ form.observaciones.errors }}</div>
-                        {% endif %}
-                        <small class="text-muted">Opcional - Ej: Llegó tarde, salió temprano, permiso médico, etc.</small>
-                    </div>
-                </div>
 
-                <!-- Botones -->
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'lista_asistencias' %}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </a>
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-circle"></i> {{ boton }}
-                    </button>
-                </div>
-            </form>
+                    <!-- ESTADO -->
+                    <div class="fa-section">
+                        <div class="fa-section-title">
+                            <i class="bi bi-toggle-on"></i>
+                            <h3>Estado de asistencia</h3>
+                        </div>
+
+                        <div class="fa-switch-container">
+                            <div class="fa-switch-label">
+                                <i class="bi bi-person-check"></i>
+                                <div class="fa-switch-text">
+                                    <strong>¿El funcionario estuvo presente?</strong>
+                                    <small>Active el interruptor si asistió, desactive si estuvo ausente</small>
+                                </div>
+                            </div>
+                            <label class="fa-switch">
+                                {{ form.presente }}
+                                <span class="fa-slider"></span>
+                            </label>
+                        </div>
+                        {% if form.presente.errors %}
+                        <div class="fa-error" style="margin-top:.5rem;"><i class="bi bi-exclamation-circle"></i> {{ form.presente.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- HORAS TRABAJADAS -->
+                    <div class="fa-section" id="horasSection">
+                        <div class="fa-section-title">
+                            <i class="bi bi-clock-fill"></i>
+                            <h3>Horas trabajadas</h3>
+                        </div>
+
+                        <div class="fa-horas-card" id="horasCard">
+                            <div class="fa-horas-icon">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div class="fa-horas-content">
+                                <div class="fa-horas-label">Cantidad de horas ese día</div>
+                                <div class="fa-horas-input-wrap">
+                                    {{ form.horas_trabajadas }}
+                                    <span class="fa-horas-unit">horas</span>
+                                </div>
+                                <div class="fa-horas-hint" id="horasHint">
+                                    {% if form.instance.pk %}
+                                    <!-- En edición, mostrar según estado -->
+                                    {% else %}
+                                    Active "Presente" para registrar horas
+                                    {% endif %}
+                                </div>
+
+                                <!-- Botón para calcular automáticamente -->
+                                <button type="button" class="fa-calc-btn" id="calcularHorasBtn" disabled>
+                                    <i class="bi bi-calculator"></i> Calcular desde horario
+                                </button>
+
+                                {% if form.horas_trabajadas.errors %}
+                                <div class="fa-error"><i class="bi bi-exclamation-circle"></i> {{ form.horas_trabajadas.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OBSERVACIONES -->
+                    <div class="fa-section">
+                        <div class="fa-section-title">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            <h3>Observaciones</h3>
+                        </div>
+                        <div class="fa-field full-width">
+                            <label class="fa-label"><i class="bi bi-pencil"></i> Notas adicionales</label>
+                            {{ form.observaciones }}
+                            {% if form.observaciones.errors %}
+                            <div class="fa-error"><i class="bi bi-exclamation-circle"></i> {{ form.observaciones.errors.0 }}</div>
+                            {% endif %}
+                            <div class="fa-hint"><i class="bi bi-info-circle"></i> Opcional — Ej: Llegó tarde, permiso médico, etc.</div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="fa-actions">
+                        <a href="{% url 'lista_asistencias' %}" class="fa-btn fa-btn-secondary">
+                            <i class="bi bi-x-lg"></i> Cancelar
+                        </a>
+                        <button type="submit" class="fa-btn fa-btn-success">
+                            <i class="bi bi-check-lg"></i> {{ boton }}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elementos del DOM
+        const presenteSwitch = document.getElementById('id_presente');
+        const horasInput = document.getElementById('id_horas_trabajadas');
+        const horasCard = document.getElementById('horasCard');
+        const horasHint = document.getElementById('horasHint');
+        const calcularBtn = document.getElementById('calcularHorasBtn');
+        const funcionarioSelect = document.getElementById('id_funcionario');
+        const horaEntrada = document.getElementById('id_hora_entrada');
+        const horaSalida = document.getElementById('id_hora_salida');
+
+        // Función para calcular horas entre dos tiempos
+        function calcularHoras(entrada, salida) {
+            if (!entrada || !salida) return null;
+
+            const [h1, m1] = entrada.split(':').map(Number);
+            const [h2, m2] = salida.split(':').map(Number);
+
+            let minutosEntrada = h1 * 60 + m1;
+            let minutosSalida = h2 * 60 + m2;
+
+            // Si la salida es menor que la entrada, asumimos que pasó la medianoche
+            if (minutosSalida < minutosEntrada) {
+                minutosSalida += 24 * 60;
+            }
+
+            const diferenciaMinutos = minutosSalida - minutosEntrada;
+            const horas = diferenciaMinutos / 60;
+
+            // Redondear a 2 decimales
+            return Math.round(horas * 100) / 100;
+        }
+
+        // Función para actualizar el estado del campo horas según el switch
+        function actualizarEstadoHoras() {
+            const presente = presenteSwitch.checked;
+
+            if (presente) {
+                // Habilitar campo de horas
+                horasInput.disabled = false;
+                horasCard.classList.remove('disabled');
+                horasHint.textContent = 'Ingrese las horas trabajadas o use el botón de cálculo automático';
+                calcularBtn.disabled = false;
+
+                // Si hay hora de entrada y salida, calcular automáticamente
+                if (horaEntrada.value && horaSalida.value) {
+                    const horasCalculadas = calcularHoras(horaEntrada.value, horaSalida.value);
+                    if (horasCalculadas !== null && !horasInput.value) {
+                        horasInput.value = horasCalculadas;
+                    }
+                }
+            } else {
+                // Deshabilitar y limpiar campo de horas
+                horasInput.disabled = true;
+                horasInput.value = '';
+                horasCard.classList.add('disabled');
+                horasHint.textContent = 'Funcionario ausente - No se registran horas';
+                calcularBtn.disabled = true;
+            }
+        }
+
+        // Función para calcular horas desde el horario del funcionario
+        function calcularDesdeHorarioFuncionario() {
+            if (!presenteSwitch.checked) {
+                alert('Debe marcar "Presente" para calcular las horas');
+                return;
+            }
+
+            const funcionarioId = funcionarioSelect.value;
+            if (!funcionarioId) {
+                alert('Seleccione un funcionario primero');
+                return;
+            }
+
+            // Aquí deberías hacer una llamada AJAX para obtener el horario del funcionario
+            // Por ahora, usaremos los campos de hora entrada/salida o valores de ejemplo
+            if (horaEntrada.value && horaSalida.value) {
+                const horasCalculadas = calcularHoras(horaEntrada.value, horaSalida.value);
+                if (horasCalculadas !== null) {
+                    horasInput.value = horasCalculadas;
+                }
+            } else {
+                // Ejemplo: Si el funcionario tiene horario fijo (8 horas)
+                // En un caso real, esto vendría de una API
+                const confirmar = confirm('¿Usar horario estándar de 8 horas?');
+                if (confirmar) {
+                    horasInput.value = 8;
+                }
+            }
+        }
+
+        // Event listeners
+        if (presenteSwitch) {
+            presenteSwitch.addEventListener('change', actualizarEstadoHoras);
+        }
+
+        if (horaEntrada && horaSalida) {
+            horaEntrada.addEventListener('change', function() {
+                if (presenteSwitch.checked && horaEntrada.value && horaSalida.value) {
+                    const horasCalculadas = calcularHoras(horaEntrada.value, horaSalida.value);
+                    if (horasCalculadas !== null) {
+                        horasInput.value = horasCalculadas;
+                    }
+                }
+            });
+
+            horaSalida.addEventListener('change', function() {
+                if (presenteSwitch.checked && horaEntrada.value && horaSalida.value) {
+                    const horasCalculadas = calcularHoras(horaEntrada.value, horaSalida.value);
+                    if (horasCalculadas !== null) {
+                        horasInput.value = horasCalculadas;
+                    }
+                }
+            });
+        }
+
+        if (calcularBtn) {
+            calcularBtn.addEventListener('click', calcularDesdeHorarioFuncionario);
+        }
+
+        // Preseleccionar fecha actual si no hay valor
+        const fechaInput = document.querySelector('input[name="fecha"]');
+        if (fechaInput && !fechaInput.value) {
+            const hoy = new Date();
+            const y = hoy.getFullYear();
+            const m = String(hoy.getMonth() + 1).padStart(2, '0');
+            const d = String(hoy.getDate()).padStart(2, '0');
+            fechaInput.value = `${y}-${m}-${d}`;
+        }
+
+        // Aplicar clase visual al input de horas
+        if (horasInput) {
+            horasInput.classList.add('fa-horas-input');
+            horasInput.classList.remove('form-control');
+
+            // Estado inicial (para edición, verificar si está presente)
+            if (presenteSwitch) {
+                actualizarEstadoHoras();
+            }
+        }
+
+        // Si es una edición y el funcionario está ausente, aseguramos que horas esté vacío
+        if (!presenteSwitch.checked && horasInput) {
+            horasInput.value = '';
+        }
+    });
+</script>
 {% endblock %}
