@@ -10,9 +10,10 @@ from django.utils import timezone
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 import json
 from django.db.models import Max
+from dateutil.relativedelta import relativedelta
 
 from .models import (
     Sede, Alumno, Funcionario, Pago, Carrera,
@@ -104,24 +105,70 @@ def dashboard(request):
 
 @login_required
 def lista_alumnos(request):
-    sede_id    = request.GET.get('sede')
+    # Obtener la sede del perfil del usuario si no es admin
+    user_sede = None
+    if not request.user.is_staff:  # Si NO es administrador
+        try:
+            user_sede = request.user.perfil.sede
+            if not user_sede:
+                messages.warning(request, 'Tu usuario no tiene una sede asignada. Contacta al administrador.')
+                return render(request, 'alumnos/listaAlumnos.html', {
+                    'alumnos': [],
+                    'total_al_dia': 0,
+                    'total_por_vencer': 0,
+                    'total_atrasados': 0,
+                    'total_alumnos': 0,
+                    'sedes': Sede.objects.none(),
+                    'carreras': Carrera.objects.filter(activa=True),
+                    'filtros': {},
+                    'user_sede': None,
+                    'is_staff': False,
+                })
+        except (AttributeError, PerfilUsuario.DoesNotExist):
+            messages.warning(request,
+                             'Tu perfil de usuario no está configurado correctamente. Contacta al administrador.')
+            return render(request, 'alumnos/listaAlumnos.html', {
+                'alumnos': [],
+                'total_al_dia': 0,
+                'total_por_vencer': 0,
+                'total_atrasados': 0,
+                'total_alumnos': 0,
+                'sedes': Sede.objects.none(),
+                'carreras': Carrera.objects.filter(activa=True),
+                'filtros': {},
+                'user_sede': None,
+                'is_staff': False,
+            })
+
+    # Obtener parámetros de filtro
+    sede_id = request.GET.get('sede')
     carrera_id = request.GET.get('carrera')
-    estado     = request.GET.get('estado')
-    busqueda   = request.GET.get('busqueda')
+    estado = request.GET.get('estado')
+    busqueda = request.GET.get('busqueda')
 
-    # Totales globales — estado_pagos es @property Python, no campo de BD
-    # No se puede usar .filter(estado_pagos=...), igual que en dashboard
-    todos_activos    = list(Alumno.objects.filter(activo=True).select_related('carrera', 'sede'))
-    total_al_dia     = sum(1 for a in todos_activos if a.estado_pagos == 'AL_DIA')
+    # Base queryset - filtrar por sede del usuario si no es admin
+    alumnos_qs = Alumno.objects.filter(activo=True).select_related('carrera', 'sede')
+
+    # APLICAR FILTRO DE SEDE SEGÚN PERFIL
+    if not request.user.is_staff and user_sede:
+        # Si no es admin, solo ver alumnos de SU sede
+        alumnos_qs = alumnos_qs.filter(sede=user_sede)
+    elif sede_id and request.user.is_staff:
+        # Si es admin y seleccionó una sede específica
+        alumnos_qs = alumnos_qs.filter(sede_id=sede_id)
+
+    # Convertir a lista para filtrar por estado_pagos (que es property)
+    todos_activos = list(alumnos_qs)
+
+    # Calcular totales por estado (para las cards)
+    total_al_dia = sum(1 for a in todos_activos if a.estado_pagos == 'AL_DIA')
     total_por_vencer = sum(1 for a in todos_activos if a.estado_pagos == 'CERCANO_VENCIMIENTO')
-    total_atrasados  = sum(1 for a in todos_activos if a.estado_pagos == 'ATRASADO')
-    total_alumnos    = len(todos_activos)
+    total_atrasados = sum(1 for a in todos_activos if a.estado_pagos == 'ATRASADO')
+    total_alumnos = len(todos_activos)
 
-    # Filtrar en Python
+    # Aplicar filtros adicionales (en Python porque estado_pagos es property)
     alumnos = todos_activos
 
-    if sede_id:
-        alumnos = [a for a in alumnos if str(a.sede_id) == sede_id]
     if carrera_id:
         alumnos = [a for a in alumnos if str(a.carrera_id) == carrera_id]
     if busqueda:
@@ -131,32 +178,93 @@ def lista_alumnos(request):
             if b in a.nombre.lower()
                or b in a.apellido.lower()
                or b in (a.cedula or '').lower()
+               or (a.carrera and b in a.carrera.nombre.lower())
+               or (a.sede and b in a.sede.nombre.lower())
         ]
     if estado:
         alumnos = [a for a in alumnos if a.estado_pagos == estado]
 
+    # Determinar qué sedes mostrar en los filtros
+    if request.user.is_staff:
+        # Admin ve todas las sedes
+        sedes = Sede.objects.filter(activa=True)
+    else:
+        # Usuario normal ve SOLO su sede
+        sedes = Sede.objects.filter(id=user_sede.id) if user_sede else Sede.objects.none()
+
     return render(request, 'alumnos/listaAlumnos.html', {
-        'alumnos':          alumnos,
-        'total_al_dia':     total_al_dia,
+        'alumnos': alumnos,
+        'total_al_dia': total_al_dia,
         'total_por_vencer': total_por_vencer,
-        'total_atrasados':  total_atrasados,
-        'total_alumnos':    total_alumnos,
-        'sedes':            Sede.objects.filter(activa=True),
-        'carreras':         Carrera.objects.filter(activa=True),
-        'filtros':          {'sede': sede_id, 'carrera': carrera_id, 'estado': estado, 'busqueda': busqueda},
+        'total_atrasados': total_atrasados,
+        'total_alumnos': total_alumnos,
+        'sedes': sedes,
+        'carreras': Carrera.objects.filter(activa=True),
+        'filtros': {
+            'sede': sede_id,
+            'carrera': carrera_id,
+            'estado': estado,
+            'busqueda': busqueda,
+        },
+        'user_sede': user_sede,
+        'is_staff': request.user.is_staff,
     })
 
 @login_required
 def detalle_alumno(request, alumno_uuid):
     alumno = get_object_or_404(Alumno, uuid=alumno_uuid)
-    pagos  = alumno.pagos.all().order_by('-fecha')
+    hoy = date.today()
+
+    # ── Pagos del alumno (excluir matrículas, ordenar del más reciente) ──────
+    pagos = alumno.pagos.all().order_by('-fecha')
+
+    # ── Canjes ────────────────────────────────────────────────────────────────
+    canjes = alumno.canjes.all().order_by('-fecha')
+
+    # ── Total pagado ──────────────────────────────────────────────────────────
+    total_pagado = alumno.pagos.filter(
+        es_matricula=False
+    ).aggregate(total=Sum('importe_total'))['total'] or 0
+
+    # ── Total de estrellas (puntos) actuales ──────────────────────────────────
+    puntos_ganados = alumno.pagos.filter(
+        es_matricula=False
+    ).aggregate(total=Sum('puntos'))['total'] or 0
+
+    puntos_canjeados = alumno.canjes.aggregate(
+        total=Sum('cantidad')
+    )['total'] or 0
+
+    total_estrellas = max(0, puntos_ganados - puntos_canjeados)
+
+    ultimo_pago_con_vigencia = alumno.pagos.filter(
+        es_matricula=False,
+        valido_hasta__isnull=False,
+    ).order_by('-valido_hasta').first()
+
+    valido_hasta = None
+    estado_cobertura = 'SIN_PAGOS'
+
+    if ultimo_pago_con_vigencia:
+        valido_hasta = ultimo_pago_con_vigencia.valido_hasta
+
+        dias_restantes = (valido_hasta - hoy).days
+
+        if dias_restantes < 0:
+            estado_cobertura = 'VENCIDO'
+        elif dias_restantes <= 10:
+            estado_cobertura = 'POR_VENCER'
+        else:
+            estado_cobertura = 'AL_DIA'
+
     return render(request, 'alumnos/detalleAlumnos.html', {
-        'alumno':         alumno,
-        'pagos':          pagos,
-        'total_pagado':   pagos.aggregate(Sum('importe_total'))['importe_total__sum'] or 0,
-        'puede_rendir':   alumno.puede_rendir_examen,
-        'total_puntos':   alumno.total_puntos,   # ← renombrado de total_estrellas
-        'canjes':         alumno.canjes.all().order_by('-fecha'),
+        'alumno':           alumno,
+        'pagos':            pagos,
+        'canjes':           canjes,
+        'total_pagado':     total_pagado,
+        'total_estrellas':  total_estrellas,
+        'estado_cobertura': estado_cobertura,
+        'valido_hasta':     valido_hasta,
     })
 
 
@@ -406,10 +514,10 @@ def registrar_pago(request):
             pago.validez_pago     = form.cleaned_data.get('validez_pago')
             pago.monto_unitario   = form.cleaned_data.get('monto_unitario')
             pago.cantidad_cuotas  = form.cleaned_data.get('cantidad_cuotas') or 1
-            pago.puntos           = form.cleaned_data.get('puntos') or 0
 
             # carrera_otro: guardar como texto si no hay FK de carrera
             carrera_otro = form.cleaned_data.get('carrera_otro', '').strip()
+
             if not pago.carrera and carrera_otro:
                 # Si el modelo tiene el campo carrera_otro (CharField), lo guarda
                 if hasattr(pago, 'carrera_otro'):
@@ -419,7 +527,7 @@ def registrar_pago(request):
             if pago.es_matricula:
                 pago.fecha_vencimiento = None
                 pago.numero_cuota      = None
-                pago.puntos            = 0
+                pago.puntos = 0
             else:
                 pago.fecha_vencimiento = form.cleaned_data.get('fecha_vencimiento')
 
@@ -455,19 +563,16 @@ def editar_pago(request, pago_uuid):
         form = PagoForm(request.POST, request.FILES, instance=pago)
         if form.is_valid():
             pago = form.save(commit=False)
-
             es_cliente_diferenciado = form.cleaned_data.get('es_cliente_diferenciado')
-
-            pago.es_matricula     = form.cleaned_data.get('es_matricula', False)
-            pago.metodo_pago      = form.cleaned_data.get('metodo_pago', 'EFECTIVO')
-            pago.numero_recibo    = pago.numero_recibo or None
-            pago.nombre_cliente   = form.cleaned_data.get('nombre_cliente') if es_cliente_diferenciado else None
-            pago.alumno           = None if es_cliente_diferenciado else form.cleaned_data.get('alumno')
-            pago.carrera          = form.cleaned_data.get('carrera') or (pago.alumno.carrera if pago.alumno else None)
+            pago.es_matricula = form.cleaned_data.get('es_matricula', False)
+            pago.metodo_pago = form.cleaned_data.get('metodo_pago', 'EFECTIVO')
+            pago.numero_recibo = pago.numero_recibo or None
+            pago.nombre_cliente = form.cleaned_data.get('nombre_cliente') if es_cliente_diferenciado else None
+            pago.alumno = None if es_cliente_diferenciado else form.cleaned_data.get('alumno')
+            pago.carrera = form.cleaned_data.get('carrera') or (pago.alumno.carrera if pago.alumno else None)
             pago.validez_pago     = form.cleaned_data.get('validez_pago')
             pago.monto_unitario   = form.cleaned_data.get('monto_unitario')
             pago.cantidad_cuotas  = form.cleaned_data.get('cantidad_cuotas') or 1
-            pago.puntos           = form.cleaned_data.get('puntos') or 0
 
             carrera_otro = form.cleaned_data.get('carrera_otro', '').strip()
             if not pago.carrera and carrera_otro and hasattr(pago, 'carrera_otro'):
@@ -874,10 +979,7 @@ def asignar_fechas(request, materia_id):
         'materia': materia, 'carrera': materia.carrera,
     })
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  USUARIOS
-# ══════════════════════════════════════════════════════════════════════════
 
 @login_required
 @admin_required
@@ -972,7 +1074,6 @@ def configuracion(request):
 
 @login_required
 def lista_caja(request):
-    """Vista principal del módulo de Caja con ingresos y egresos"""
     hoy = timezone.now().date()
 
     # Filtros
@@ -1149,21 +1250,10 @@ def eliminar_egreso(request, egreso_uuid):
             return redirect('detalle_egreso', egreso_uuid=egreso.uuid)
     return redirect('lista_egresos')
 
-
 @login_required
 def informe_caja(request):
-    """
-    Informe de caja con balance de ingresos y egresos.
-
-    - Administradores (is_staff): pueden elegir cualquier sede o ver global.
-    - Usuarios normales: ven ÚNICAMENTE su sede asignada en PerfilUsuario.
-      Si no tienen sede asignada, se les muestra un error 403.
-    """
-    from django.core.exceptions import PermissionDenied
-
     es_admin = request.user.is_staff
 
-    # ── Resolver sede del usuario normal ────────────────────────────────
     sede_usuario = None
     if not es_admin:
         try:
@@ -1172,7 +1262,6 @@ def informe_caja(request):
             sede_usuario = None
 
         if sede_usuario is None:
-            # Usuario sin sede asignada — no puede ver ningún informe
             messages.error(
                 request,
                 'Tu usuario no tiene una sede asignada. '
@@ -1180,32 +1269,56 @@ def informe_caja(request):
             )
             return redirect('lista_caja')
 
-    # ── Parámetros de filtro ─────────────────────────────────────────────
-    fecha_desde_str = request.GET.get('fecha_desde')
-    fecha_hasta_str = request.GET.get('fecha_hasta')
+    hoy = timezone.now().date()
 
-    if not fecha_desde_str or not fecha_hasta_str:
-        hoy = timezone.now().date()
-        fecha_desde = hoy.replace(day=1)
-        if hoy.month == 12:
-            fecha_hasta = hoy.replace(day=31)
-        else:
-            fecha_hasta = (hoy.replace(month=hoy.month + 1, day=1) - timedelta(days=1))
-    else:
-        fecha_desde = datetime.strptime(fecha_desde_str, '%Y-%m-%d').date()
-        fecha_hasta = datetime.strptime(fecha_hasta_str, '%Y-%m-%d').date()
-
-    # ── Resolver sede a filtrar ──────────────────────────────────────────
     if es_admin:
-        # Admin puede elegir sede o ver global
-        sede_id  = request.GET.get('sede')
-        sede_obj = get_object_or_404(Sede, id=sede_id) if sede_id else None
-    else:
-        # Usuario normal: forzar su sede, ignorar ?sede= de la URL
-        sede_obj = sede_usuario
-        sede_id  = str(sede_usuario.pk)
+        # ADMIN: puede usar rango de fechas
+        fecha_desde_str = request.GET.get('fecha_desde')
+        fecha_hasta_str = request.GET.get('fecha_hasta')
 
-    # ── Querysets base ───────────────────────────────────────────────────
+        if fecha_desde_str and fecha_hasta_str:
+            try:
+                fecha_desde = datetime.strptime(fecha_desde_str, '%Y-%m-%d').date()
+                fecha_hasta = datetime.strptime(fecha_hasta_str, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                # Si hay error en las fechas, usar mes actual
+                fecha_desde = hoy.replace(day=1)
+                if hoy.month == 12:
+                    fecha_hasta = hoy.replace(day=31)
+                else:
+                    fecha_hasta = (hoy.replace(month=hoy.month + 1, day=1) - timedelta(days=1))
+        else:
+            # Si no hay fechas, usar mes actual
+            fecha_desde = hoy.replace(day=1)
+            if hoy.month == 12:
+                fecha_hasta = hoy.replace(day=31)
+            else:
+                fecha_hasta = (hoy.replace(month=hoy.month + 1, day=1) - timedelta(days=1))
+
+        # Filtrar por sede para admin
+        sede_id = request.GET.get('sede')
+        sede_obj = get_object_or_404(Sede, id=sede_id) if sede_id else None
+
+    else:
+        # USUARIO COMÚN: puede seleccionar UNA fecha específica
+        fecha_seleccionada_str = request.GET.get('fecha')
+
+        if fecha_seleccionada_str:
+            try:
+                fecha_seleccionada = datetime.strptime(fecha_seleccionada_str, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                # Si hay error, usar hoy
+                fecha_seleccionada = hoy
+        else:
+            # Si no hay fecha seleccionada, usar hoy
+            fecha_seleccionada = hoy
+
+        # Para usuarios comunes, la fecha desde y hasta son la misma
+        fecha_desde = fecha_seleccionada
+        fecha_hasta = fecha_seleccionada
+        sede_obj = sede_usuario  # Sede forzada
+
+    # Filtrar ingresos y egresos por fechas
     ingresos = Pago.objects.filter(
         fecha__gte=fecha_desde, fecha__lte=fecha_hasta
     )
@@ -1213,37 +1326,45 @@ def informe_caja(request):
         fecha__gte=fecha_desde, fecha__lte=fecha_hasta
     )
 
+    # Filtrar por sede si corresponde
     if sede_obj:
         ingresos = ingresos.filter(sede=sede_obj)
-        egresos  = egresos.filter(sede=sede_obj)
+        egresos = egresos.filter(sede=sede_obj)
 
+    # Ordenar y seleccionar relaciones
     ingresos = ingresos.select_related('alumno', 'sede', 'carrera').order_by('fecha')
-    egresos  = egresos.select_related('sede').order_by('fecha')
+    egresos = egresos.select_related('sede').order_by('fecha')
 
-    # ── Totales ──────────────────────────────────────────────────────────
+    # Calcular totales
     total_ingresos = ingresos.aggregate(Sum('importe_total'))['importe_total__sum'] or 0
-    total_egresos  = egresos.aggregate(Sum('monto'))['monto__sum'] or 0
+    total_egresos = egresos.aggregate(Sum('monto'))['monto__sum'] or 0
 
+    # Agrupar egresos por categoría
     egresos_por_categoria = {}
     for e in egresos:
         cat = e.get_categoria_display()
         egresos_por_categoria[cat] = egresos_por_categoria.get(cat, 0) + e.monto
 
-    return render(request, 'caja/informeCaja.html', {
-        'sede':                   sede_obj,
-        'fecha_desde':            fecha_desde,
-        'fecha_hasta':            fecha_hasta,
-        'ingresos':               ingresos,
-        'egresos':                egresos,
-        'total_ingresos':         total_ingresos,
-        'total_egresos':          total_egresos,
-        'balance':                total_ingresos - total_egresos,
-        'egresos_por_categoria':  egresos_por_categoria,
-        'sedes':                  Sede.objects.all().order_by('nombre'),
-        # Contexto extra para el template
-        'es_admin':               es_admin,
-        'sede_forzada':           None if es_admin else sede_usuario,
-    })
+    # Preparar contexto
+    context = {
+        'sede': sede_obj,
+        'fecha_desde': fecha_desde,
+        'fecha_hasta': fecha_hasta,
+        'ingresos': ingresos,
+        'egresos': egresos,
+        'total_ingresos': total_ingresos,
+        'total_egresos': total_egresos,
+        'balance': total_ingresos - total_egresos,
+        'egresos_por_categoria': egresos_por_categoria,
+        'sedes': Sede.objects.all().order_by('nombre'),
+        'es_admin': es_admin,
+        'sede_forzada': None if es_admin else sede_usuario,
+        'fecha_emision': timezone.now(),
+        # Para usuarios comunes, pasar la fecha seleccionada
+        'fecha_seleccionada': fecha_desde if not es_admin else None,
+    }
+
+    return render(request, 'caja/informeCaja.html', context)
 
 #SOLICITUDES DE ELIMINACIÓN
 
@@ -1287,3 +1408,125 @@ def procesar_solicitud_eliminacion(request, solicitud_id):
 
         solicitud.save()
     return redirect('lista_solicitudes_eliminacion')
+
+@login_required
+def ficha_alumno(request, alumno_uuid):
+    """
+    Genera la ficha personal díptico del alumno.
+    Calcula las 12 cuotas a partir de fecha_inicio y cruza con pagos reales.
+    """
+    alumno = get_object_or_404(Alumno, uuid=alumno_uuid)
+
+    cuotas = []
+
+    if alumno.fecha_inicio:
+        pagos_alumno = alumno.pagos.filter(
+            es_matricula=False
+        ).exclude(fecha_vencimiento__isnull=True).order_by('fecha_vencimiento')
+
+        for i in range(1, 13):
+            vencimiento = alumno.fecha_inicio + relativedelta(months=i)
+
+            rango_2_desde = vencimiento - timedelta(days=29)
+            rango_2_hasta = vencimiento - timedelta(days=3)
+            rango_1_desde = vencimiento - timedelta(days=2)
+            rango_1_hasta = vencimiento + timedelta(days=5)
+
+            ventana_desde = vencimiento - timedelta(days=15)
+            ventana_hasta = vencimiento + timedelta(days=15)
+
+            pago_cuota = pagos_alumno.filter(
+                fecha_vencimiento__gte=ventana_desde,
+                fecha_vencimiento__lte=ventana_hasta,
+            ).first()
+
+            if not pago_cuota:
+                pago_cuota = pagos_alumno.filter(
+                    numero_cuota__contains=str(i)
+                ).first()
+
+            cuotas.append({
+                'numero':        i,
+                'vencimiento':   vencimiento,
+                'pago':          pago_cuota,
+                'recibo':        pago_cuota.numero_recibo if pago_cuota else None,
+                'fecha_pago':    pago_cuota.fecha         if pago_cuota else None,
+                'puntaje':       pago_cuota.puntos        if pago_cuota else None,
+                'rango_2_desde': rango_2_desde,
+                'rango_2_hasta': rango_2_hasta,
+                'rango_1_desde': rango_1_desde,
+                'rango_1_hasta': rango_1_hasta,
+            })
+
+    cuotas_izq = cuotas[:6]
+    cuotas_der = cuotas[6:]
+    anio = alumno.fecha_inicio.year if alumno.fecha_inicio else timezone.now().year
+
+    return render(request, 'alumnos/fichaAlumno.html', {
+        'alumno':         alumno,
+        'cuotas':         cuotas,
+        'cuotas_izq':     cuotas_izq,
+        'cuotas_der':     cuotas_der,
+        'anio':           anio,
+        'anio_siguiente': anio + 1,
+        'tiene_inicio':   bool(alumno.fecha_inicio),
+    })
+
+
+@login_required
+def editar_datos_ficha(request, alumno_uuid):
+    """
+    Recibe el POST del modo edición inline de fichaAlumno.html.
+    Solo actualiza los campos del modelo Alumno que el JS envía:
+    nombre, apellido, carrera, fecha_inicio, curso_actual.
+
+    Los campos de institución (dirección, teléfono, etc.) se guardan
+    en localStorage del navegador — no requieren modelo.
+    """
+    alumno = get_object_or_404(Alumno, uuid=alumno_uuid)
+
+    if request.method == 'POST':
+        # Campos directos del modelo
+        nombre       = request.POST.get('nombre', '').strip()
+        apellido     = request.POST.get('apellido', '').strip()
+        fecha_inicio = request.POST.get('fecha_inicio', '').strip()
+        curso_actual = request.POST.get('curso_actual', '').strip()
+        carrera_id   = request.POST.get('carrera', '').strip()
+
+        # Actualizar solo los campos que llegaron con valor
+        if nombre:
+            alumno.nombre = nombre
+        if apellido:
+            alumno.apellido = apellido
+
+        # Carrera: validar que exista
+        if carrera_id:
+            try:
+                from .models import Carrera
+                alumno.carrera = Carrera.objects.get(pk=carrera_id)
+            except (Carrera.DoesNotExist, ValueError):
+                pass  # mantener la carrera actual si el id es inválido
+
+        # Fecha de inicio: validar formato YYYY-MM-DD
+        if fecha_inicio:
+            from datetime import date
+            try:
+                año, mes, dia = fecha_inicio.split('-')
+                alumno.fecha_inicio = date(int(año), int(mes), int(dia))
+            except (ValueError, AttributeError):
+                pass  # mantener fecha actual si el formato es inválido
+
+        # Curso actual: entero o nulo
+        if curso_actual:
+            try:
+                alumno.curso_actual = int(curso_actual)
+            except ValueError:
+                alumno.curso_actual = None
+        else:
+            alumno.curso_actual = None
+
+        alumno.save()
+        messages.success(request, 'Datos de la ficha actualizados correctamente.')
+
+    # Siempre redirigir a la ficha (GET o POST)
+    return redirect('ficha_alumno', alumno_uuid=alumno.uuid)
