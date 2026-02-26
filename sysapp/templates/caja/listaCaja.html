@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
-{% block title %}Caja — Movimientos{% endblock %}
+{% block title %}Caja — ITS CEP{% endblock %}
 {% block page_title %}Caja{% endblock %}
 
 {% block content %}
@@ -255,11 +255,9 @@
             </div>
         </div>
         <div class="lc-head-actions">
-            {% if user.is_staff %}
             <a href="{% url 'informe_caja' %}" class="lc-btn lc-btn-primary">
                 <i class="bi bi-file-earmark-bar-graph"></i> Informe
             </a>
-            {% endif %}
             <a href="{% url 'registrar_pago' %}" class="lc-btn lc-btn-success">
                 <i class="bi bi-plus-circle"></i> Ingreso
             </a>
@@ -300,15 +298,9 @@
         <div class="lc-tabs">
             <button class="lc-tab ingresos active" data-tab="ingresos">
                 <i class="bi bi-arrow-up-circle-fill"></i> Ingresos
-                <span style="background:rgba(5,150,105,.15);color:var(--lc-green);border-radius:999px;padding:.1rem .6rem;font-size:.72rem;">
-                    {{ ingresos_hoy|length }}
-                </span>
             </button>
             <button class="lc-tab egresos" data-tab="egresos">
                 <i class="bi bi-arrow-down-circle-fill"></i> Egresos
-                <span style="background:rgba(220,38,38,.12);color:var(--lc-red);border-radius:999px;padding:.1rem .6rem;font-size:.72rem;">
-                    {{ egresos_hoy|length }}
-                </span>
             </button>
         </div>
 
@@ -423,14 +415,14 @@
             </div>
         </div>
 
-        <!-- ══ TAB EGRESOS ═══════════════════════════════════ -->
+        <!--TAB EGRESOS-->
         <div class="lc-tab-content" id="tab-egresos">
 
             <!-- Toolbar: badge "Solo hoy" + botón de orden -->
             <div class="lc-toolbar">
                 <div class="lc-toolbar-left">
                     <span class="lc-chip lc-chip-day">
-                        <i class="bi bi-calendar-check"></i> Solo hoy — {{ fecha_hoy }}
+                        <i class="bi bi-calendar-check"></i> {{ fecha_hoy }}
                     </span>
                     <span class="lc-chip lc-chip-count">
                         <i class="bi bi-arrow-down-circle"></i>
