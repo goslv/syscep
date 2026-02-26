@@ -465,3 +465,40 @@ class MateriaForm(forms.ModelForm):
         self.fields['docente'].empty_label = "Sin asignar"
         self.fields['fecha_examen_parcial'].required = False
         self.fields['fecha_examen_final'].required   = False
+
+class FichaAlumnoDatosForm(forms.ModelForm):
+
+    class Meta:
+        model = Alumno
+        fields = ['nombre', 'apellido', 'carrera', 'fecha_inicio', 'curso_actual']
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'class': 'lc-form-control',
+                'placeholder': 'Nombre del alumno',
+            }),
+            'apellido': forms.TextInput(attrs={
+                'class': 'lc-form-control',
+                'placeholder': 'Apellido del alumno',
+            }),
+            'carrera': forms.Select(attrs={'class': 'lc-form-select'}),
+            'fecha_inicio': forms.DateInput(attrs={
+                'class': 'lc-form-control',
+                'type': 'date',
+            }),
+            'curso_actual': forms.NumberInput(attrs={
+                'class': 'lc-form-control',
+                'min': '1',
+            }),
+        }
+        labels = {
+            'nombre': 'Nombre',
+            'apellido': 'Apellido',
+            'carrera': 'Carrera',
+            'fecha_inicio': 'Fecha de Inicio',
+            'curso_actual': 'Curso / Año actual',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['carrera'].queryset = Carrera.objects.filter(activa=True).order_by('nombre')
+        self.fields['curso_actual'].required = False

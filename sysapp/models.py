@@ -2,6 +2,7 @@ import os
 import uuid
 from typing import Any
 
+from django.contrib.auth.context_processors import auth
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -226,33 +227,36 @@ class Alumno(models.Model):
 
     @property
     def estado_pagos(self):
-        ultimo_pago = self.pagos.order_by('-fecha_vencimiento').first()
+        ultimo_pago = self.pagos.filter(
+            es_matricula=False,
+            valido_hasta__isnull=False,
+        ).order_by('-valido_hasta').first()
+
         if not ultimo_pago:
             return 'SIN_PAGOS'
-        if not ultimo_pago.fecha_vencimiento:
-            return 'SIN_FECHA_VENCIMIENTO'
+
         hoy = timezone.now().date()
-        try:
-            diferencia = (ultimo_pago.fecha_vencimiento - hoy).days
-        except (TypeError, AttributeError):
-            return 'ERROR_FECHA'
-        if diferencia >= 0:
+        dias = (ultimo_pago.valido_hasta - hoy).days
+
+        if dias > 10:
             return 'AL_DIA'
-        elif diferencia >= -3:
+        elif dias >= 0:
             return 'CERCANO_VENCIMIENTO'
         else:
             return 'ATRASADO'
 
     @property
     def dias_hasta_vencimiento(self):
-        ultimo_pago = self.pagos.order_by('-fecha_vencimiento').first()
-        if not ultimo_pago or not ultimo_pago.fecha_vencimiento:
+        ultimo_pago = self.pagos.filter(
+            es_matricula=False,
+            valido_hasta__isnull=False,
+        ).order_by('-valido_hasta').first()
+
+        if not ultimo_pago:
             return None
+
         hoy = timezone.now().date()
-        try:
-            return (ultimo_pago.fecha_vencimiento - hoy).days
-        except (TypeError, AttributeError):
-            return None
+        return (ultimo_pago.valido_hasta - hoy).days
 
     @property
     def puede_rendir_examen(self):
@@ -287,7 +291,6 @@ class Alumno(models.Model):
             detalle['mensaje'] = 'Estado desconocido'
         return detalle
 
-
 class Pago(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     sede = models.ForeignKey(Sede, on_delete=models.CASCADE, related_name='pagos', verbose_name="Sede")
@@ -317,10 +320,8 @@ class Pago(models.Model):
     monto_unitario = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True)
     cantidad_cuotas = models.IntegerField(null=True, blank=True, default=1)
     usuario_registro = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
-    cuenta_bancaria = models.ForeignKey(
-        'CuentaBancaria', on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='pagos', verbose_name="Cuenta bancaria destino"
-    )
+    cuenta_bancaria = models.ForeignKey('CuentaBancaria', on_delete=models.SET_NULL, null=True, blank=True,related_name='pagos', verbose_name="Cuenta bancaria destino")
+    tiene_multa   = models.BooleanField(default=False,verbose_name="Tiene multa por pago tardío")
 
     class Meta:
         ordering = ['-fecha', '-id']
@@ -353,8 +354,18 @@ class Pago(models.Model):
     def save(self, *args, **kwargs):
         if self.es_matricula:
             self.puntos = 0
-        elif not self.pk or self.puntos == 0:
+            self.tiene_multa = False
+        else:
             self.puntos = self.calcular_puntos()
+            if (self.fecha_vencimiento
+                    and self.fecha
+                    and self.carrera
+                    and self.carrera.naturalidad == 'TS'
+                    and self.fecha > self.fecha_vencimiento):
+                self.tiene_multa = True
+            else:
+                self.tiene_multa = False
+
         super().save(*args, **kwargs)
 
     @property
@@ -382,7 +393,6 @@ class Pago(models.Model):
     def esta_vencido(self):
         dias = self.dias_para_vencimiento
         return dias is not None and dias < 0
-
 
 class CanjeEstrellas(models.Model):
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE, related_name='canjes', verbose_name="Alumno")
@@ -503,7 +513,6 @@ class SolicitudEliminacion(models.Model):
         self.fecha_decision = timezone.now()
         self.observaciones_decision = observaciones
         self.save()
-
 
 class CuentaBancaria(models.Model):
     entidad = models.CharField(max_length=100, verbose_name="Entidad bancaria")

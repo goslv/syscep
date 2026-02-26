@@ -1,0 +1,707 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}Ficha — {{ alumno.nombre_completo }}{% endblock %}
+{% block page_title %}Ficha del Alumno{% endblock %}
+
+{% block content %}
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
+
+        :root {
+            --s:#fff; --ink:#0f1419; --mut:#64748b; --brd:#e2e8f0;
+            --b:#0756a3; --bdk:#071e60; --blt:#e9f0fe; --glt:#f1f5f9;
+            --grn:#059669; --sh:0 1px 3px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.07);
+            --t:all .18s cubic-bezier(.4,0,.2,1);
+        }
+        [data-theme="dark"] {
+            --s:#13171d; --ink:#e8ecf0; --mut:#6e7d8f; --brd:#2a2f38;
+            --blt:#0d1e35; --glt:#181c23;
+        }
+
+        .lc { font-family:'Plus Jakarta Sans',sans-serif; color:var(--ink); }
+        .lc * { box-sizing:border-box; margin:0; padding:0; }
+
+        /* ── Header ─────────────────────────────────────────── */
+        .lc-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.6rem; flex-wrap:wrap; gap:1rem; }
+        .lc-hl { display:flex; flex-direction:column; gap:.2rem; }
+        .lc-tit { font-family:'Sora',sans-serif; font-size:1.8rem; font-weight:800; color:var(--ink); letter-spacing:-.6px; display:flex; align-items:center; gap:.6rem; line-height:1.1; }
+        .lc-ico { width:44px; height:44px; border-radius:12px; background:var(--blt); display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:var(--b); flex-shrink:0; }
+        .lc-bc { font-size:.8rem; color:var(--mut); display:flex; align-items:center; gap:.32rem; }
+        .lc-bc a { color:var(--b); text-decoration:none; font-weight:600; }
+        .lc-bc a:hover { text-decoration:underline; }
+        .lc-bc i { font-size:.48rem; opacity:.55; }
+        .lc-acts { display:flex; align-items:center; gap:.48rem; flex-wrap:wrap; }
+
+        /* ── Botones ─────────────────────────────────────────── */
+        .btn { display:inline-flex; align-items:center; gap:.38rem; padding:.58rem 1.05rem; border-radius:10px; font-size:.84rem; font-weight:700; font-family:'Sora',sans-serif; border:none; cursor:pointer; transition:var(--t); text-decoration:none; white-space:nowrap; }
+        .btn i { font-size:.92rem; }
+        .btn-p { background:linear-gradient(135deg,var(--b),var(--bdk)); color:#fff; box-shadow:0 4px 12px rgba(7,86,163,.22); }
+        .btn-p:hover { transform:translateY(-1px); color:#fff; }
+        .btn-g { background:var(--s); color:var(--mut); border:1.5px solid var(--brd); }
+        .btn-g:hover { border-color:var(--b); color:var(--b); background:var(--blt); }
+        .btn-e { background:linear-gradient(135deg,#d97706,#b45309); color:#fff; box-shadow:0 4px 12px rgba(217,119,6,.2); }
+        .btn-e:hover { transform:translateY(-1px); color:#fff; }
+        .btn-s { background:linear-gradient(135deg,#059669,#047857); color:#fff; box-shadow:0 4px 12px rgba(5,150,105,.22); }
+        .btn-s:hover { transform:translateY(-1px); color:#fff; }
+        .btn-c { background:var(--s); color:#dc2626; border:1.5px solid #fca5a5; }
+        .btn-c:hover { background:#fff1f1; border-color:#dc2626; }
+
+        .modo-bdg { display:none; align-items:center; gap:.42rem; padding:.4rem .85rem; border-radius:50px; font-size:.74rem; font-weight:700; font-family:'Sora',sans-serif; background:rgba(217,119,6,.09); color:#b45309; border:1.5px solid rgba(217,119,6,.25); }
+        body.ed .modo-bdg { display:flex; }
+
+        /* ── Alerta ──────────────────────────────────────────── */
+        .alerta { background:rgba(245,158,11,.09); border:1.5px solid rgba(245,158,11,.28); border-radius:12px; padding:.85rem 1.25rem; display:flex; align-items:center; gap:.65rem; font-size:.84rem; color:var(--ink); margin-bottom:1.35rem; }
+        .alerta i { font-size:1.05rem; color:#d97706; flex-shrink:0; }
+
+        /* ══════════════════════════════════════════════════════
+           DÍPTICO — pantalla
+        ══════════════════════════════════════════════════════ */
+        .dw { display:flex; flex-direction:column; gap:1.35rem; }
+
+        .hoja {
+            background:var(--s); border:1px solid var(--brd); border-radius:16px;
+            box-shadow:var(--sh); overflow:hidden; animation:fadein .28s ease both;
+        }
+        .hoja:nth-child(2) { animation-delay:.08s; }
+        @keyframes fadein { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+        body.ed .hoja { border-color:#fbbf24; box-shadow:0 0 0 3px rgba(251,191,36,.14); }
+
+        .hoja-lbl { background:var(--glt); border-bottom:1px solid var(--brd); padding:.58rem 1.25rem; font-family:'Sora',sans-serif; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--mut); display:flex; align-items:center; gap:.4rem; }
+        .hoja-lbl span { font-weight:400; }
+
+        .hgrid { display:grid; grid-template-columns:1fr 1fr; min-height:470px; }
+        .pan { padding:1.45rem; }
+        .pan:first-child { border-right:2px dashed var(--brd); }
+
+        /* ── Panel cuotas ────────────────────────────────────── */
+        .stit { font-family:'Sora',sans-serif; font-weight:800; font-size:.88rem; color:var(--b); text-align:center; margin-bottom:.95rem; text-transform:uppercase; letter-spacing:.03em; }
+        .smeta { display:flex; gap:1.4rem; margin-bottom:.95rem; padding-bottom:.8rem; border-bottom:1px solid var(--brd); flex-wrap:wrap; justify-content:space-between; }
+        .smeta-i { display:flex; flex-direction:column; gap:.08rem; }
+        .sml { font-size:.58rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--mut); }
+        .smv { font-size:.8rem; font-weight:600; color:var(--ink); }
+        /* Monto en smeta: alineado a la derecha */
+        .smeta-i.monto .smv { color:var(--b); font-family:'Sora',sans-serif; font-size:.88rem; }
+
+        .cg { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; }
+
+        .cuota { border:1.5px solid var(--brd); border-radius:6px; overflow:hidden; transition:var(--t); }
+
+        .ch { background:#fff; color:#0756A3FF; font-family:'Sora',sans-serif; font-weight:800; font-size:.57rem; text-align:center; padding:.23rem .38rem; text-transform:uppercase; letter-spacing:.05em; }
+
+        .cb { display:grid; grid-template-columns:1fr 1fr; }
+        .ci { padding:.38rem .43rem; border-right:1px solid var(--brd); }
+        .cd { padding:.38rem .43rem; display:flex; flex-direction:column; gap:.25rem; }
+
+        .fl { font-weight:700; font-size:.5rem; text-transform:uppercase; letter-spacing:.06em; color:var(--b); margin-bottom:.08rem; display:block; }
+        .fv { font-size:.62rem; font-weight:600; color:var(--ink); border-bottom:1px solid var(--brd); padding-bottom:.13rem; min-height:.88rem; display:block; }
+        .fv.em { color:var(--mut); font-weight:400; }
+
+        .pb { background:var(--glt); border-radius:3px; padding:.17rem .24rem; }
+        .pbl { font-weight:700; font-size:.46rem; text-transform:uppercase; letter-spacing:.05em; color:var(--b); display:block; margin-bottom:.04rem; }
+        .pbr { font-size:.52rem; color:var(--mut); line-height:1.3; }
+
+        .cpie { padding:.24rem .43rem; border-top:1px solid var(--brd); background:var(--glt); display:flex; align-items:center; justify-content:space-between; }
+        .piel { font-weight:700; font-size:.48rem; text-transform:uppercase; letter-spacing:.05em; color:var(--b); }
+        .piev { font-family:'Sora',sans-serif; font-weight:800; font-size:.68rem; }
+        .p0{color:var(--mut)} .p1{color:var(--b)} .p2{color:var(--b)} .p3{color:var(--b)}
+
+        .nofecha { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.55rem; text-align:center; padding:2.5rem 1rem; color:var(--mut); font-size:.78rem; }
+        .nofecha i { font-size:2rem; opacity:.2; }
+
+        /* ── Panel portada ───────────────────────────────────── */
+        .port { display:flex; flex-direction:column; align-items:center; gap:.75rem; height:100%; }
+        .port-logo { width:108px; height:auto; }
+        .port-inst { text-align:center; width:100%; }
+        .port-nom { font-family:'Sora',sans-serif; font-weight:800; font-size:.92rem; color:var(--b); line-height:1.22; display:block; }
+        .port-sub { font-size:.74rem; font-weight:500; color:var(--mut); display:block; margin-top:.1rem; }
+
+        .port-campos { width:100%; display:flex; flex-direction:column; gap:.55rem; }
+        .port-campo { text-align:center; width:100%; }
+        .port-lbl { font-size:.56rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--mut); display:block; margin-bottom:.08rem; }
+        .port-val { font-size:.84rem; font-weight:600; color:var(--ink); border-bottom:2px solid var(--brd); padding-bottom:.24rem; min-height:1.3rem; display:block; text-align:center; }
+
+        .port-anio { font-family:'Sora',sans-serif; font-weight:800; font-size:.95rem; color:var(--b); text-align:center; display:block; width:100%; }
+        .port-info { font-size:.62rem; color:var(--mut); line-height:1.6; text-align:center; width:100%; display:block; }
+        .port-motto { font-size:.6rem; color:var(--mut); font-style:italic; text-align:center; display:block; width:100%; }
+
+        .port-monto { width:100%; text-align:center; padding-top:.52rem; border-top:1px solid var(--brd); margin-top:auto; }
+        .port-monto-l { font-size:.56rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--mut); display:block; margin-bottom:.07rem; }
+        .port-monto-v { font-family:'Sora',sans-serif; font-size:.9rem; font-weight:800; color:var(--b); display:block; }
+
+        /* ── Panel reglamento ────────────────────────────────── */
+        .reg { display:flex; flex-direction:column; gap:.78rem; }
+        .reg-mec { display:flex; align-items:center; gap:.5rem; padding-bottom:.62rem; border-bottom:1px solid var(--brd); }
+        .reg-mec img { height:30px; width:auto; }
+        .reg-mec-t { font-size:.64rem; line-height:1.48; }
+        .reg-pts { background:var(--blt); border-radius:10px; padding:.78rem .9rem; }
+        .reg-tit { font-family:'Sora',sans-serif; font-weight:700; font-size:.74rem; color:var(--b); font-style:italic; display:block; margin-bottom:.4rem; }
+        .reg-desc { font-size:.64rem; color:var(--mut); margin-bottom:.5rem; line-height:1.48; display:block; }
+        .reg-fila { display:flex; gap:.38rem; margin-bottom:.26rem; font-size:.66rem; color:var(--ink); align-items:flex-start; }
+        .reg-bdg { font-family:'Sora',sans-serif; font-weight:800; font-size:.74rem; color:var(--b); width:14px; flex-shrink:0; }
+        .reg-canje { background:var(--glt); border-radius:8px; padding:.65rem .78rem; flex:1; }
+        .reg-canje-t { font-family:'Sora',sans-serif; font-weight:700; font-size:.62rem; text-transform:uppercase; letter-spacing:.05em; color:var(--mut); display:block; margin-bottom:.35rem; }
+        .reg-item { display:flex; gap:.28rem; font-size:.61rem; color:var(--ink); margin-bottom:.17rem; line-height:1.38; }
+        .rst { color:#f59e0b; flex-shrink:0; }
+
+        .ef {
+            display:none !important;
+            width:100%; font-family:'Plus Jakarta Sans',sans-serif;
+            font-size:inherit; font-weight:inherit; color:var(--ink);
+            background:rgba(251,191,36,.07); border:1.5px solid #fbbf24;
+            border-radius:5px; padding:.2rem .36rem; outline:none;
+            transition:border-color .14s,box-shadow .14s; text-align:center;
+        }
+        .ef:focus { border-color:var(--b); box-shadow:0 0 0 3px rgba(7,86,163,.1); background:rgba(7,86,163,.03); }
+        textarea.ef { resize:vertical; min-height:4.5rem; }
+
+        .ev { display:block; }
+        body.ed .ev { display:none !important; }
+        body.ed .ef { display:block !important; }
+
+        @media print {
+            @page { size: letter landscape; margin:.4cm .5cm; }
+
+            nav, header, footer, .sidebar, .navbar,
+            .lc-head, .alerta, .hoja-lbl, .modo-bdg,
+            .no-print, form, .ef { display:none !important; }
+
+            .ev { display:block !important; }
+
+            html, body { margin:0 !important; padding:0 !important; background:#fff !important; }
+            .lc { margin:0 !important; padding:0 !important; }
+            .dw { gap:0 !important; margin:0 !important; padding:0 !important; display:block !important; }
+
+            .hoja {
+                display:block !important;
+                width:100% !important;
+                height:19cm !important;
+                max-height:19cm !important;
+                overflow:hidden !important;
+                page-break-after:always !important;
+                page-break-inside:avoid !important;
+                border:none !important;
+                border-radius:0 !important;
+                margin:0 !important;
+                padding:0 !important;
+                box-shadow:none !important;
+                animation:none !important;
+            }
+            .hoja:last-child { page-break-after:avoid !important; }
+
+            .hgrid {
+                display:grid !important;
+                grid-template-columns:1fr 1fr !important;
+                height:19cm !important;
+                border:.4pt solid #ccc !important;
+            }
+            .pan { padding:.7cm .9cm !important; }
+            .pan:first-child { border-right:.4pt solid #ccc !important; }
+            .stit { font-size:10pt !important; margin-bottom:.45cm !important; }
+            .smeta { margin-bottom:.45cm !important; padding-bottom:.35cm !important; }
+            .sml { font-size:6pt !important; }
+            .smv { font-size:8.5pt !important; }
+            .smeta-i.monto .smv { font-size:9pt !important; }
+            .cg { gap:.22cm !important; }
+            .cuota { border:.5pt solid #ccc !important; border-radius:3pt !important; }
+            .cuota.ok { border-color:rgba(5,150,105,.5) !important; }
+            .ch {
+                font-size:6pt !important;
+                padding:.12cm .3cm !important;
+                background:var(--b) !important;
+                color:#fff !important;
+                -webkit-print-color-adjust:exact !important;
+                print-color-adjust:exact !important;
+            }
+            .cuota.ok .ch {
+                background:var(--grn) !important;
+                -webkit-print-color-adjust:exact !important;
+                print-color-adjust:exact !important;
+            }
+            .ci { padding:.2cm .24cm !important; border-right:.4pt solid #ddd !important; }
+            .cd { padding:.2cm .24cm !important; gap:.16cm !important; }
+            .fl { font-size:5.5pt !important; color:var(--b) !important; }
+            .fv { font-size:6.5pt !important; border-bottom:.4pt solid #ccc !important; min-height:.44cm !important; }
+            .fv.em { color:#aaa !important; }
+            .pb {
+                padding:.1cm .14cm !important;
+                background:var(--glt) !important;
+                -webkit-print-color-adjust:exact !important;
+            }
+            .pbl { font-size:5pt !important; color:var(--b) !important; }
+            .pbr { font-size:5.5pt !important; }
+            .cpie {
+                padding:.14cm .22cm !important;
+                background:var(--glt) !important;
+                border-top:.4pt solid #ccc !important;
+                -webkit-print-color-adjust:exact !important;
+            }
+            .piel { font-size:5.5pt !important; color:var(--b) !important; }
+            .piev { font-size:7pt !important; }
+            .p0{color:var(--mut) !important}
+            .p1,.p2,.p3 { color:var(--b) !important; }
+            .port { gap:.55cm !important; }
+            .port-logo { width:85pt !important; }
+            .port-nom { font-size:11pt !important; }
+            .port-sub { font-size:8pt !important; }
+            .port-lbl { font-size:6pt !important; }
+            .port-val { font-size:9pt !important; border-bottom:1pt solid #ccc !important; }
+            .port-anio { font-size:10pt !important; color:var(--b) !important; }
+            .port-info { font-size:6pt !important; padding-top:.4cm !important; }
+            .port-motto { font-size:6pt !important; }
+            .port-monto-l { font-size:6pt !important; }
+            .port-monto-v { font-size:10pt !important; color:var(--b) !important; }
+            .port-monto { padding-top:.35cm !important; }
+            .reg-mec img { height:26pt !important; }
+            .reg-mec-t { font-size:6.5pt !important; }
+            .reg-pts {
+                padding:.4cm .5cm !important;
+                background:var(--blt) !important;
+                -webkit-print-color-adjust:exact !important;
+            }
+            .reg-tit { font-size:7.5pt !important; }
+            .reg-desc { font-size:6pt !important; }
+            .reg-fila { font-size:6.5pt !important; margin-bottom:.15cm !important; }
+            .reg-bdg { font-size:7pt !important; color:var(--b) !important; }
+            .reg-canje {
+                padding:.32cm .42cm !important;
+                background:var(--glt) !important;
+                -webkit-print-color-adjust:exact !important;
+            }
+            .reg-canje-t { font-size:6pt !important; }
+            .reg-item { font-size:5.5pt !important; margin-bottom:.12cm !important; }
+            .rst { color:#f59e0b !important; -webkit-print-color-adjust:exact !important; }
+        }
+    </style>
+
+    <form id="fdata" method="POST" action="{% url 'editar_datos_ficha' alumno.uuid %}" style="display:none !important;">
+        {% csrf_token %}
+        <input type="hidden" id="fn"   name="nombre"        value="{{ alumno.nombre }}">
+        <input type="hidden" id="fa"   name="apellido"      value="{{ alumno.apellido }}">
+        <input type="hidden" id="fc"   name="carrera"       value="{{ alumno.carrera.id }}">
+        <input type="hidden" id="fi"   name="fecha_inicio"  value="{{ alumno.fecha_inicio|date:'Y-m-d'|default:'' }}">
+        <input type="hidden" id="fca"  name="curso_actual"  value="{{ alumno.curso_actual|default:'' }}">
+    </form>
+
+    <div class="lc mt-5">
+
+        <div class="lc-head no-print">
+            <div class="lc-hl">
+                <div class="lc-tit">
+                    <div class="lc-ico"><i class="bi bi-journal-text"></i></div>
+                    Ficha del Alumno
+                </div>
+                <div class="lc-bc">
+                    <a href="{% url 'dashboard' %}">Inicio</a><i class="bi bi-chevron-right"></i>
+                    <a href="{% url 'lista_alumnos' %}">Alumnos</a><i class="bi bi-chevron-right"></i>
+                    <a href="{% url 'detalle_alumno' alumno.uuid %}">{{ alumno.nombre_completo }}</a><i class="bi bi-chevron-right"></i>
+                    <span>Ficha</span>
+                </div>
+            </div>
+            <div class="lc-acts">
+                <a href="{% url 'detalle_alumno' alumno.uuid %}" class="btn btn-g"><i class="bi bi-arrow-left"></i> Volver</a>
+                <div class="modo-bdg"><i class="bi bi-pencil-fill"></i> Modo edición activo</div>
+                <button id="btn-ed" onclick="activar()"  class="btn btn-e"><i class="bi bi-pencil"></i> Editar ficha</button>
+                <button id="btn-cx" onclick="cancelar()" class="btn btn-c" style="display:none"><i class="bi bi-x-lg"></i> Cancelar</button>
+                <button id="btn-sv" onclick="guardar()"  class="btn btn-s" style="display:none"><i class="bi bi-check-lg"></i> Guardar cambios</button>
+                <button onclick="window.print()" class="btn btn-p"><i class="bi bi-printer-fill"></i> Imprimir</button>
+            </div>
+        </div>
+
+        {% if not tiene_inicio %}
+            <div class="alerta no-print">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div><strong>Sin fecha de inicio.</strong> Las cuotas no pueden calcularse. Usá "Editar ficha" para completar los datos.</div>
+            </div>
+        {% endif %}
+
+        <div class="dw ">
+
+            <!-- ══ HOJA 1 — Cuotas 1–6  |  Portada ══ -->
+            <div class="hoja">
+                <div class="hoja-lbl no-print">
+                    <i class="bi bi-file-earmark"></i> Hoja 1 — <span>Primer semestre + Portada</span>
+                </div>
+                <div class="hgrid">
+
+                    <!-- Cuotas 1-6 -->
+                    <div class="pan">
+                        <div class="stit">Primer Semestre</div>
+                        {% if tiene_inicio %}
+                            <div class="smeta">
+                                <div class="smeta-i">
+                                    <span class="sml">Inicio</span>
+                                    <span class="smv">{{ alumno.fecha_inicio|date:"d/m/Y" }}</span>
+                                </div>
+                                <div class="smeta-i monto">
+                                    <span class="sml">Monto</span>
+                                    <span class="smv">Gs. {{ alumno.carrera.monto_mensualidad|formato_guaranies }}</span>
+                                </div>
+                            </div>
+                            <div class="cg">
+                                {% for cuota in cuotas_izq %}
+                                    <div class="cuota {% if cuota.fecha_pago %}ok{% endif %}">
+                                        <div class="ch">Cuota {{ cuota.numero }}</div>
+                                        <div class="cb">
+                                            <div class="ci">
+                                                <div style="margin-bottom:.33rem">
+                                                    <span class="fl">Vencimiento</span>
+                                                    <span class="fv">{{ cuota.vencimiento|date:"d/m/Y" }}</span>
+                                                </div>
+                                                <div style="margin-bottom:.33rem">
+                                                    <span class="fl">Recibo N°</span>
+                                                    <span class="fv {% if not cuota.recibo %}em{% endif %}">{% if cuota.recibo %}{{ cuota.recibo }}{% else %}&nbsp;{% endif %}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="fl">Fecha de Pago</span>
+                                                    <span class="fv {% if not cuota.fecha_pago %}em{% endif %}">{% if cuota.fecha_pago %}{{ cuota.fecha_pago|date:"d/m/Y" }}{% else %}&nbsp;{% endif %}</span>
+                                                </div>
+                                            </div>
+                                            <div class="cd">
+                                                <div class="pb">
+                                                    <span class="pbl">2 Puntos</span>
+                                                    <div class="pbr">Del {{ cuota.rango_2_desde|date:"d/m" }}<br>Al {{ cuota.rango_2_hasta|date:"d/m" }}</div>
+                                                </div>
+                                                <div class="pb">
+                                                    <span class="pbl">1 Punto</span>
+                                                    <div class="pbr">Del {{ cuota.rango_1_desde|date:"d/m" }}<br>Al {{ cuota.rango_1_hasta|date:"d/m" }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="cpie">
+                                            <span class="piel">Puntaje obtenido</span>
+                                            <span class="piev {% if cuota.puntaje == None %}p0{% elif cuota.puntaje == 1 %}p1{% elif cuota.puntaje == 2 %}p2{% elif cuota.puntaje >= 3 %}p3{% else %}p0{% endif %}">
+                                    {% if cuota.puntaje != None %}{{ cuota.puntaje }} ★{% else %}—{% endif %}
+                                </span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="nofecha">
+                                <i class="bi bi-calendar-x"></i>
+                                Sin fecha de inicio — usá "Editar ficha" para completar.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Portada -->
+                    <div class="pan port">
+                        <img src="{% static 'img/logo.png' %}" alt="CEP" class="port-logo"
+                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22110%22 height=%22110%22><circle cx=%2255%22 cy=%2255%22 r=%2255%22 fill=%22%230756a3%22/><text x=%2255%22 y=%2271%22 font-size=%2236%22 font-weight=%22800%22 fill=%22white%22 text-anchor=%22middle%22 font-family=%22Sora%22>CEP</text></svg>'">
+
+                        <div class="port-inst">
+                            <span  class="port-nom ev" id="s-inm">Centro de Educación Profesional</span>
+                            <input class="ef" id="e-inm" type="text" value="Centro de Educación Profesional" style="font-size:.92rem;font-weight:800;color:var(--b);">
+
+                            <span  class="port-sub ev" id="s-isb">Informática &amp; Empresarial</span>
+                            <input class="ef" id="e-isb" type="text" value="Informática & Empresarial" style="font-size:.74rem;margin-top:.18rem;">
+                        </div>
+                        <span class="port-info ev" id="s-inf">
+                        <strong id="s-res">Res. N° 176/14</strong><br>
+                        <span id="s-dir">Dirección: Eligio Ayala esq. Boquerón</span><br>
+                        <span id="s-tel">Cel.: 0975-184.585</span><br>
+                        <span id="s-mail">Email: cep.informaticaempresarial@gmail.com</span><br>
+                        <span id="s-loc">Capibary - San Pedro</span>
+                    </span>
+                        <textarea class="ef" id="e-inf" style="font-size:.62rem;text-align:center;min-height:5rem;"></textarea>
+
+
+                        <div class="port-campos">
+                            <div class="port-campo">
+                                <span class="port-lbl">Alumno/a</span>
+                                <span  class="port-val ev" id="s-nom">{{ alumno.nombre_completo }}</span>
+                                <input class="ef" id="e-nom" type="text" value="{{ alumno.nombre_completo }}" style="font-size:.84rem;font-weight:600;">
+                            </div>
+                            <div class="port-campo">
+                                <span class="port-lbl">Carrera</span>
+                                <span  class="port-val ev" id="s-car">{{ alumno.carrera.nombre }}</span>
+                                <input class="ef" id="e-car" type="text" value="{{ alumno.carrera.nombre }}" style="font-size:.84rem;font-weight:600;">
+                            </div>
+                            {% if alumno.curso_actual %}
+                                <div class="port-campo">
+                                    <span class="port-lbl">Año / Curso</span>
+                                    <span  class="port-val ev" id="s-cso">{{ alumno.curso_actual }}°</span>
+                                    <input class="ef" id="e-cso" type="text" value="{{ alumno.curso_actual }}°" style="font-size:.84rem;font-weight:600;">
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div style="text-align:center;width:100%">
+                            <span  class="port-anio ev" id="s-anio">AÑO {{ anio }} — {{ anio_siguiente }}</span>
+                            <input class="ef" id="e-anio" type="text" value="AÑO {{ anio }} — {{ anio_siguiente }}" style="font-size:.95rem;font-weight:800;color:var(--b);">
+                        </div>
+
+                        <span  class="port-motto ev" id="s-mot">"Tu futuro depende de ti... ¡CAPACÍTATE!"</span>
+                        <input class="ef" id="e-mot" type="text" style="font-size:.6rem;font-style:italic;">
+
+                    </div>
+
+                </div>
+            </div><!-- /hoja 1 -->
+
+
+            <!-- ══ HOJA 2 — Reglamento  |  Cuotas 7–12 ══ -->
+            <div class="hoja">
+                <div class="hoja-lbl no-print">
+                    <i class="bi bi-file-earmark-text"></i> Hoja 2 — <span>Reglamento de puntos + Segundo semestre</span>
+                </div>
+                <div class="hgrid">
+
+                    <!-- Reglamento -->
+                    <div class="pan reg">
+                        <div class="reg-mec">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Escudo_de_Paraguay.svg/120px-Escudo_de_Paraguay.svg.png"
+                                 alt="MEC" onerror="this.style.display='none'">
+                            <div class="reg-mec-t">
+                                <strong>MINISTERIO DE EDUCACIÓN Y CIENCIAS</strong><br>
+                                República del Paraguay
+                            </div>
+                        </div>
+                        <div class="reg-pts">
+                            <span class="reg-tit">"Un reconocimiento real por su compromiso"</span>
+                            <span class="reg-desc">La recompensa de fidelización es real al momento del intercambio de beneficios, al canjear los puntos (estrellas) por premios:</span>
+                            <div class="reg-fila"><span class="reg-bdg">3</span><div><strong>Tres puntos (★★★)</strong> — podrás ganar tus 3 puntos por la cuota pagada un mes antes de su vencimiento.</div></div>
+                            <div class="reg-fila"><span class="reg-bdg">2</span><div><strong>Dos puntos (★★)</strong> — podrás ganar tus 2 puntos por el pago en fecha y hasta cinco días antes del vencimiento.</div></div>
+                            <div class="reg-fila"><span class="reg-bdg">1</span><div><strong>Un punto (★)</strong> — podrás ganar tu 1 punto por el pago posterior al vencimiento y hasta cinco días de atraso.</div></div>
+                        </div>
+                        <div class="reg-canje">
+                            <span class="reg-canje-t">Con Estos Puntos — Reglamento de Canje</span>
+                            <div class="reg-item"><span class="rst">★</span> El canje es individual a cada curso realizado.</div>
+                            <div class="reg-item"><span class="rst">★</span> No se puede sumar puntos de otros cursos; el manejo de acumulación es indistinto por carrera.</div>
+                            <div class="reg-item"><span class="rst">★</span> El alumno de la promoción anterior puede canjear sus puntos hasta el siguiente año de su graduación.</div>
+                            <div class="reg-item"><span class="rst">★</span> Se recomienda acercarse a la institución el día de la Feria de Canjes para realizar UN canje de manera que todos puedan retirar su premio.</div>
+                            <div class="reg-item"><span class="rst">★</span> Posterior a la feria, pueden retirar los premios que deseen hasta el límite de sus puntos.</div>
+                            <div class="reg-item"><span class="rst">★</span> Con cada canje se pierde el puntaje acumulado. Podés no canjear y seguir acumulando.</div>
+                            <div class="reg-item"><span class="rst">★</span> Los premios son sorpresas; dependen de la disponibilidad y la cantidad estimativa de puntos.</div>
+                        </div>
+                    </div>
+
+                    <!-- Cuotas 7-12 -->
+                    <div class="pan">
+                        <div class="stit">Segundo Semestre</div>
+                        {% if tiene_inicio %}
+                            <div class="smeta">
+                                <div class="smeta-i">
+                                    <span class="sml">Alumno/a</span>
+                                    <span class="smv">{{ alumno.nombre_completo }}</span>
+                                </div>
+                            </div>
+                            <div class="cg">
+                                {% for cuota in cuotas_der %}
+                                    <div class="cuota {% if cuota.fecha_pago %}ok{% endif %}">
+                                        <div class="ch">Cuota {{ cuota.numero }}</div>
+                                        <div class="cb">
+                                            <div class="ci">
+                                                <div style="margin-bottom:.33rem">
+                                                    <span class="fl">Vencimiento</span>
+                                                    <span class="fv">{{ cuota.vencimiento|date:"d/m/Y" }}</span>
+                                                </div>
+                                                <div style="margin-bottom:.33rem">
+                                                    <span class="fl">Recibo N°</span>
+                                                    <span class="fv {% if not cuota.recibo %}em{% endif %}">{% if cuota.recibo %}{{ cuota.recibo }}{% else %}&nbsp;{% endif %}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="fl">Fecha de Pago</span>
+                                                    <span class="fv {% if not cuota.fecha_pago %}em{% endif %}">{% if cuota.fecha_pago %}{{ cuota.fecha_pago|date:"d/m/Y" }}{% else %}&nbsp;{% endif %}</span>
+                                                </div>
+                                            </div>
+                                            <div class="cd">
+                                                <div class="pb">
+                                                    <span class="pbl">2 Puntos</span>
+                                                    <div class="pbr">Del {{ cuota.rango_2_desde|date:"d/m" }}<br>Al {{ cuota.rango_2_hasta|date:"d/m" }}</div>
+                                                </div>
+                                                <div class="pb">
+                                                    <span class="pbl">1 Punto</span>
+                                                    <div class="pbr">Del {{ cuota.rango_1_desde|date:"d/m" }}<br>Al {{ cuota.rango_1_hasta|date:"d/m" }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="cpie">
+                                            <span class="piel">Puntaje obtenido</span>
+                                            <span class="piev {% if cuota.puntaje == None %}p0{% elif cuota.puntaje == 1 %}p1{% elif cuota.puntaje == 2 %}p2{% elif cuota.puntaje >= 3 %}p3{% else %}p0{% endif %}">
+                                    {% if cuota.puntaje != None %}{{ cuota.puntaje }} ★{% else %}—{% endif %}
+                                </span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="nofecha"><i class="bi bi-calendar-x"></i> Sin fecha de inicio.</div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div><!-- /hoja 2 -->
+
+        </div><!-- /dw -->
+    </div><!-- /lc -->
+
+    <script>
+        /* ════════════════════════════════════════════════════════════
+           CLAVE DE STORAGE — específica por alumno para no mezclar datos
+        ════════════════════════════════════════════════════════════ */
+        const STORE_KEY = 'ficha_inst_{{ alumno.uuid }}';
+
+        /* Valores por defecto de los campos de institución */
+        const DEFAULTS = {
+            inm:  'Centro de Educación Profesional',
+            isb:  'Informática & Empresarial',
+            inf:  'Res. N° 176/14\nDirección: Eligio Ayala esq. Boquerón\nCel.: 0975-184.585\nEmail: cep.informaticaempresarial@gmail.com\nCapibary - San Pedro',
+            mot:  '"Tu futuro depende de ti... ¡CAPACÍTATE!"',
+            mnt:  'Gs. {{ alumno.carrera.monto_mensualidad|formato_guaranies }}',
+            anio: 'AÑO {{ anio }} — {{ anio_siguiente }}',
+            nom:  '{{ alumno.nombre_completo }}',
+            car:  '{{ alumno.carrera.nombre }}',
+            cso:  '{% if alumno.curso_actual %}{{ alumno.curso_actual }}°{% endif %}',
+        };
+
+        /* ── Cargar datos guardados en localStorage al iniciar ── */
+        function cargarDatos() {
+            let guardado = {};
+            try { guardado = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch(e){}
+
+            const datos = Object.assign({}, DEFAULTS, guardado);
+
+            /* Poblar inputs */
+            setInput('e-inm', datos.inm);
+            setInput('e-isb', datos.isb);
+            setInput('e-inf', datos.inf);
+            setInput('e-mot', datos.mot);
+            setInput('e-mnt', datos.mnt);
+            setInput('e-anio', datos.anio);
+            setInput('e-nom', datos.nom);
+            setInput('e-car', datos.car);
+            setInput('e-cso', datos.cso);
+
+            /* Actualizar spans de visualización */
+            setText('s-inm', datos.inm);
+            setText('s-isb', datos.isb);
+            setText('s-mot', datos.mot);
+            setText('s-mnt', datos.mnt);
+            setText('s-anio', datos.anio);
+            setText('s-nom', datos.nom);
+            setText('s-car', datos.car);
+            if (datos.cso) setText('s-cso', datos.cso);
+
+            /* Info con formato (primera línea en negrita) */
+            setInfoSpan(datos.inf);
+        }
+
+        function setInfoSpan(txt) {
+            const el = document.getElementById('s-inf');
+            if (!el) return;
+            const lineas = txt.split('\n');
+            el.innerHTML = lineas.map((l, i) => i === 0 ? '<strong>' + xss(l) + '</strong>' : xss(l)).join('<br>');
+        }
+
+        function setInput(id, val) {
+            const el = document.getElementById(id);
+            if (el && val !== undefined && val !== null) el.value = val;
+        }
+        function setText(id, val) {
+            const el = document.getElementById(id);
+            if (el && val !== undefined && val !== null) el.textContent = val;
+        }
+
+        /* ── Guardar en localStorage ── */
+        function guardarLocal() {
+            const datos = {
+                inm:  val('e-inm'),
+                isb:  val('e-isb'),
+                inf:  val('e-inf'),
+                mot:  val('e-mot'),
+                mnt:  val('e-mnt'),
+                anio: val('e-anio'),
+                nom:  val('e-nom'),
+                car:  val('e-car'),
+                cso:  val('e-cso'),
+            };
+            try { localStorage.setItem(STORE_KEY, JSON.stringify(datos)); } catch(e){}
+        }
+
+        function val(id) {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           MODO EDICIÓN
+        ════════════════════════════════════════════════════════════ */
+        let snap = {};
+
+        function activar() {
+            /* Snapshot para cancelar */
+            document.querySelectorAll('.ef').forEach(el => { snap[el.id] = el.value; });
+            document.body.classList.add('ed');
+            document.getElementById('btn-ed').style.display = 'none';
+            document.getElementById('btn-cx').style.display = '';
+            document.getElementById('btn-sv').style.display = '';
+            const f = document.getElementById('e-nom');
+            if (f) { f.focus(); f.select(); }
+        }
+
+        function cancelar() {
+            document.querySelectorAll('.ef').forEach(el => {
+                if (snap[el.id] !== undefined) el.value = snap[el.id];
+            });
+            document.body.classList.remove('ed');
+            document.getElementById('btn-ed').style.display = '';
+            document.getElementById('btn-cx').style.display = 'none';
+            document.getElementById('btn-sv').style.display = 'none';
+        }
+
+        function guardar() {
+            /* 1. Guardar campos de institución en localStorage (no son del modelo) */
+            guardarLocal();
+
+            /* 2. Actualizar spans visuales */
+            const mapa = {
+                'e-inm':'s-inm', 'e-isb':'s-isb',
+                'e-nom':'s-nom',  'e-car':'s-car',
+                'e-cso':'s-cso',  'e-anio':'s-anio',
+                'e-mot':'s-mot',  'e-mnt':'s-mnt'
+            };
+            for (const [eid, sid] of Object.entries(mapa)) {
+                const inp = document.getElementById(eid);
+                const spn = document.getElementById(sid);
+                if (inp && spn) spn.textContent = inp.value;
+            }
+            setInfoSpan(val('e-inf'));
+
+            /* 3. Sincronizar campos del modelo (nombre, apellido, fecha_inicio, curso_actual) */
+            /* nombre completo → separar en nombre + apellido heurísticamente */
+            const nc  = val('e-nom').trim();
+            const sep = nc.lastIndexOf(' ');
+            document.getElementById('fn').value  = sep > 0 ? nc.slice(0, sep)   : nc;
+            document.getElementById('fa').value  = sep > 0 ? nc.slice(sep + 1)  : '';
+            document.getElementById('fca').value = val('e-cso').replace(/[°º]/g, '').trim();
+            /* carrera y fecha_inicio ya están seteados en el form como valores iniciales */
+
+            /* 4. Salir del modo edición */
+            document.body.classList.remove('ed');
+            document.getElementById('btn-ed').style.display = '';
+            document.getElementById('btn-cx').style.display = 'none';
+            document.getElementById('btn-sv').style.display = 'none';
+
+            /* 5. POST al servidor para persistir los campos del modelo */
+            document.getElementById('fdata').submit();
+        }
+
+        /* Escape = cancelar */
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && document.body.classList.contains('ed')) cancelar();
+        });
+
+        function xss(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        /* Inicializar al cargar la página */
+        document.addEventListener('DOMContentLoaded', cargarDatos);
+    </script>
+
+{% endblock %}

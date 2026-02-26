@@ -19,6 +19,8 @@ urlpatterns = [
     path('alumnos/<uuid:alumno_uuid>/editar/', views.editar_alumno, name='editar_alumno'),
     path('alumnos/<uuid:alumno_uuid>/canjear-estrellas/', views.canjear_estrellas, name='canjear_estrellas'),
     path('buscar-alumno/', views.buscar_alumno, name='buscar_alumno'),
+    path('alumno/<uuid:alumno_uuid>/ficha/', views.ficha_alumno, name='ficha_alumno'),
+    path('alumno/<uuid:alumno_uuid>/ficha/editar/', views.editar_datos_ficha, name='editar_datos_ficha'),
 
     # Caja (Ingresos y Egresos)
     path('caja/', views.lista_caja, name='lista_caja'),
@@ -70,5 +72,6 @@ urlpatterns = [
     path('usuarios/configuracion/', views.configuracion, name='configuracion'),
     path('usuarios/<int:usuario_id>/editar/', views.editar_usuario, name='editar_usuario'),
     path('usuarios/<int:usuario_id>/cambiar-estado/', views.cambiar_estado_usuario, name='cambiar_estado_usuario'),
+
 
 ]
