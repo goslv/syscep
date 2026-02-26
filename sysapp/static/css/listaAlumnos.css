@@ -179,14 +179,31 @@
     background: var(--success-light);
     color: var(--success);
 }
+
+[data-theme="dark"] .la-stat-icon.green {
+    background: #12352DFF !important;
+    color: #10B981FF;
+}
+
 .la-stat-icon.amber {
     background: var(--warning-light);
     color: var(--warning);
 }
+[data-theme="dark"] .la-stat-icon.amber {
+    background: #302010FF;
+    color: #F59E0BFF;
+}
+
 .la-stat-icon.red {
     background: var(--danger-light);
     color: var(--danger);
 }
+[data-theme="dark"] .la-stat-icon.red  {
+    background: #2F1518FF;
+    color: #EF4444FF;
+    --stat-color: var(--la-danger);
+}
+
 .la-stat-icon.blue {
     background: var(--primary-100);
     color: var(--primary-600);

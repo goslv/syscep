@@ -4,243 +4,243 @@
 
 {% load static %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/listaAlumnos.css' %}">
+    <link rel="stylesheet" href="{% static 'css/listaAlumnos.css' %}">
 
-<div class="la mt-5">
+    <div class="la mt-5">
 
-    <!--Header-->
-    <div class="la-head">
-        <div class="la-head-left">
-            <div class="la-head-title">
-                <div class="la-head-title-icon">
-                    <i class="bi bi-people-fill"></i>
+        <!--Header-->
+        <div class="la-head">
+            <div class="la-head-left">
+                <div class="la-head-title">
+                    <div class="la-head-title-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    Alumnos
                 </div>
-                Alumnos
-            </div>
-            <div class="la-breadcrumb">
-                <a href="{% url 'dashboard' %}">Inicio</a>
-                <i class="bi bi-chevron-right"></i>
-                <span>Gestión de Alumnos</span>
-            </div>
-        </div>
-        <div class="la-head-actions">
-            <a href="{% url 'crear_alumno' %}" class="la-btn la-btn-primary">
-                <i class="bi bi-plus-circle"></i>
-                Nuevo Alumno
-            </a>
-        </div>
-    </div>
-
-    <!-- Stats cards -->
-    <div class="la-stats-grid">
-        <div class="la-stat" onclick="applyFilter('AL_DIA')" role="button" tabindex="0">
-            <div class="la-stat-icon green">
-                <i class="bi bi-check-circle-fill"></i>
-            </div>
-            <div class="la-stat-content">
-                <div class="la-stat-label">Al día</div>
-                <div class="la-stat-value">{{ total_al_dia|default:"0" }}</div>
-                <div class="la-stat-trend ok">
-                    <i class="bi bi-check2-circle"></i>
-                    Pagos vigentes
+                <div class="la-breadcrumb">
+                    <a href="{% url 'dashboard' %}">Inicio</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span>Gestión de Alumnos</span>
                 </div>
             </div>
+            <div class="la-head-actions">
+                <a href="{% url 'crear_alumno' %}" class="la-btn la-btn-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    Nuevo Alumno
+                </a>
+            </div>
         </div>
 
-        <div class="la-stat" onclick="applyFilter('CERCANO_VENCIMIENTO')" role="button" tabindex="0">
-            <div class="la-stat-icon amber">
-                <i class="bi bi-clock-fill"></i>
-            </div>
-            <div class="la-stat-content">
-                <div class="la-stat-label">Por vencer</div>
-                <div class="la-stat-value">{{ total_por_vencer|default:"0" }}</div>
-                <div class="la-stat-trend warn">
-                    <i class="bi bi-calendar-event"></i>
-                    Próximos 7 días
+        <!-- Stats cards -->
+        <div class="la-stats-grid">
+            <div class="la-stat" onclick="applyFilter('AL_DIA')" role="button" tabindex="0">
+                <div class="la-stat-icon green">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="la-stat-content">
+                    <div class="la-stat-label">Al día</div>
+                    <div class="la-stat-value">{{ total_al_dia|default:"0" }}</div>
+                    <div class="la-stat-trend ok">
+                        <i class="bi bi-check2-circle"></i>
+                        Pagos vigentes
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="la-stat" onclick="applyFilter('ATRASADO')" role="button" tabindex="0">
-            <div class="la-stat-icon red">
-                <i class="bi bi-exclamation-circle-fill"></i>
-            </div>
-            <div class="la-stat-content">
-                <div class="la-stat-label">Atrasados</div>
-                <div class="la-stat-value">{{ total_atrasados|default:"0" }}</div>
-                <div class="la-stat-trend danger">
-                    <i class="bi bi-bell-fill"></i>
-                    Requieren atención
+            <div class="la-stat" onclick="applyFilter('CERCANO_VENCIMIENTO')" role="button" tabindex="0">
+                <div class="la-stat-icon amber">
+                    <i class="bi bi-clock-fill"></i>
+                </div>
+                <div class="la-stat-content">
+                    <div class="la-stat-label">Por vencer</div>
+                    <div class="la-stat-value">{{ total_por_vencer|default:"0" }}</div>
+                    <div class="la-stat-trend warn">
+                        <i class="bi bi-calendar-event"></i>
+                        Próximos 7 días
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="la-stat" onclick="applyFilter('')" role="button" tabindex="0">
-            <div class="la-stat-icon blue">
-                <i class="bi bi-graph-up-arrow"></i>
+            <div class="la-stat" onclick="applyFilter('ATRASADO')" role="button" tabindex="0">
+                <div class="la-stat-icon red">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                </div>
+                <div class="la-stat-content">
+                    <div class="la-stat-label">Atrasados</div>
+                    <div class="la-stat-value">{{ total_atrasados|default:"0" }}</div>
+                    <div class="la-stat-trend danger">
+                        <i class="bi bi-bell-fill"></i>
+                        Requieren atención
+                    </div>
+                </div>
             </div>
-            <div class="la-stat-content">
-                <div class="la-stat-label">Total activos</div>
-                <div class="la-stat-value">{{ total_alumnos }}</div>
-                <div class="la-stat-trend">
-                    <i class="bi bi-people"></i>
-                    En {{ sedes|length }} sede{{ sedes|length|pluralize }}
+
+            <div class="la-stat" onclick="applyFilter('')" role="button" tabindex="0">
+                <div class="la-stat-icon blue">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div class="la-stat-content">
+                    <div class="la-stat-label">Total activos</div>
+                    <div class="la-stat-value">{{ total_alumnos }}</div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ─── Search Box ───────────────────────────── -->
-    <div class="la-search-container">
-        <div class="la-search">
-            <i class="bi bi-search"></i>
-            <input type="text" id="searchInput" placeholder="Buscar por nombre, teléfono, carrera o sede...">
-        </div>
-    </div>
-
-    <!-- ─── Tabla ──────────────────────────────────────────── -->
-    <div class="la-table-container">
-        <div class="la-table-header">
-            <div class="la-table-title">
-                <div class="la-table-title-icon"><i class="bi bi-table"></i></div>
-                <h2>Listado de alumnos</h2>
-            </div>
-            <div class="la-table-count">
-                <i class="bi bi-people me-1"></i>
-                <span id="visibleCount">{{ alumnos|length }}</span> de {{ total_alumnos }} alumno{{ total_alumnos|pluralize }}
+        <!--Search Box-->
+        <div class="la-search-container">
+            <div class="la-search">
+                <i class="bi bi-search"></i>
+                {% if user.is_staff %}
+                    <input type="text" id="searchInput" placeholder="Buscar por nombre, teléfono, carrera o sede...">
+                {% else %}
+                    <input type="text" id="searchInput" placeholder="Buscar por nombre, teléfono o carrera...">
+                {% endif %}
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="la-table">
-                <thead>
-                <tr>
-                    <th>Alumno</th>
-                    <th>Carrera / Sede</th>
-                    <th style="text-align:center;">Curso</th>
-                    <th>Estado de pago</th>
-                    <th style="text-align:center;">Acciones</th>
-                </tr>
-                </thead>
-                <tbody id="alumnoTableBody">
-                {% for alumno in alumnos %}
-                <tr onclick="window.location.href='{% url 'detalle_alumno' alumno.uuid %}'" role="button" tabindex="0">
-                    <td data-label="ALUMNO">
-                        <div class="la-name-cell">
-                            <div class="la-avatar">{{ alumno.nombre_completo|first|upper }}</div>
-                            <div class="la-name-info">
-                                <div class="la-name-primary">{{ alumno.nombre_completo }}</div>
-                                <div class="la-name-secondary">
-                                    <i class="bi bi-telephone"></i>{{ alumno.telefono|default:"Sin teléfono" }}
+        <!--Tabla -->
+        <div class="la-table-container">
+            <div class="la-table-header">
+                <div class="la-table-title">
+                    <div class="la-table-title-icon"><i class="bi bi-table"></i></div>
+                    <h2>Listado de alumnos</h2>
+                </div>
+                <div class="la-table-count">
+                    <i class="bi bi-people me-1"></i>
+                    <span id="visibleCount">{{ alumnos|length }}</span> de {{ total_alumnos }} alumno{{ total_alumnos|pluralize }}
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="la-table">
+                    <thead>
+                    <tr>
+                        <th>Alumno</th>
+                        <th>Carrera / Sede</th>
+                        <th style="text-align:center;">Curso</th>
+                        <th>Estado de pago</th>
+                        <th style="text-align:center;">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="alumnoTableBody">
+                    {% for alumno in alumnos %}
+                        <tr onclick="window.location.href='{% url 'detalle_alumno' alumno.uuid %}'" role="button" tabindex="0">
+                            <td data-label="ALUMNO">
+                                <div class="la-name-cell">
+                                    <div class="la-avatar">{{ alumno.nombre_completo|first|upper }}</div>
+                                    <div class="la-name-info">
+                                        <div class="la-name-primary">{{ alumno.nombre_completo }}</div>
+                                        <div class="la-name-secondary">
+                                            <i class="bi bi-telephone"></i>{{ alumno.telefono|default:"Sin teléfono" }}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td data-label="CARRERA / SEDE">
-                        <div class="la-name-primary">{{ alumno.carrera.nombre }}</div>
-                        <div class="la-name-secondary">
-                            <i class="bi bi-building"></i>{{ alumno.sede.nombre }}
-                        </div>
-                    </td>
-                    <td data-label="Curso" style="text-align:center;">
-                        <span class="la-curso-badge">{{ alumno.curso_actual|default:"—" }}º</span>
-                    </td>
-                    <td data-label="ESTADO DE PAGO">
-                        {% if alumno.estado_pagos == 'AL_DIA' %}
-                        <span class="la-badge la-badge-success"><i class="bi bi-check-circle-fill"></i> Al día</span>
-                        {% elif alumno.estado_pagos == 'CERCANO_VENCIMIENTO' %}
-                        <span class="la-badge la-badge-warning"><i class="bi bi-clock-fill"></i> Por vencer</span>
-                        {% elif alumno.estado_pagos == 'ATRASADO' %}
-                        <span class="la-badge la-badge-danger"><i class="bi bi-exclamation-circle-fill"></i> Atrasado</span>
-                        {% else %}
-                        <span class="la-badge la-badge-secondary"><i class="bi bi-dash-circle"></i> Sin pagos</span>
-                        {% endif %}
-                    </td>
-                    <td data-label="Acciones" style="text-align:center;">
-                        <div class="la-row-actions">
-                            <a href="{% url 'detalle_alumno' alumno.uuid %}" class="la-row-action"
-                               title="Ver detalle" onclick="event.stopPropagation()">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <a href="{% url 'editar_alumno' alumno.uuid %}" class="la-row-action"
-                               title="Editar" onclick="event.stopPropagation()">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr id="emptyRow">
-                    <td colspan="5">
-                        <div class="la-empty">
-                            <div class="la-empty-illustration">
-                                <i class="bi bi-people"></i>
-                            </div>
-                            <h3>No hay alumnos que mostrar</h3>
-                            <p>Comienza agregando tu primer alumno.</p>
-                            <div class="la-empty-actions">
-                                <a href="{% url 'crear_alumno' %}" class="la-btn la-btn-primary">
-                                    <i class="bi bi-plus-circle"></i> Nuevo alumno
-                                </a>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                            </td>
+                            <td data-label="CARRERA / SEDE">
+                                <div class="la-name-primary">{{ alumno.carrera.nombre }}</div>
+                                <div class="la-name-secondary">
+                                    <i class="bi bi-building"></i>{{ alumno.sede.nombre }}
+                                </div>
+                            </td>
+                            <td data-label="Curso" style="text-align:center;">
+                                <span class="la-curso-badge">{{ alumno.curso_actual|default:"—" }}º</span>
+                            </td>
+                            <td data-label="ESTADO DE PAGO">
+                                {% if alumno.estado_pagos == 'AL_DIA' %}
+                                    <span class="la-badge la-badge-success"><i class="bi bi-check-circle-fill"></i> Al día</span>
+                                {% elif alumno.estado_pagos == 'CERCANO_VENCIMIENTO' %}
+                                    <span class="la-badge la-badge-warning"><i class="bi bi-clock-fill"></i> Por vencer</span>
+                                {% elif alumno.estado_pagos == 'ATRASADO' %}
+                                    <span class="la-badge la-badge-danger"><i class="bi bi-exclamation-circle-fill"></i> Atrasado</span>
+                                {% else %}
+                                    <span class="la-badge la-badge-secondary"><i class="bi bi-dash-circle"></i> Sin pagos</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Acciones" style="text-align:center;">
+                                <div class="la-row-actions">
+                                    <a href="{% url 'detalle_alumno' alumno.uuid %}" class="la-row-action"
+                                       title="Ver detalle" onclick="event.stopPropagation()">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'editar_alumno' alumno.uuid %}" class="la-row-action"
+                                       title="Editar" onclick="event.stopPropagation()">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr id="emptyRow">
+                            <td colspan="5">
+                                <div class="la-empty">
+                                    <div class="la-empty-illustration">
+                                        <i class="bi bi-people"></i>
+                                    </div>
+                                    <h3>No hay alumnos que mostrar</h3>
+                                    <p>Comienza agregando tu primer alumno.</p>
+                                    <div class="la-empty-actions">
+                                        <a href="{% url 'crear_alumno' %}" class="la-btn la-btn-primary">
+                                            <i class="bi bi-plus-circle"></i> Nuevo alumno
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if alumnos %}
+                <div class="la-table-footer">
+                    <span><i class="bi bi-info-circle me-1"></i>Hacé clic en cualquier fila para ver el detalle completo</span>
+                    <span><i class="bi bi-arrow-up me-1"></i>Ordenado por apellido</span>
+                </div>
+            {% endif %}
         </div>
 
-        {% if alumnos %}
-        <div class="la-table-footer">
-            <span><i class="bi bi-info-circle me-1"></i>Hacé clic en cualquier fila para ver el detalle completo</span>
-            <span><i class="bi bi-arrow-up me-1"></i>Ordenado por apellido</span>
-        </div>
-        {% endif %}
+        <!-- FAB mobile -->
+        <a href="{% url 'crear_alumno' %}" class="la-fab d-lg-none">
+            <i class="bi bi-plus-lg"></i>
+            <span class="la-fab-tooltip">Nuevo alumno</span>
+        </a>
     </div>
 
-    <!-- FAB mobile -->
-    <a href="{% url 'crear_alumno' %}" class="la-fab d-lg-none">
-        <i class="bi bi-plus-lg"></i>
-        <span class="la-fab-tooltip">Nuevo alumno</span>
-    </a>
-</div>
-
-<script>
-    // Función para filtrar por estado (desde las cards)
-    function applyFilter(estado) {
-        window.location.href = window.location.pathname + '?estado=' + estado;
-    }
-
-    // Función de búsqueda en tiempo real
-    document.getElementById('searchInput')?.addEventListener('keyup', function() {
-        const searchValue = this.value.toLowerCase().trim();
-        const tableRows = document.querySelectorAll('#alumnoTableBody tr');
-        let visibleCount = 0;
-
-        tableRows.forEach(row => {
-            if (row.id === 'emptyRow') return;
-
-            const text = row.textContent.toLowerCase();
-            const isVisible = text.includes(searchValue);
-            row.style.display = isVisible ? '' : 'none';
-
-            if (isVisible) visibleCount++;
-        });
-
-        const countElement = document.getElementById('visibleCount');
-        if (countElement) {
-            countElement.textContent = visibleCount;
+    <script>
+        // Función para filtrar por estado (desde las cards)
+        function applyFilter(estado) {
+            window.location.href = window.location.pathname + '?estado=' + estado;
         }
 
-        const emptyRow = document.getElementById('emptyRow');
-        const hasVisibleRows = visibleCount > 0;
+        // Función de búsqueda en tiempo real
+        document.getElementById('searchInput')?.addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase().trim();
+            const tableRows = document.querySelectorAll('#alumnoTableBody tr');
+            let visibleCount = 0;
 
-        if (!hasVisibleRows && !emptyRow) {
-            const tbody = document.getElementById('alumnoTableBody');
-            const noResultsRow = document.createElement('tr');
-            noResultsRow.id = 'noResultsRow';
-            noResultsRow.innerHTML = `
+            tableRows.forEach(row => {
+                if (row.id === 'emptyRow') return;
+
+                const text = row.textContent.toLowerCase();
+                const isVisible = text.includes(searchValue);
+                row.style.display = isVisible ? '' : 'none';
+
+                if (isVisible) visibleCount++;
+            });
+
+            const countElement = document.getElementById('visibleCount');
+            if (countElement) {
+                countElement.textContent = visibleCount;
+            }
+
+            const emptyRow = document.getElementById('emptyRow');
+            const hasVisibleRows = visibleCount > 0;
+
+            if (!hasVisibleRows && !emptyRow) {
+                const tbody = document.getElementById('alumnoTableBody');
+                const noResultsRow = document.createElement('tr');
+                noResultsRow.id = 'noResultsRow';
+                noResultsRow.innerHTML = `
                 <td colspan="5">
                     <div class="la-empty">
                         <div class="la-empty-illustration">
@@ -251,17 +251,17 @@
                     </div>
                 </td>
             `;
-            tbody.appendChild(noResultsRow);
-        } else if (hasVisibleRows) {
-            const noResultsRow = document.getElementById('noResultsRow');
-            if (noResultsRow) noResultsRow.remove();
-        }
-    });
+                tbody.appendChild(noResultsRow);
+            } else if (hasVisibleRows) {
+                const noResultsRow = document.getElementById('noResultsRow');
+                if (noResultsRow) noResultsRow.remove();
+            }
+        });
 
-    // Inicializar contador
-    document.addEventListener('DOMContentLoaded', function() {
-        const totalRows = document.querySelectorAll('#alumnoTableBody tr:not(#emptyRow)').length;
-        document.getElementById('visibleCount').textContent = totalRows;
-    });
-</script>
+        // Inicializar contador
+        document.addEventListener('DOMContentLoaded', function() {
+            const totalRows = document.querySelectorAll('#alumnoTableBody tr:not(#emptyRow)').length;
+            document.getElementById('visibleCount').textContent = totalRows;
+        });
+    </script>
 {% endblock %}
