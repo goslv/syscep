@@ -2,478 +2,613 @@
 {% load custom_filters %}
 
 {% block title %}Informe de Caja{% endblock %}
+{% block page_title %}Informe de Caja{% endblock %}
 
 {% block content %}
-<style>
-    :root {
-        --primary-color: #0d6efd;
-        --success-color: #198754;
-        --danger-color: #dc3545;
-        --card-bg: #ffffff;
-        --text-main: #212529;
-        --text-muted: #6c757d;
-        --border-color: #dee2e6;
-        --body-bg: #f8f9fa;
-    }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
 
-    [data-theme="dark"] {
-        --card-bg: #1e293b;
-        --text-main: #f1f5f9;
-        --text-muted: #94a3b8;
-        --border-color: #334155;
-        --body-bg: #0f172a;
-        --primary-color: #3b82f6;
-        --success-color: #22c55e;
-        --danger-color: #ef4444;
-    }
-
-    body {
-        background-color: var(--body-bg);
-        color: var(--text-main);
-    }
-
-    .card {
-        background-color: var(--card-bg);
-        border-color: var(--border-color);
-        color: var(--text-main);
-    }
-
-    .card-header {
-        border-bottom-color: var(--border-color);
-    }
-
-    .table {
-        color: var(--text-main);
-        border-color: var(--border-color);
-    }
-
-    .table-light {
-        background-color: rgba(0,0,0,0.05);
-        color: var(--text-main);
-    }
-
-    [data-theme="dark"] .table-light {
-        background-color: rgba(255,255,255,0.05);
-    }
-
-    [data-theme="dark"] .card-header {
-        background-color: rgba(11, 18, 32, 0.6) !important;
-        color: #a4a7ae;
-    }
-
-    .form-control, .form-select {
-        background-color: var(--card-bg);
-        border-color: var(--border-color);
-        color: var(--text-main);
-    }
-
-    .form-control:focus, .form-select:focus {
-        background-color: var(--card-bg);
-        color: var(--text-main);
-    }
-
-    .text-muted {
-        color: var(--text-muted) !important;
-    }
-
-    [data-theme="dark"] .stat-mini-card {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    [data-theme="dark"] .badge.bg-light.text-dark {
-        background-color: var(--gray-800) !important;
-        color: var(--gray-300) !important;
-        border-color: var(--border-color) !important;
-    }
-
-    [data-theme="dark"] .table-light,
-    [data-theme="dark"] .bg-light {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        color: var(--text-main) !important;
-    }
-
-    [data-theme="dark"] .table-success,
-    [data-theme="dark"] .bg-success.bg-opacity-10 {
-        background-color: rgba(34, 197, 94, 0.15) !important;
-    }
-
-    [data-theme="dark"] .table-danger,
-    [data-theme="dark"] .bg-danger.bg-opacity-10 {
-        background-color: rgba(239, 68, 68, 0.15) !important;
-    }
-
-    [data-theme="dark"] .bg-primary.bg-opacity-10 {
-        background-color: rgba(59, 130, 246, 0.15) !important;
-    }
-
-    [data-theme="dark"] .bg-warning.bg-opacity-10 {
-        background-color: rgba(245, 158, 11, 0.15) !important;
-    }
-
-    .report-header {
-        border-bottom: 2px solid var(--primary-color);
-        padding-bottom: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-mini-card {
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border: 1px solid var(--border-color);
-    }
-
-    .firma-linea {
-        border-top: 1px solid var(--text-main);
-        margin-top: 3rem;
-        width: 200px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    @media print {
-        body {
-            background-color: white !important;
-            color: black !important;
+        :root {
+            --lc-bg:       #f8faf9;
+            --lc-surface:  #ffffff;
+            --lc-ink:      #0f1419;
+            --lc-muted:    #64748b;
+            --lc-border:   #e2e8f0;
+            --lc-green:    #059669;
+            --lc-green-lt: #d1fae5;
+            --lc-red:      #dc2626;
+            --lc-red-lt:   #fee2e2;
+            --lc-blue:     #0756a3;
+            --lc-blue-dk:  #071e60;
+            --lc-blue-lt:  #e9f0fe;
+            --lc-gray-lt:  #f1f5f9;
+            --lc-sh:       0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.06);
+            --lc-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .no-print {
-            display: none !important;
+        [data-theme="dark"] {
+            --lc-bg:       #0d1117;
+            --lc-surface:  #13171d;
+            --lc-ink:      #e8ecf0;
+            --lc-muted:    #6e7d8f;
+            --lc-border:   #2a2f38;
+            --lc-green-lt: #0a2118;
+            --lc-red-lt:   #220d0d;
+            --lc-blue-lt:  #0d1e35;
+            --lc-gray-lt:  #181c23;
+            --lc-sh:       0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.5);
         }
-        .card {
-            border: none !important;
-            box-shadow: none !important;
-        }
-        .card-body {
-            padding: 0 !important;
-        }
-        .informe-compacto {
-            font-size: 8pt !important;
-        }
-        .informe-compacto th,
-        .informe-compacto td {
-            padding: 2px 4px !important;
-            border: 1px solid #dee2e6 !important;
-        }
-        .print-only {
-            display: block !important;
-        }
-        .report-header {
-            margin-bottom: 1rem;
-        }
-        .stat-summary-print {
-            display: flex !important;
-            justify-content: space-between;
-            border: 1px solid #dee2e6;
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-        }
-        .stat-item-print {
-            text-align: center;
-            flex: 1;
-        }
-        .stat-item-print:not(:last-child) {
-            border-right: 1px solid #dee2e6;
-        }
-        .resumen-ejecutivo {
-            display: none !important;
-        }
-        .balance-final-card {
-            margin-top: 10px !important;
-            border: 1px solid #dee2e6 !important;
-        }
-        .table-success { background-color: #e2f0d9 !important; }
-        .table-danger { background-color: #fbe5e1 !important; }
-        .text-success { color: #2e7d32 !important; }
-        .text-danger { color: #c62828 !important; }
-        .text-primary { color: #1565c0 !important; }
 
-        .card-header {
-            background-color: #f8f9fa !important;
-            color: black !important;
-            border: 1px solid #dee2e6 !important;
-            font-weight: bold !important;
+        .lc { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--lc-ink); }
+        .lc * { box-sizing: border-box; }
+
+        /* ─── Header ─────────────────────────────────────────── */
+        .lc-head {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
         }
-    }
+        .lc-head-left { display: flex; flex-direction: column; gap: .25rem; }
+        .lc-head-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.9rem; font-weight: 800; color: var(--lc-ink);
+            margin: 0; letter-spacing: -.6px;
+            display: flex; align-items: center; gap: .7rem; line-height: 1.1;
+        }
+        .lc-head-title-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            background: var(--lc-blue-lt);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.35rem; color: var(--lc-blue); flex-shrink: 0;
+        }
+        .lc-breadcrumb {
+            font-size: .83rem; color: var(--lc-muted);
+            display: flex; align-items: center; gap: .4rem; margin-top: .15rem;
+        }
+        .lc-breadcrumb a { color: var(--lc-blue); text-decoration: none; font-weight: 600; }
+        .lc-breadcrumb a:hover { text-decoration: underline; }
+        .lc-breadcrumb i { font-size: .55rem; opacity: .7; }
+        .lc-head-actions { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
 
-    .print-only {
-        display: none;
-    }
-</style>
+        /* ─── Botones ─────────────────────────────────────────── */
+        .lc-btn {
+            display: inline-flex; align-items: center; gap: .45rem;
+            padding: .65rem 1.2rem; border-radius: 12px;
+            font-size: .88rem; font-weight: 700; font-family: 'Sora', sans-serif;
+            border: none; cursor: pointer; transition: var(--lc-transition);
+            text-decoration: none; white-space: nowrap;
+        }
+        .lc-btn i { font-size: 1rem; }
+        .lc-btn-primary { background: linear-gradient(135deg, var(--lc-blue), var(--lc-blue-dk)); color: #fff; box-shadow: 0 4px 12px rgba(7,86,163,.25); }
+        .lc-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(7,86,163,.35); color: #fff; }
+        .lc-btn-ghost {
+            background: var(--lc-surface); color: var(--lc-muted);
+            border: 1.5px solid var(--lc-border);
+        }
+        .lc-btn-ghost:hover { border-color: var(--lc-blue); color: var(--lc-blue); background: var(--lc-blue-lt); }
 
-<div class="container-fluid mt-4">
-    <!-- Encabezado -->
-    <div class="d-flex justify-content-between align-items-center mb-4 no-print mt-5">
-        <div class="d-flex gap-3">
-            <a href="{% url 'lista_caja' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Volver
-            </a>
-            <button onclick="window.print()" class="btn btn-primary me-2">
-                <i class="fas fa-print"></i> Imprimir
-            </button>
+        /* ─── Stats ───────────────────────────────────────────── */
+        .lc-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .lc-stat-card {
+            background: var(--lc-surface); border: 1px solid var(--lc-border);
+            border-radius: 20px; padding: 1.3rem 1.5rem; box-shadow: var(--lc-sh);
+            display: flex; flex-direction: column; gap: .5rem;
+            transition: var(--lc-transition); position: relative; overflow: hidden;
+        }
+        .lc-stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+        .lc-stat-card.green::before { background: linear-gradient(90deg, var(--lc-green), transparent); }
+        .lc-stat-card.red::before   { background: linear-gradient(90deg, var(--lc-red),   transparent); }
+        .lc-stat-card.blue::before  { background: linear-gradient(90deg, var(--lc-blue),  transparent); }
+        .lc-stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,.1); }
+        .lc-stat-label { font-size: .73rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--lc-muted); display: flex; align-items: center; gap: .35rem; }
+        .lc-stat-value { font-family: 'Sora', sans-serif; font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
+        .lc-stat-value small { font-size: 1.1rem; font-weight: 500; opacity: .8; margin-right: .25rem; }
+        .lc-stat-card.green .lc-stat-value { color: var(--lc-green); }
+        .lc-stat-card.red   .lc-stat-value { color: var(--lc-red); }
+        .lc-stat-card.blue  .lc-stat-value { color: var(--lc-blue); }
+        .lc-stat-sub { font-size: .75rem; color: var(--lc-muted); display: flex; align-items: center; gap: .3rem; }
+
+        /* ─── Filter card ─────────────────────────────────────── */
+        .lc-filter-card {
+            background: var(--lc-surface); border: 1px solid var(--lc-border);
+            border-radius: 20px; box-shadow: var(--lc-sh);
+            padding: 1.4rem 1.6rem; margin-bottom: 1.5rem;
+        }
+        .lc-filter-grid { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: end; }
+        .lc-form-label {
+            display: block; font-size: .73rem; font-weight: 700;
+            letter-spacing: .06em; text-transform: uppercase;
+            color: var(--lc-muted); margin-bottom: .4rem;
+        }
+        .lc-form-control, .lc-form-select {
+            width: 100%; padding: .6rem .9rem;
+            border: 1.5px solid var(--lc-border); border-radius: 12px;
+            background: var(--lc-surface); color: var(--lc-ink);
+            font-family: 'Plus Jakarta Sans', sans-serif; font-size: .88rem;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .lc-form-control:focus, .lc-form-select:focus {
+            outline: none; border-color: var(--lc-blue);
+            box-shadow: 0 0 0 3px rgba(7,86,163,.1);
+        }
+        .lc-input-addon { display: flex; align-items: stretch; }
+        .lc-input-addon-icon {
+            padding: .6rem .8rem; background: var(--lc-gray-lt);
+            border: 1.5px solid var(--lc-border); border-right: none;
+            border-radius: 12px 0 0 12px; color: var(--lc-green);
+            display: flex; align-items: center; font-size: .9rem;
+        }
+        .lc-input-addon .lc-form-control { border-radius: 0 12px 12px 0; }
+
+        /* ─── Card ────────────────────────────────────────────── */
+        .lc-card {
+            background: var(--lc-surface); border: 1px solid var(--lc-border);
+            border-radius: 20px; box-shadow: var(--lc-sh); overflow: hidden;
+            margin-bottom: 1.5rem; animation: lc-fade .3s ease both;
+        }
+        @keyframes lc-fade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+        /* ─── Toolbar ─────────────────────────────────────────── */
+        .lc-toolbar {
+            padding: .9rem 1.5rem; background: var(--lc-gray-lt);
+            border-bottom: 1px solid var(--lc-border);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: .75rem;
+        }
+        .lc-toolbar-left { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+        .lc-toolbar-title {
+            font-family: 'Sora', sans-serif; font-size: .85rem;
+            font-weight: 700; color: var(--lc-ink);
+            display: flex; align-items: center; gap: .5rem;
+        }
+        .lc-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+        .lc-dot-green { background: var(--lc-green); }
+        .lc-dot-red   { background: var(--lc-red); }
+        .lc-chip {
+            display: inline-flex; align-items: center; gap: .35rem;
+            padding: .28rem .85rem; border-radius: 999px;
+            font-size: .75rem; font-weight: 700;
+        }
+        .lc-chip-count { background: var(--lc-surface); color: var(--lc-muted); border: 1px solid var(--lc-border); }
+
+        /* ─── Table ───────────────────────────────────────────── */
+        .lc-table { width: 100%; border-collapse: collapse; }
+        .lc-table thead th {
+            padding: 1rem 1.5rem; text-align: left;
+            font-size: .75rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .08em; color: var(--lc-muted);
+            background: var(--lc-gray-lt); border-bottom: 2px solid var(--lc-border);
+            white-space: nowrap;
+        }
+        .lc-table thead th.tr { text-align: right; }
+        .lc-table tbody tr { border-bottom: 1px solid var(--lc-border); transition: var(--lc-transition); }
+        .lc-table tbody tr:last-child { border-bottom: none; }
+        .lc-table tbody tr:hover { background: var(--lc-blue-lt); }
+        .lc-table tbody td { padding: .95rem 1.5rem; font-size: .9rem; color: var(--lc-ink); vertical-align: middle; }
+        .lc-table tfoot td {
+            padding: .9rem 1.5rem; background: var(--lc-gray-lt);
+            border-top: 2px solid var(--lc-border);
+            font-family: 'Sora', sans-serif; font-weight: 700; font-size: .88rem;
+        }
+
+        .lc-cell-stack { display: flex; flex-direction: column; gap: .2rem; }
+        .lc-cell-primary { font-weight: 600; font-size: .93rem; color: var(--lc-ink); }
+        .lc-cell-sub { font-size: .78rem; color: var(--lc-muted); display: flex; align-items: center; gap: .3rem; }
+        .lc-date { color: var(--lc-muted); font-size: .83rem; font-family: monospace; white-space: nowrap; }
+        .lc-monto { text-align: right; font-family: 'Sora', sans-serif; font-size: .95rem; font-weight: 700; white-space: nowrap; }
+        .monto-ingreso { color: var(--lc-green); }
+        .monto-egreso  { color: var(--lc-red); }
+
+        .lc-badge {
+            display: inline-flex; align-items: center; gap: .35rem;
+            padding: .35rem .9rem; border-radius: 999px;
+            font-size: .78rem; font-weight: 700; border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .lc-badge-success   { background: var(--lc-green-lt); color: var(--lc-green); border-color: rgba(5,150,105,.2); }
+        .lc-badge-secondary { background: var(--lc-gray-lt);  color: var(--lc-muted); border-color: var(--lc-border); }
+        .lc-cat { font-size: .73rem; color: var(--lc-muted); background: var(--lc-gray-lt); border: 1px solid var(--lc-border); border-radius: 6px; padding: .15rem .5rem; display: inline-block; }
+
+        .lc-empty { padding: 4rem 2rem; text-align: center; color: var(--lc-muted); }
+        .lc-empty-illustration { font-size: 4rem; color: var(--lc-blue); opacity: .2; margin-bottom: 1rem; }
+        .lc-empty h3 { font-size: 1.15rem; font-weight: 700; color: var(--lc-ink); margin-bottom: .4rem; }
+        .lc-empty p  { margin: 0; font-size: .9rem; }
+
+        .lc-table-footer {
+            padding: 1rem 1.5rem; background: var(--lc-gray-lt);
+            border-top: 1px solid var(--lc-border);
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: .83rem; color: var(--lc-muted);
+        }
+        .lc-table-count {
+            background: var(--lc-surface); border: 1px solid var(--lc-border);
+            border-radius: 999px; padding: .3rem 1rem;
+            font-size: .78rem; font-weight: 600; color: var(--lc-muted);
+        }
+
+        /* ─── Balance ─────────────────────────────────────────── */
+        .lc-balance-wrap { display: flex; justify-content: flex-end; margin-bottom: 2rem; }
+        .lc-balance-card {
+            background: var(--lc-surface); border: 1px solid var(--lc-border);
+            border-radius: 20px; box-shadow: var(--lc-sh);
+            overflow: hidden; min-width: 360px;
+        }
+        .lc-balance-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: .9rem 1.4rem; border-bottom: 1px solid var(--lc-border);
+            font-size: .88rem;
+        }
+        .lc-balance-row:last-child { border-bottom: none; }
+        .lc-balance-row.total { background: var(--lc-blue-lt); padding: 1.1rem 1.4rem; }
+        .bl-label { color: var(--lc-muted); font-weight: 500; }
+        .bl-value { font-family: 'Sora', sans-serif; font-weight: 700; }
+        .lc-balance-row.total .bl-label { font-family: 'Sora', sans-serif; font-size: 1rem; font-weight: 700; color: var(--lc-ink); }
+        .lc-balance-row.total .bl-value { font-size: 1.25rem; }
+
+        /* ══════════════════════════════════════════════════════
+           PRINT
+        ══════════════════════════════════════════════════════ */
+        .print-only, .print-header, .print-kpi-strip, .firma-section, .print-footer { display: none; }
+
+        @media print {
+            @page { margin: 1.4cm 1.8cm; size: A4; }
+
+            body { background: #fff !important; color: #111 !important; font-size: 8.5pt !important; }
+            .lc  { color: #111 !important; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+
+            /* Print header */
+            .print-header {
+                display: flex !important;
+                justify-content: space-between; align-items: flex-start;
+                border-bottom: 2pt solid #111; padding-bottom: .55cm; margin-bottom: .65cm;
+            }
+            .ph-org { font-family: 'Sora', Georgia, serif; font-size: 17pt; font-weight: 800; color: #111; margin: 0 0 3pt; }
+            .ph-sub { font-size: 8pt; color: #555; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; }
+            .ph-right { text-align: right; font-size: 7.5pt; color: #555; line-height: 1.8; }
+            .ph-right strong { color: #111; }
+
+            /* KPI strip */
+            .print-kpi-strip {
+                display: flex !important;
+                border: 1pt solid #ccc; border-radius: 4pt; overflow: hidden; margin-bottom: .65cm;
+            }
+            .pk-item { flex: 1; padding: .3cm .4cm; text-align: center; }
+            .pk-item:not(:last-child) { border-right: 1pt solid #ccc; }
+            .pk-label { display: block; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; color: #666; margin-bottom: 2pt; }
+            .pk-value { display: block; font-family: 'Sora', Georgia, serif; font-size: 12pt; font-weight: 800; }
+            .pk-value.green { color: #0a5c38; }
+            .pk-value.red   { color: #9b1a1a; }
+            .pk-value.blue  { color: #1a3a99; }
+
+            /* Cards */
+            .lc-card { box-shadow: none !important; border: 1pt solid #ccc !important; border-radius: 4pt !important; margin-bottom: .5cm !important; animation: none !important; page-break-inside: avoid; }
+            .lc-toolbar { background: #f5f5f5 !important; border-bottom: 1pt solid #ccc !important; padding: .3cm .5cm !important; }
+            .lc-toolbar-title { font-size: 8.5pt !important; color: #111 !important; }
+            .lc-chip { display: none !important; }
+
+            /* Table */
+            .lc-table thead th { background: #f5f5f5 !important; color: #444 !important; font-size: 7pt !important; padding: .2cm .4cm !important; border-bottom: 1pt solid #bbb !important; }
+            .lc-table tbody td { padding: .18cm .4cm !important; font-size: 7.5pt !important; border-bottom: .5pt solid #e0e0e0 !important; }
+            .lc-table tbody tr:hover { background: transparent !important; }
+            .lc-table tfoot td { background: #f5f5f5 !important; border-top: 1pt solid #bbb !important; font-size: 8pt !important; padding: .22cm .4cm !important; }
+
+            .monto-ingreso { color: #0a5c38 !important; }
+            .monto-egreso  { color: #9b1a1a !important; }
+            .lc-cell-sub { color: #666 !important; font-size: 7pt !important; }
+            .lc-date { font-size: 7pt !important; }
+            .lc-badge { border: .5pt solid #ccc !important; background: #f9f9f9 !important; color: #333 !important; font-size: 7pt !important; padding: .1rem .4rem !important; }
+            .lc-cat { background: #f5f5f5 !important; color: #555 !important; font-size: 6.5pt !important; }
+
+            .lc-stats, .lc-filter-card, .lc-table-footer { display: none !important; }
+
+            /* Balance */
+            .lc-balance-wrap { margin-bottom: .7cm !important; }
+            .lc-balance-card { box-shadow: none !important; border: 1pt solid #ccc !important; border-radius: 4pt !important; min-width: 250pt !important; }
+            .lc-balance-row { padding: .25cm .5cm !important; font-size: 8pt !important; border-bottom: .5pt solid #ccc !important; }
+            .lc-balance-row.total { background: #e8f0fe !important; }
+            .lc-balance-row.total .bl-label, .lc-balance-row.total .bl-value { font-size: 10pt !important; }
+
+            /* Firma */
+            .firma-section { display: flex !important; justify-content: space-around; margin-top: 1.4cm; }
+            .firma-box { text-align: center; width: 38%; }
+            .firma-line { border-top: 1pt solid #111; margin-bottom: .2cm; }
+            .firma-name { font-size: 8pt; font-weight: 700; }
+            .firma-role { font-size: 7pt; color: #666; }
+
+            .print-footer { display: block !important; text-align: center; margin-top: .7cm; padding-top: .35cm; border-top: .5pt solid #ccc; font-size: 6.5pt; color: #888; }
+        }
+
+        @media (max-width: 768px) {
+            .lc-filter-grid { grid-template-columns: 1fr; }
+            .lc-stats { grid-template-columns: 1fr; }
+            .lc-balance-card { min-width: unset; width: 100%; }
+            .lc-balance-wrap { justify-content: stretch; }
+        }
+    </style>
+
+    <div class="lc mt-5">
+
+        <!-- ══ PRINT: Encabezado ════════════════════════════════ -->
+        <div class="print-header">
+            <div>
+                <p class="ph-org">Instituto Técnico Superior CEP</p>
+                <p class="ph-sub">Informe de Caja</p>
+            </div>
+            <div class="ph-right">
+                <div><strong>Sede:</strong> {% if sede %}{{ sede.nombre }}{% else %}Todas las Sedes{% endif %}</div>
+                <div><strong>Período:</strong> {{ fecha_desde|date:"d/m/Y" }} – {{ fecha_hasta|date:"d/m/Y" }}</div>
+                <div><strong>Emitido:</strong> {{ fecha_emision|date:"d/m/Y H:i" }}</div>
+            </div>
         </div>
-    </div>
 
-    <!-- Encabezado de Impresión -->
-    <div class="print-only report-header text-center">
-        <h1 class="h3 mb-1">INFORME DE CAJA</h1>
-        <h2 class="h5 mb-2">Instituto Técnico Superior CEP</h2>
-        <div class="d-flex justify-content-center gap-4 small">
-            <span><strong>Sede:</strong> {% if sede %}{{ sede.nombre }}{% else %}Todas las Sedes{% endif %}</span>
-            <span><strong>Período:</strong> {{ fecha_desde|date:"d/m/Y" }} - {{ fecha_hasta|date:"d/m/Y" }}</span>
-            <span><strong>Emisión:</strong> {{ "now"|date:"d/m/Y H:i" }}</span>
+        <!-- ══ PRINT: KPI strip ══════════════════════════════════ -->
+        <div class="print-kpi-strip">
+            <div class="pk-item">
+                <span class="pk-label">Total Ingresos</span>
+                <span class="pk-value green">Gs. {{ total_ingresos|formato_guaranies }}</span>
+            </div>
+            <div class="pk-item">
+                <span class="pk-label">Total Egresos</span>
+                <span class="pk-value red">Gs. {{ total_egresos|formato_guaranies }}</span>
+            </div>
+            <div class="pk-item">
+                <span class="pk-label">Balance Neto</span>
+                <span class="pk-value {% if balance >= 0 %}blue{% else %}red{% endif %}">
+                Gs. {{ balance|formato_guaranies }}
+            </span>
+            </div>
         </div>
-    </div>
 
-    <!-- Filtros -->
-    <div class="card mb-4 no-print shadow-sm">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                {% if es_admin %}
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Sede</label>
-                    <select name="sede" class="form-select">
-                        <option value="">Todas las sedes</option>
-                        {% for s in sedes %}
-                        <option value="{{ s.id }}" {% if sede and sede.id == s.id %}selected{% endif %}>
-                            {{ s.nombre }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                {% else %}
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Sede</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light">
-                            <i class="bi bi-geo-alt-fill text-success"></i>
-                        </span>
-                        <input type="text"
-                               class="form-control bg-light"
-                               value="{{ sede_forzada.nombre }}"
-                               readonly
-                               title="Sede asignada">
-                        <input type="hidden" name="sede" value="{{ sede_forzada.id }}">
+        <!-- ══ WEB: Header ═══════════════════════════════════════ -->
+        <div class="lc-head no-print">
+            <div class="lc-head-left">
+                <div class="lc-head-title">
+                    <div class="lc-head-title-icon">
+                        <i class="bi bi-file-earmark-bar-graph"></i>
                     </div>
+                    Informe de Caja
                 </div>
-                {% endif %}
-                <div class="col-md-3">
-                    <label for="fecha_desde" class="form-label small fw-bold">Fecha Desde</label>
-                    <input type="date" name="fecha_desde" id="fecha_desde" class="form-control"
-                           value="{{ fecha_desde|date:'Y-m-d' }}">
+                <div class="lc-breadcrumb">
+                    <a href="{% url 'dashboard' %}">Inicio</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <a href="{% url 'lista_caja' %}">Caja</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span>Informe</span>
                 </div>
-                <div class="col-md-3">
-                    <label for="fecha_hasta" class="form-label small fw-bold">Fecha Hasta</label>
-                    <input type="date" name="fecha_hasta" id="fecha_hasta" class="form-control"
-                           value="{{ fecha_hasta|date:'Y-m-d' }}">
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-sync-alt"></i> Actualizar
-                    </button>
+            </div>
+            <div class="lc-head-actions">
+                <a href="{% url 'lista_caja' %}" class="lc-btn lc-btn-ghost">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+                <button onclick="window.print()" class="lc-btn lc-btn-primary">
+                    <i class="bi bi-printer-fill"></i> Imprimir
+                </button>
+            </div>
+        </div>
+
+        <!-- ══ WEB: KPIs ═════════════════════════════════════════ -->
+        <div class="lc-stats no-print">
+            <div class="lc-stat-card green">
+                <div class="lc-stat-label"><i class="bi bi-arrow-up-circle-fill"></i> Total Ingresos</div>
+                <div class="lc-stat-value"><small>Gs.</small>{{ total_ingresos|formato_guaranies }}</div>
+                <div class="lc-stat-sub"><i class="bi bi-receipt"></i> {{ ingresos|length }} registro{{ ingresos|length|pluralize }}</div>
+            </div>
+            <div class="lc-stat-card red">
+                <div class="lc-stat-label"><i class="bi bi-arrow-down-circle-fill"></i> Total Egresos</div>
+                <div class="lc-stat-value"><small>Gs.</small>{{ total_egresos|formato_guaranies }}</div>
+                <div class="lc-stat-sub"><i class="bi bi-file-text"></i> {{ egresos|length }} registro{{ egresos|length|pluralize }}</div>
+            </div>
+            <div class="lc-stat-card {% if balance >= 0 %}blue{% else %}red{% endif %}">
+                <div class="lc-stat-label"><i class="bi bi-calculator-fill"></i> Balance Neto</div>
+                <div class="lc-stat-value"><small>Gs.</small>{{ balance|formato_guaranies }}</div>
+                <div class="lc-stat-sub"><i class="bi bi-arrow-left-right"></i> Ingresos − Egresos</div>
+            </div>
+        </div>
+
+        <div class="lc-filter-card no-print">
+            <form method="get">
+                <div class="lc-filter-grid" style="grid-template-columns: {% if es_admin %}2fr 1fr 1fr auto{% else %}2fr 1fr auto{% endif %};">
+                    <!-- Campo Sede -->
+                    <div>
+                        <label class="lc-form-label">Sede</label>
+                        {% if es_admin %}
+                            <select name="sede" class="lc-form-select">
+                                <option value="">Todas las sedes</option>
+                                {% for s in sedes %}
+                                    <option value="{{ s.id }}" {% if sede and sede.id == s.id %}selected{% endif %}>{{ s.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        {% else %}
+                            <div class="lc-input-addon">
+                                <span class="lc-input-addon-icon"><i class="bi bi-geo-alt-fill"></i></span>
+                                <input class="lc-form-control" value="{{ sede_forzada.nombre }}" readonly>
+                                <input type="hidden" name="sede" value="{{ sede_forzada.id }}">
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if es_admin %}
+                        <!-- ADMIN: Fecha Desde y Fecha Hasta -->
+                        <div>
+                            <label class="lc-form-label" for="fecha_desde">Fecha Desde</label>
+                            <input type="date" name="fecha_desde" id="fecha_desde" class="lc-form-control" value="{{ fecha_desde|date:'Y-m-d' }}">
+                        </div>
+                        <div>
+                            <label class="lc-form-label" for="fecha_hasta">Fecha Hasta</label>
+                            <input type="date" name="fecha_hasta" id="fecha_hasta" class="lc-form-control" value="{{ fecha_hasta|date:'Y-m-d' }}">
+                        </div>
+                    {% else %}
+                        <!-- USUARIO COMÚN: Una sola fecha -->
+                        <div>
+                            <label class="lc-form-label" for="fecha">Fecha</label>
+                            <div class="lc-input-addon">
+                                <span class="lc-input-addon-icon"><i class="bi bi-calendar-date"></i></span>
+                                <input type="date" name="fecha" id="fecha" class="lc-form-control" value="{{ fecha_seleccionada|date:'Y-m-d' }}">
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Botón Actualizar -->
+                    <div>
+                        <label class="lc-form-label">&nbsp;</label>
+                        <button type="submit" class="lc-btn lc-btn-primary" style="width:100%;">
+                            <i class="bi bi-arrow-clockwise"></i> Actualizar
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
-    </div>
 
-    <!-- Resumen para Impresión (Compacto) -->
-    <div class="print-only stat-summary-print">
-        <div class="stat-item-print">
-            <div class="small text-muted">Total Ingresos</div>
-            <div class="fw-bold text-success">Gs. {{ total_ingresos|formato_guaranies }}</div>
-        </div>
-        <div class="stat-item-print">
-            <div class="small text-muted">Total Egresos</div>
-            <div class="fw-bold text-danger">Gs. {{ total_egresos|formato_guaranies }}</div>
-        </div>
-        <div class="stat-item-print">
-            <div class="small text-muted">Balance</div>
-            <div class="fw-bold {% if balance >= 0 %}text-primary{% else %}text-danger{% endif %}">
-                Gs. {{ balance|formato_guaranies }}
-            </div>
-        </div>
-    </div>
-
-    <!-- Resumen Ejecutivo (Vista Web) -->
-    <div class="row mb-4 resumen-ejecutivo no-print">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-success bg-opacity-10">
-                <div class="card-body text-center">
-                    <h6 class="text-success text-uppercase small fw-bold">Total Ingresos</h6>
-                    <h3 class="text-success mb-0">Gs. {{ total_ingresos|formato_guaranies }}</h3>
-                    <small class="text-muted">{{ ingresos|length }} registros</small>
+        <!-- ══ DETALLE INGRESOS ══════════════════════════════════ -->
+        <div class="lc-card">
+            <div class="lc-toolbar">
+                <div class="lc-toolbar-left">
+                    <span class="lc-toolbar-title">Detalle de Ingresos</span>
+                    <span class="lc-chip lc-chip-count">
+                    <i class="bi bi-receipt"></i>
+                    {{ ingresos|length }} registro{{ ingresos|length|pluralize }}
+                </span>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-danger bg-opacity-10">
-                <div class="card-body text-center">
-                    <h6 class="text-danger text-uppercase small fw-bold">Total Egresos</h6>
-                    <h3 class="text-danger mb-0">Gs. {{ total_egresos|formato_guaranies }}</h3>
-                    <small class="text-muted">{{ egresos|length }} registros</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm {% if balance >= 0 %}bg-primary{% else %}bg-warning{% endif %} bg-opacity-10">
-                <div class="card-body text-center">
-                    <h6 class="{% if balance >= 0 %}text-primary{% else %}text-warning{% endif %} text-uppercase small fw-bold">Balance</h6>
-                    <h3 class="{% if balance >= 0 %}text-primary{% else %}text-warning{% endif %} mb-0">
-                        Gs. {{ balance|formato_guaranies }}
-                    </h3>
-                    <small class="text-muted">Ingresos - Egresos</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Detalle de Ingresos -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-            <span class="fw-bold"><i class="fas fa-arrow-up text-success me-2"></i>Detalle de Ingresos</span>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-sm table-hover mb-0 informe-compacto">
-                    <thead class="table-light">
+            <div style="overflow-x:auto;">
+                <table class="lc-table">
+                    <thead>
                     <tr>
-                        <th class="ps-3">Fecha</th>
-                        <th>Recibo</th>
+                        <th>Fecha</th>
+                        <th>N° Recibo</th>
                         <th>Sede</th>
-                        <th>Alumno/Cliente</th>
+                        <th>Alumno / Cliente</th>
                         <th>Concepto</th>
-                        <th class="text-end pe-3">Monto</th>
+                        <th class="tr">Monto</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for ingreso in ingresos %}
-                    <tr>
-                        <td class="ps-3">{{ ingreso.fecha|date:"d/m/Y" }}</td>
-                        <td><span class="badge bg-light text-dark border">{{ ingreso.numero_recibo }}</span></td>
-                        <td>{{ ingreso.sede.nombre }}</td>
-                        <td>
-                            {% if ingreso.alumno %}
-                            {{ ingreso.alumno.nombre_completo }}
-                            {% else %}
-                            {{ ingreso.nombre_cliente }}
-                            {% endif %}
-                        </td>
-                        <td>{{ ingreso.concepto|truncatewords:8 }}</td>
-                        <td class="text-end pe-3 text-success fw-medium">Gs. {{ ingreso.importe_total|formato_guaranies }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center text-muted py-4">No hay ingresos registrados</td>
-                    </tr>
+                        <tr>
+                            <td><span class="lc-date">{{ ingreso.fecha|date:"d/m/Y" }}</span></td>
+                            <td>
+                        <span class="lc-badge {% if ingreso.numero_recibo %}lc-badge-success{% else %}lc-badge-secondary{% endif %}">
+                            <i class="bi {% if ingreso.numero_recibo %}bi-receipt{% else %}bi-dash{% endif %}"></i>
+                            {{ ingreso.numero_recibo|default:"Sin recibo" }}
+                        </span>
+                            </td>
+                            <td><span class="lc-cell-sub"><i class="bi bi-building"></i> {{ ingreso.sede.nombre }}</span></td>
+                            <td>
+                                <div class="lc-cell-stack">
+                            <span class="lc-cell-primary">
+                                {% if ingreso.alumno %}{{ ingreso.alumno.nombre_completo }}{% else %}{{ ingreso.nombre_cliente }}{% endif %}
+                            </span>
+                                </div>
+                            </td>
+                            <td><span class="lc-cell-sub">{{ ingreso.concepto|truncatewords:8 }}</span></td>
+                            <td class="lc-monto monto-ingreso">Gs. {{ ingreso.importe_total|formato_guaranies }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6">
+                            <div class="lc-empty">
+                                <div class="lc-empty-illustration"><i class="bi bi-cash-stack"></i></div>
+                                <h3>Sin ingresos registrados</h3>
+                                <p>No hay ingresos en el período seleccionado.</p>
+                            </div>
+                        </td></tr>
                     {% endfor %}
                     </tbody>
                     {% if ingresos %}
-                    <tfoot class="table-light fw-bold">
-                    <tr>
-                        <td colspan="5" class="text-end">SUBTOTAL INGRESOS:</td>
-                        <td class="text-end pe-3 text-success">Gs. {{ total_ingresos|formato_guaranies }}</td>
-                    </tr>
-                    </tfoot>
+                        <tfoot>
+                        <tr>
+                            <td colspan="5" style="text-align:right;">SUBTOTAL INGRESOS</td>
+                            <td class="lc-monto monto-ingreso">Gs. {{ total_ingresos|formato_guaranies }}</td>
+                        </tr>
+                        </tfoot>
                     {% endif %}
                 </table>
             </div>
         </div>
-    </div>
 
-    <!-- Detalle de Egresos -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-            <span class="fw-bold"><i class="fas fa-arrow-down text-danger me-2"></i>Detalle de Egresos</span>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-sm table-hover mb-0 informe-compacto">
-                    <thead class="table-light">
+        <!-- ══ DETALLE EGRESOS ═══════════════════════════════════ -->
+        <div class="lc-card">
+            <div class="lc-toolbar">
+                <div class="lc-toolbar-left">
+                    <span class="lc-toolbar-title">Detalle de Egresos</span>
+                    <span class="lc-chip lc-chip-count">
+                    <i class="bi bi-file-text"></i>
+                    {{ egresos|length }} registro{{ egresos|length|pluralize }}
+                </span>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="lc-table">
+                    <thead>
                     <tr>
-                        <th class="ps-3">Fecha</th>
-                        <th>Comprobante</th>
+                        <th>Fecha</th>
+                        <th>N° Comp.</th>
                         <th>Sede</th>
                         <th>Categoría</th>
                         <th>Concepto</th>
-                        <th class="text-end pe-3">Monto</th>
+                        <th class="tr">Monto</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for egreso in egresos %}
-                    <tr>
-                        <td class="ps-3">{{ egreso.fecha|date:"d/m/Y" }}</td>
-                        <td><span class="badge bg-light text-dark border">{{ egreso.numero_comprobante }}</span></td>
-                        <td>{{ egreso.sede.nombre }}</td>
-                        <td><span class="small text-muted">{{ egreso.get_categoria_display }}</span></td>
-                        <td>{{ egreso.concepto|truncatewords:8 }}</td>
-                        <td class="text-end pe-3 text-danger fw-medium">Gs. {{ egreso.monto|formato_guaranies }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center text-muted py-4">No hay egresos registrados</td>
-                    </tr>
+                        <tr>
+                            <td><span class="lc-date">{{ egreso.fecha|date:"d/m/Y" }}</span></td>
+                            <td>
+                        <span class="lc-badge lc-badge-secondary">
+                            <i class="bi bi-file-text"></i>
+                            {{ egreso.numero_comprobante|default:"—" }}
+                        </span>
+                            </td>
+                            <td><span class="lc-cell-sub"><i class="bi bi-building"></i> {{ egreso.sede.nombre }}</span></td>
+                            <td><span class="lc-cat">{{ egreso.get_categoria_display }}</span></td>
+                            <td><span class="lc-cell-sub">{{ egreso.concepto|truncatewords:8 }}</span></td>
+                            <td class="lc-monto monto-egreso">Gs. {{ egreso.monto|formato_guaranies }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6">
+                            <div class="lc-empty">
+                                <div class="lc-empty-illustration"><i class="bi bi-dash-circle"></i></div>
+                                <h3>Sin egresos registrados</h3>
+                                <p>No hay egresos en el período seleccionado.</p>
+                            </div>
+                        </td></tr>
                     {% endfor %}
                     </tbody>
                     {% if egresos %}
-                    <tfoot class="table-light fw-bold">
-                    <tr>
-                        <td colspan="5" class="text-end">SUBTOTAL EGRESOS:</td>
-                        <td class="text-end pe-3 text-danger">Gs. {{ total_egresos|formato_guaranies }}</td>
-                    </tr>
-                    </tfoot>
+                        <tfoot>
+                        <tr>
+                            <td colspan="5" style="text-align:right;">SUBTOTAL EGRESOS</td>
+                            <td class="lc-monto monto-egreso">Gs. {{ total_egresos|formato_guaranies }}</td>
+                        </tr>
+                        </tfoot>
                     {% endif %}
                 </table>
             </div>
-        </div>
-    </div>
-
-    <!-- Balance Final (Compacto para impresión) -->
-    <div class="row justify-content-end">
-        <div class="col-md-5">
-            <div class="card border-primary balance-final-card mb-4 shadow-sm">
-                <div class="card-body p-0">
-                    <table class="table table-bordered mb-0">
-                        <tbody>
-                        <tr>
-                            <td class="text-end fw-bold bg-light" style="width: 50%;">Total ingresos:</td>
-                            <td class="text-end text-success fw-bold">Gs. {{ total_ingresos|formato_guaranies }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-end fw-bold bg-light">Total egresos:</td>
-                            <td class="text-end text-danger fw-bold">Gs. {{ total_egresos|formato_guaranies }}</td>
-                        </tr>
-                        <tr class="table-primary">
-                            <td class="text-end fw-bold fs-5">BALANCE:</td>
-                            <td class="text-end fw-bold fs-5 {% if balance >= 0 %}text-primary{% else %}text-danger{% endif %}">
-                                Gs. {{ balance|formato_guaranies }}
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+            {% if egresos %}
+                <div class="lc-table-footer">
+                    <div class="lc-table-count"><i class="bi bi-arrow-down-circle me-1"></i>{{ egresos|length }} Registro{{ egresos|length|pluralize }}</div>
+                    <span style="color:var(--lc-red);font-weight:700;font-size:.8rem;">Gs. {{ total_egresos|formato_guaranies }}</span>
                 </div>
+            {% endif %}
+        </div>
+
+        <!-- ══ PRINT: Firmas ═════════════════════════════════════ -->
+        <div class="firma-section">
+            <div class="firma-box">
+                <div class="firma-line"></div>
+                <div class="firma-name">Preparado por</div>
+                <div class="firma-role">Firma y Aclaración</div>
+            </div>
+            <div class="firma-box">
+                <div class="firma-line"></div>
+                <div class="firma-name">Aprobado por</div>
+                <div class="firma-role">Firma y Aclaración</div>
             </div>
         </div>
-    </div>
 
-    <!-- Firmas -->
-    <div class="firma-section print-only mt-4">
-        <div class="row">
-            <div class="col-6 text-center">
-                <div class="firma-linea"></div>
-                <p class="mb-0 small fw-bold">Preparado por</p>
-                <small class="text-muted">Firma y Aclaración</small>
-            </div>
-            <div class="col-6 text-center">
-                <div class="firma-linea"></div>
-                <p class="mb-0 small fw-bold">Aprobado por</p>
-                <small class="text-muted">Firma y Aclaración</small>
-            </div>
+        <!-- ══ PRINT: Footer ════════════════════════════════════ -->
+        <div class="print-footer">
+            Documento generado por el Sistema de Gestión CEP — {{ fecha_emision|date:"d/m/Y H:i" }}
         </div>
-    </div>
 
-    <!-- Footer de impresión -->
-    <div class="print-only text-center mt-4 pt-3 border-top small text-muted">
-        Documento generado por el Sistema de Gestión CEP - {{ "now"|date:"d/m/Y H:i" }}
     </div>
-</div>
 {% endblock %}
