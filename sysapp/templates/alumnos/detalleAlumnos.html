@@ -1,488 +1,954 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
 
-{% block title %}{{ alumno.nombre_completo }} - ITS CEP{% endblock %}
+{% block title %}{{ alumno.nombre_completo }} — CEP{% endblock %}
 {% block page_title %}Detalle del Alumno{% endblock %}
 
 {% block extra_css %}
-<style>
-    .alumno-header {
-        background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
-        color: white;
-        border-radius: var(--border-radius-lg);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow-md);
-    }
-    .info-label {
-        color: var(--text-muted);
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.25rem;
-    }
-    .puntos-estrellas {
-        display: flex;
-        gap: 0.5rem;
-    }
-    .info-value {
-        font-weight: 600;
-        color: var(--text-main);
-    }
-    .info-value-white {
-        font-weight: 600;
-        color: white;
-    }
-    .star-badge {
-        background: rgba(255, 243, 205, 0.1);
-        color: #ffc107;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        display: inline-flex;
-        align-items: center;
-        font-weight: 700;
-        border: 1px solid rgba(255, 238, 186, 0.2);
-    }
-    [data-theme="dark"] .star-badge {
-        background: rgba(255, 193, 7, 0.15);
-        color: #ffc107;
-        border-color: rgba(255, 193, 7, 0.3);
-    }
-    [data-theme="light"] .star-badge {
-        background: #fff3cd;
-        color: #856404;
-        border-color: #ffeeba;
-    }
-    .section-card {
-        background: var(--card-bg);
-        border-radius: var(--border-radius-lg);
-        padding: 1.5rem;
-        height: 100%;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
-        color: var(--text-main);
-    }
-    .nav-pills .nav-link {
-        border-radius: 50px;
-        padding: 0.5rem 1.25rem;
-        color: var(--text-muted);
-        font-weight: 500;
-    }
-    .nav-pills .nav-link.active {
-        background-color: var(--primary-500);
-    }
-    [data-theme="dark"] .badge.border {
-        background-color: #0f172a !important;
-        border-color: #334155 !important;
-        color: var(--gray-600) !important;
-    }
+    <style>
+        /* ══════════════════════════════════════════════
+           Usa las variables globales del sistema (base.html)
+           igual que listaAlumnos.css — sin redefinir nada
+        ══════════════════════════════════════════════ */
 
-    [data-theme="dark"] .table-hover tbody tr:hover {
-        background-color: rgba(148, 163, 184, 0.1) !important;
-    }
-    [data-theme="dark"] .alert-danger{
-        background-color: rgba(113, 28, 35, 0.68);
-        border-color: #f5c6cb;
-        color: #f8d7da;
+        .da {
+            font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
+            color: var(--text-main);
+        }
+        .da * { box-sizing: border-box; }
 
-    }
+        /* ── PAGE HEADER ── */
+        .da-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .da-head-left { display: flex; flex-direction: column; gap: .25rem; }
 
-    /* Estilos para tablas responsivas en móviles */
-    @media (max-width: 768px) {
-        .alumno-header {
-            padding: 1.5rem;
-            text-align: center;
+        .da-title {
+            font-family: 'Sora', 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+            letter-spacing: -.6px;
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+            line-height: 1.1;
         }
-        .alumno-header .d-flex.align-items-center {
-            flex-direction: column;
-        }
-        .alumno-header .rounded-circle {
-            margin-right: 0 !important;
-            margin-bottom: 1rem;
-        }
-        .alumno-header .d-flex.flex-wrap {
-            justify-content: center;
-        }
-        .alumno-header .star-badge {
-            width: 100%;
-            justify-content: center;
-        }
-        .alumno-header .d-flex.justify-content-md-end {
-            justify-content: center;
-            width: 100%;
-            gap: 0.5rem !important;
-        }
-        .alumno-header .btn {
-            flex: 1;
-            padding: 0.6rem 0.4rem;
-            font-size: 0.75rem;
-            white-space: nowrap;
+        .da-title-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: var(--primary-100);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.35rem;
+            color: var(--primary-600);
+            flex-shrink: 0;
         }
-        .alumno-header .btn i {
-            margin-right: 2px !important;
+        .da-breadcrumb {
+            font-size: .83rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            margin-top: .15rem;
+        }
+        .da-breadcrumb a { color: var(--primary-500); text-decoration: none; font-weight: 600; }
+        .da-breadcrumb a:hover { text-decoration: underline; }
+        .da-breadcrumb i { font-size: .55rem; opacity: .7; }
+
+        /* ── BOTONES ── */
+        .da-acts { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+        .da-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            padding: .62rem 1.2rem;
+            border-radius: 12px;
+            font-size: .88rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            text-decoration: none;
+            white-space: nowrap;
+            font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: .01em;
+        }
+        .da-btn i { font-size: 1rem; }
+        .da-btn-ghost {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1.5px solid var(--border-color);
+        }
+        .da-btn-ghost:hover {
+            border-color: var(--primary-500);
+            color: var(--primary-500);
+            background: var(--primary-100);
+        }
+        .da-btn-primary {
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(7,86,163,.28);
+        }
+        .da-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(7,86,163,.38); color: #fff; }
+        .da-btn-success {
+            background: linear-gradient(135deg, var(--success), #047857);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(5,150,105,.24);
+        }
+        .da-btn-success:hover { transform: translateY(-2px); color: #fff; }
+        .da-btn-warning {
+            background: linear-gradient(135deg, var(--warning), #b45309);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(217,119,6,.24);
+        }
+        .da-btn-warning:hover { transform: translateY(-2px); color: #fff; }
+
+        /* ══════════════════════════════════════════════
+           HERO GLASS — transparente sobre el fondo del sistema (#161C26)
+        ══════════════════════════════════════════════ */
+        .da-hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            margin-bottom: 1.75rem;
+
+            /* Glass puro: solo difumina el fondo del base.html */
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(28px) saturate(160%);
+            -webkit-backdrop-filter: blur(28px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow:
+                    0 0 0 .5px rgba(255,255,255,.05) inset,
+                    0 1px 0 rgba(255,255,255,.12) inset,
+                    0 8px 32px rgba(0,0,0,.25),
+                    0 2px 8px rgba(0,0,0,.15);
+
+            animation: da-fade .3s ease both;
         }
 
-        /* Tabs lado a lado en móvil */
-        .nav-pills {
-            flex-wrap: nowrap !important;
+        /* En modo claro el fondo del sistema es claro, más transparencia visible */
+        [data-theme="light"] .da-hero {
+            background: rgba(255, 255, 255, 0.55);
+            border-color: rgba(255,255,255,.6);
+            box-shadow:
+                    0 0 0 .5px rgba(255,255,255,.4) inset,
+                    0 1px 0 rgba(255,255,255,.7) inset,
+                    0 6px 28px rgba(7,30,96,.12),
+                    0 2px 6px rgba(7,30,96,.07);
+        }
+
+        /* Línea highlight superior */
+        .da-hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            z-index: 3; pointer-events: none;
+            background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255,255,255,.18) 25%,
+            rgba(255,255,255,.18) 75%,
+            transparent 100%);
+        }
+        [data-theme="light"] .da-hero::before {
+            background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255,255,255,.8) 25%,
+            rgba(255,255,255,.8) 75%,
+            transparent 100%);
+        }
+
+        /* Orbe decorativo */
+        .da-hero-orb {
+            position: absolute;
+            pointer-events: none;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            right: -80px; top: -100px;
+            background: radial-gradient(circle at 35% 35%,
+            rgba(7, 86, 163, .08) 0%, transparent 68%);
+            border: 1px solid rgba(255, 255, 255, .04);
+        }
+
+        .da-hero-inner {
+            position: relative;
+            z-index: 2;
+            padding: 1.75rem 1.75rem 0;
+        }
+
+        .da-hero-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        /* Avatar */
+        .da-av-wrap { position: relative; flex-shrink: 0; }
+        .da-av {
+            width: 64px; height: 64px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .18);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.65rem;
+            color: rgba(255, 255, 255, .75);
+            box-shadow: 0 4px 16px rgba(0,0,0,.15);
+        }
+        [data-theme="light"] .da-av {
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 14px rgba(7,86,163,.3);
+        }
+
+        .da-av-dot {
+            position: absolute; bottom: -3px; right: -3px;
+            width: 15px; height: 15px; border-radius: 50%;
+        }
+        .da-av-dot.on  { background: #22c97a; border: 2.5px solid rgba(22,28,38,.8); box-shadow: 0 0 7px rgba(34,201,122,.55); }
+        .da-av-dot.off { background: #f87171; border: 2.5px solid rgba(22,28,38,.8); box-shadow: 0 0 7px rgba(248,113,113,.5); }
+        [data-theme="light"] .da-av-dot.on  { border-color: #fff; }
+        [data-theme="light"] .da-av-dot.off { border-color: #fff; }
+
+        /* Identidad */
+        .da-hero-id { display: flex; align-items: flex-start; gap: 1rem; flex: 1; min-width: 0; }
+        .da-hero-meta { display: flex; flex-direction: column; gap: .32rem; min-width: 0; }
+
+        .da-nom {
+            font-family: 'Sora', 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.55rem;
+            font-weight: 800;
+            letter-spacing: -.5px;
+            line-height: 1.12;
+            margin: 0;
+            color: #e8eeff;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        [data-theme="light"] .da-nom { color: var(--text-main); }
+
+        .da-sub {
+            font-size: .8rem;
+            color: rgba(255,255,255,.45);
+            font-weight: 500;
+            display: flex; align-items: center; gap: .4rem; flex-wrap: wrap;
+        }
+        [data-theme="light"] .da-sub { color: var(--text-muted); }
+        .da-sub i { font-size: .72rem; }
+        .da-sub-dot { opacity: .3; }
+
+        .da-status {
+            display: inline-flex; align-items: center; gap: .22rem;
+            padding: .16rem .58rem; border-radius: 999px;
+            font-size: .65rem; font-weight: 700;
+            font-family: 'Sora', sans-serif; letter-spacing: .04em;
+        }
+        .da-status.on  {
+            background: rgba(16,185,129,.15);
+            color: #34d399;
+            border: 1px solid rgba(52,211,153,.25);
+        }
+        .da-status.off {
+            background: rgba(239,68,68,.15);
+            color: #f87171;
+            border: 1px solid rgba(248,113,113,.25);
+        }
+        [data-theme="light"] .da-status.on  { background: var(--success-light); color: var(--success); border-color: rgba(16,185,129,.2); }
+        [data-theme="light"] .da-status.off { background: var(--danger-light); color: var(--danger); border-color: rgba(239,68,68,.2); }
+
+        /* Pills de info */
+        .da-hero-info { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .25rem; }
+        .da-hero-pill {
+            display: inline-flex; align-items: center; gap: .25rem;
+            padding: .18rem .54rem; border-radius: 999px;
+            font-size: .7rem; font-weight: 600;
+            color: rgba(255,255,255,.45);
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.09);
+        }
+        [data-theme="light"] .da-hero-pill {
+            color: var(--text-muted);
+            background: rgba(7,86,163,.06);
+            border-color: rgba(7,86,163,.1);
+        }
+        .da-hero-pill i { font-size: .62rem; }
+
+        /* Badge puntos */
+        .da-pts {
+            flex-shrink: 0;
+            background: rgba(217,119,6,.1);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(245,158,11,.22);
+            border-radius: 18px;
+            padding: .85rem 1.3rem;
+            display: flex; flex-direction: column; align-items: center; gap: .06rem;
+            min-width: 82px; text-align: center;
+            box-shadow: 0 2px 14px rgba(245,158,11,.08);
+        }
+        .da-pts-n {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.9rem; font-weight: 800;
+            color: var(--warning); line-height: 1;
+        }
+        .da-pts-l {
+            font-size: .52rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .1em;
+            color: var(--warning); opacity: .55;
+        }
+
+        /* Tabs */
+        .da-tabs {
+            display: flex;
+            margin-top: 1.6rem;
+            gap: 0;
             overflow-x: auto;
-            gap: 0.5rem;
-            padding-bottom: 0.5rem;
+            scrollbar-width: none;
+            border-top: 1px solid rgba(255,255,255,.07);
         }
-        .nav-pills .nav-item {
-            flex: 1;
+        [data-theme="light"] .da-tabs { border-top-color: var(--border-color); }
+        .da-tabs::-webkit-scrollbar { display: none; }
+
+        .da-tab {
+            flex-shrink: 0;
+            display: inline-flex; align-items: center; gap: .35rem;
+            padding: .75rem 1.2rem;
+            font-family: 'Sora', 'Plus Jakarta Sans', sans-serif;
+            font-size: .78rem; font-weight: 700;
+            letter-spacing: .01em;
+            border: none; cursor: pointer;
+            transition: var(--transition-normal);
+            color: var(--text-muted);
+            background: transparent;
+            position: relative;
         }
-        .nav-pills .nav-link {
-            padding: 0.5rem 0.5rem;
-            font-size: 0.85rem;
-            text-align: center;
+        .da-tab i { font-size: .8rem; }
+        .da-tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 16px; right: 16px; height: 2px;
+            border-radius: 2px 2px 0 0;
+            background: var(--primary-500);
+            transform: scaleX(0);
+            transition: transform .22s cubic-bezier(.4,0,.2,1);
+        }
+        .da-tab:hover { color: var(--text-main); }
+        .da-tab.act { color: var(--primary-500); }
+        .da-tab.act::after { transform: scaleX(1); }
+
+        /* ══════════════════════════════════════════════
+           CARDS — misma base que listaAlumnos
+        ══════════════════════════════════════════════ */
+        .da-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            transition: var(--transition-normal);
+        }
+        .da-card:hover { box-shadow: var(--shadow-lg); }
+        .da-card-hd {
+            padding: 1rem 1.5rem;
+            background: var(--gray-100);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: .6rem;
+        }
+        .da-card-ic {
+            width: 34px; height: 34px;
+            border-radius: 10px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .9rem;
+        }
+        .ic-b { background: var(--primary-100); color: var(--primary-600); }
+        .ic-g { background: var(--success-light); color: var(--success); }
+        .ic-a { background: var(--warning-light); color: var(--warning); }
+        .da-card-tit {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700; font-size: .88rem;
+            color: var(--text-main);
+        }
+        .da-card-bd { padding: 1.5rem; }
+
+        /* Fields grid */
+        .da-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem 2rem; }
+        .da-lbl {
+            display: block;
+            font-size: .7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .08em;
+            color: var(--text-muted); margin-bottom: .22rem;
+        }
+        .da-val {
+            font-size: .9rem; font-weight: 600;
+            color: var(--text-main); line-height: 1.4;
+        }
+        .da-val.mono { font-family: 'Sora', monospace; font-size: .84rem; }
+        .da-val.dim  { color: var(--text-muted); font-weight: 400; }
+
+        .da-hr { border: none; border-top: 1px solid var(--border-color); margin: 1.25rem 0; }
+        .da-sec-lbl {
+            font-family: 'Sora', sans-serif;
+            font-size: .68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em;
+            color: var(--primary-500);
+            display: flex; align-items: center; gap: .35rem;
+            margin-bottom: .9rem;
+        }
+
+        /* Estado financiero */
+        .da-estado {
+            border-radius: 14px; padding: .8rem 1rem;
+            display: flex; align-items: flex-start; gap: .6rem;
+            font-size: .85rem; font-weight: 600;
+            margin-bottom: 1rem; border: 1px solid;
+        }
+        .da-estado > i { font-size: 1rem; flex-shrink: 0; margin-top: .04rem; }
+        .da-est-body { display: flex; flex-direction: column; gap: .08rem; }
+        .da-est-main { font-weight: 700; font-size: .85rem; }
+        .da-est-sub  { font-size: .73rem; font-weight: 500; opacity: .65; }
+        .est-ok   { background: var(--success-light);  color: var(--success);  border-color: rgba(16,185,129,.2); }
+        .est-warn { background: var(--warning-light);  color: var(--warning);  border-color: rgba(245,158,11,.2); }
+        .est-bad  { background: var(--danger-light);   color: var(--danger);   border-color: rgba(239,68,68,.2); }
+        .est-none { background: var(--gray-100);       color: var(--text-muted); border-color: var(--border-color); }
+
+        /* Total pagado */
+        .da-total {
+            background: var(--success-light);
+            border: 1px solid rgba(16,185,129,.18);
+            border-radius: 14px; padding: .9rem 1.1rem; margin-bottom: 1rem;
+        }
+        .da-total-l { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--success); display: block; margin-bottom: .2rem; }
+        .da-total-v { font-family: 'Sora', sans-serif; font-size: 1.28rem; font-weight: 800; color: var(--success); line-height: 1; }
+
+        /* Habilitación */
+        .da-hab {
+            border-radius: 14px; padding: .7rem 1rem;
+            border: 1px solid var(--border-color);
+            background: var(--gray-100);
+            display: flex; align-items: center; gap: .65rem;
+        }
+        .da-hab-ic {
+            width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; font-size: .82rem;
+        }
+        .da-hab.ok .da-hab-ic { background: var(--success-light); color: var(--success); }
+        .da-hab.no .da-hab-ic { background: var(--danger-light);  color: var(--danger); }
+        .da-hab-l { font-size: .58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); display: block; }
+        .da-hab.ok .da-hab-v { font-size: .83rem; font-weight: 700; color: var(--success); }
+        .da-hab.no .da-hab-v { font-size: .83rem; font-weight: 700; color: var(--danger); }
+
+        /* ══════════════════════════════════════════════
+           PANELS
+        ══════════════════════════════════════════════ */
+        .da-panels > div { display: none; }
+        .da-panels > div.act { display: block; animation: da-fade .22s ease both; }
+
+        @keyframes da-fade {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ══════════════════════════════════════════════
+           TABLA — misma base que la lista
+        ══════════════════════════════════════════════ */
+        .da-tbl { width: 100%; border-collapse: collapse; font-size: .9rem; }
+        .da-tbl thead th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: .75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .08em;
+            color: var(--text-muted);
+            background: var(--gray-100);
+            border-bottom: 2px solid var(--border-color);
             white-space: nowrap;
         }
-        .nav-pills .nav-link i {
-            display: none; /* Ocultar iconos en tabs para ahorrar espacio en móvil */
+        .da-tbl tbody td {
+            padding: .9rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+            color: var(--text-main);
+            font-size: .9rem;
+            transition: var(--transition-normal);
+        }
+        .da-tbl tbody tr { cursor: pointer; transition: var(--transition-normal); }
+        .da-tbl tbody tr:last-child td { border-bottom: none; }
+        .da-tbl tbody tr:hover td { background: var(--primary-100); }
+        .da-tbl tr.no-click { cursor: default; }
+        .da-tbl tr.no-click:hover td { background: transparent; }
+
+        /* Badges tabla */
+        .da-rec {
+            display: inline-flex; align-items: center; gap: .25rem;
+            background: var(--primary-100);
+            border: 1px solid rgba(7,86,163,.12);
+            border-radius: 8px; padding: .18rem .55rem;
+            font-size: .72rem; font-weight: 700;
+            color: var(--primary-600);
+            font-family: 'Sora', sans-serif;
+        }
+        .da-cuota { font-family: 'Sora', sans-serif; font-weight: 800; color: var(--primary-500); }
+        .da-importe { font-family: 'Sora', sans-serif; font-weight: 800; color: var(--success); }
+
+        .da-pts-badge {
+            display: inline-flex; align-items: center; gap: .18rem;
+            border-radius: 999px; padding: .14rem .5rem;
+            font-size: .72rem; font-weight: 700;
+            border: 1px solid;
+            font-family: 'Sora', sans-serif;
+        }
+        .pts-0 { background: var(--gray-100); color: var(--text-muted); border-color: var(--border-color); }
+        .pts-1 { background: var(--warning-light); color: var(--warning); border-color: rgba(245,158,11,.2); }
+        .pts-2 { background: var(--primary-100); color: var(--primary-500); border-color: rgba(7,86,163,.18); }
+        .pts-3 { background: rgba(109,40,217,.08); color: #6d28d9; border-color: rgba(109,40,217,.18); }
+        [data-theme="dark"] .pts-3 { color: #a78bfa; background: rgba(109,40,217,.12); }
+
+        .da-multa {
+            display: inline-flex; align-items: center; gap: .18rem;
+            background: var(--danger-light); color: var(--danger);
+            border: 1px solid rgba(239,68,68,.2); border-radius: 999px;
+            font-size: .68rem; font-weight: 700; padding: .13rem .45rem;
+            font-family: 'Sora', sans-serif;
         }
 
-        .table-responsive-stack thead {
-            display: none;
+        /* Empty state */
+        .da-empty {
+            padding: 4rem 2rem; text-align: center; color: var(--text-muted);
         }
-        .table-responsive-stack tr {
-            display: block;
-            border: 1px solid var(--border-color);
-            margin-bottom: 1rem;
-            border-radius: var(--border-radius-md);
-            padding: 0.5rem;
+        .da-empty-ico {
+            font-size: 3.5rem; color: var(--primary-500);
+            opacity: .15; margin-bottom: .75rem;
+        }
+        .da-empty p { font-size: .88rem; margin: 0; }
+
+        /* ══════════════════════════════════════════════
+           MODAL CANJE
+        ══════════════════════════════════════════════ */
+        .modal-da .modal-content {
+            border: none; border-radius: 22px;
             background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 60px rgba(0,0,0,.25);
+            overflow: hidden;
         }
-        .table-responsive-stack td {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0.75rem !important;
-            border-bottom: 1px solid var(--border-color);
-            text-align: right !important;
+        .modal-da .modal-header {
+            background: linear-gradient(135deg, var(--warning), #b45309);
+            border: none; padding: 1.2rem 1.5rem;
         }
-        .table-responsive-stack td:last-child {
-            border-bottom: none;
+        .modal-da .modal-title {
+            font-family: 'Sora', sans-serif;
+            font-weight: 800; font-size: .95rem; color: #fff; margin: 0;
         }
-        .table-responsive-stack td::before {
-            content: attr(data-label);
-            font-weight: 700;
-            text-align: left;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-right: 1rem;
+        .modal-da .modal-body   { padding: 1.5rem; }
+        .modal-da .modal-footer { border: none; padding: 0 1.5rem 1.5rem; gap: .5rem; }
+
+        .pts-disp {
+            background: var(--warning-light);
+            border: 1.5px solid rgba(245,158,11,.18);
+            border-radius: 16px; padding: 1.35rem 1rem;
+            text-align: center; margin-bottom: 1.25rem;
         }
-        
-        /* Ajustes específicos para las estrellas en móvil */
-        .puntos-estrellas {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            max-width: 150px;
+        .pts-disp .n {
+            font-family: 'Sora', sans-serif;
+            font-size: 2.6rem; font-weight: 800;
+            color: var(--warning); display: block; line-height: 1;
         }
-    }
-</style>
+        .pts-disp .l {
+            font-size: .62rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .09em;
+            color: var(--warning); opacity: .6; display: block; margin-top: .25rem;
+        }
+
+        .m-lbl {
+            font-size: .72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .08em;
+            color: var(--text-muted); display: block; margin-bottom: .4rem;
+            font-family: 'Sora', sans-serif;
+        }
+        .m-input {
+            width: 100%;
+            height: 46px;
+            padding: 0 1rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--card-bg);
+            font-size: .9rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-main);
+            transition: var(--transition-normal);
+            outline: none;
+        }
+        .m-input:focus {
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 4px rgba(7,86,163,.1);
+        }
+
+        .m-btn {
+            display: inline-flex; align-items: center; gap: .4rem;
+            padding: .6rem 1.25rem; border-radius: 12px;
+            font-family: 'Sora', sans-serif; font-size: .85rem; font-weight: 700;
+            border: none; cursor: pointer; transition: var(--transition-normal);
+        }
+        .m-btn-cancel {
+            background: var(--gray-100); color: var(--text-muted);
+            border: 1.5px solid var(--border-color);
+        }
+        .m-btn-cancel:hover { border-color: var(--primary-500); color: var(--primary-500); }
+        .m-btn-ok {
+            background: linear-gradient(135deg, var(--warning), #b45309);
+            color: #fff;
+            box-shadow: 0 3px 12px rgba(245,158,11,.3);
+        }
+        .m-btn-ok:hover { transform: translateY(-1px); }
+
+        /* ══════════════════════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════════════════════ */
+        @media (max-width: 768px) {
+            .da-head   { flex-direction: column; align-items: stretch; }
+            .da-title  { font-size: 1.45rem; }
+            .da-title-icon { width: 40px; height: 40px; font-size: 1.1rem; }
+
+            .da-hero-inner { padding: 1.25rem 1.1rem 0; }
+            .da-nom    { font-size: 1.2rem; }
+            .da-av     { width: 54px; height: 54px; font-size: 1.4rem; }
+            .da-pts    { padding: .65rem 1rem; }
+            .da-pts-n  { font-size: 1.6rem; }
+
+            .da-btn-tx  { display: none; }
+            .da-btn.keep-tx .da-btn-tx { display: inline; }
+
+            .da-fields  { grid-template-columns: 1fr; gap: .9rem; }
+            .da-card-bd { padding: 1.1rem; }
+            .da-card-hd { padding: .85rem 1.1rem; }
+            .da-tab     { padding: .7rem .95rem; font-size: .74rem; }
+
+            .da-tbl thead { display: none; }
+            .da-tbl tbody tr {
+                display: block;
+                border: 1px solid var(--border-color);
+                border-radius: 16px; margin-bottom: .75rem;
+                background: var(--card-bg); overflow: hidden;
+            }
+            .da-tbl tbody tr:hover td { background: var(--primary-100); }
+            .da-tbl tbody td {
+                display: flex; justify-content: space-between; align-items: center;
+                padding: .55rem 1rem !important;
+                border-bottom: 1px solid var(--border-color); font-size: .83rem;
+            }
+            .da-tbl tbody td:last-child { border-bottom: none; }
+            .da-tbl tbody td::before {
+                content: attr(data-label);
+                font-size: .62rem; font-weight: 700;
+                text-transform: uppercase; letter-spacing: .06em;
+                color: var(--text-muted); flex-shrink: 0; margin-right: .75rem;
+                font-family: 'Sora', sans-serif;
+            }
+        }
+
+        [data-theme="dark"] .da-tbl tbody tr:hover td {
+            background: rgba(7,86,163,.15);
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-<!-- Header del Alumno -->
-<div class="alumno-header mt-5">
-    <div class="row align-items-center">
-        <div class="col-md-7">
-            <div class="d-flex align-items-center mb-3">
-                <div class="rounded-circle p-3 me-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: rgba(255,255,255,0.2);">
-                    <i class="bi bi-person-fill text-white" style="font-size: 2.5rem;"></i>
-                </div>
-                <div>
-                    <h2 class="mb-0 fw-bold text-white">{{ alumno.nombre_completo }}</h2>
-                    <p class="mb-0 text-white-50"><i class="bi bi-mortarboard-fill me-1"></i> {{ alumno.carrera.nombre }}</p>
-                </div>
+    <div class="da mt-5">
+
+        <!-- ══ HEADER ══ -->
+        <div class="da-head">
+            <div class="da-head-left">
+                <h1 class="da-title">
+                    <div class="da-title-icon"><i class="bi bi-person-badge-fill"></i></div>
+                    Detalle del Alumno
+                </h1>
+                <nav class="da-breadcrumb">
+                    <a href="{% url 'dashboard' %}">Inicio</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <a href="{% url 'lista_alumnos' %}">Alumnos</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span>{{ alumno.nombre_completo }}</span>
+                </nav>
             </div>
-            <div class="d-flex flex-wrap gap-4 mt-3">
-                <div>
-                    <div class="small opacity-75">Cédula</div>
-                    <div class="fw-bold">{{ alumno.cedula }}</div>
-                </div>
-                <div>
-                    <div class="small opacity-75">Sede</div>
-                    <div class="fw-bold">{{ alumno.sede.nombre }}</div>
-                </div>
-                <div>
-                    <div class="small opacity-75">Estado</div>
-                    {% if alumno.activo %}
-                        <span class="badge bg-success">Activo</span>
-                    {% else %}
-                        <span class="badge bg-danger">Inactivo</span>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <div class="col-md-5 text-md-end mt-4 mt-md-0">
-            <div class="star-badge mb-3">
-                <i class="bi bi-star-fill text-warning me-2"></i>
-                <span class="fs-4">{{ total_estrellas }}</span>
-                <span class="ms-2">Puntos</span>
-            </div>
-            <div class="d-flex justify-content-md-end gap-2">
-                <a href="{% url 'editar_alumno' alumno.uuid %}" class="btn btn-light btn-sm rounded-pill px-3">
-                    <i class="bi bi-pencil me-1"></i> Editar
+            <div class="da-acts">
+                <a href="{% url 'editar_alumno' alumno.uuid %}" class="da-btn da-btn-ghost">
+                    <i class="bi bi-pencil"></i><span class="da-btn-tx"> Editar</span>
                 </a>
-                <a href="{% url 'registrar_pago' %}?alumno={{ alumno.id }}&sede={{ alumno.sede.id }}&carrera={{ alumno.carrera.id }}&nombre={{ alumno.nombre_completo|urlencode }}" class="btn btn-success btn-sm rounded-pill px-3">
-                    <i class="bi bi-cash-stack me-1"></i> Cobrar
+                <a href="{% url 'registrar_pago' %}?alumno={{ alumno.id }}&sede={{ alumno.sede.id }}&carrera={{ alumno.carrera.id }}&nombre={{ alumno.nombre_completo|urlencode }}"
+                   class="da-btn da-btn-success keep-tx">
+                    <i class="bi bi-cash-stack"></i><span class="da-btn-tx"> Cobrar</span>
                 </a>
-                <button type="button" class="btn btn-warning btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalCanje">
-                    <i class="bi bi-gift me-1"></i> Canjear
+                <a href="{% url 'ficha_alumno' alumno.uuid %}" class="da-btn da-btn-primary">
+                    <i class="bi bi-journal-text"></i><span class="da-btn-tx"> Ficha</span>
+                </a>
+                <button class="da-btn da-btn-warning keep-tx"
+                        data-bs-toggle="modal" data-bs-target="#modalCanje">
+                    <i class="bi bi-gift"></i><span class="da-btn-tx"> Canjear</span>
                 </button>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="row g-4 mb-4">
-    <!-- Información Personal -->
-    <div class="col-md-8">
-        <div class="section-card">
-            <h5 class="mb-4 d-flex align-items-center">
-                <i class="bi bi-info-circle-fill text-primary me-2"></i>
-                Información Detallada
-            </h5>
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <div class="info-label">Fecha de Nacimiento</div>
-                        <div class="info-value">{{ alumno.fecha_nacimiento|date:"d M, Y" }}</div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="info-label">Teléfono</div>
-                        <div class="info-value">{{ alumno.telefono }}</div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="info-label">Curso Actual</div>
-                        <div class="info-value">{{ alumno.curso_actual }}º Año</div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <div class="info-label">Fecha de Inicio</div>
-                        <div class="info-value">{{ alumno.fecha_inicio|date:"d M, Y" }}</div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="info-label">Carrera Naturalidad</div>
-                        <div class="info-value">{{ alumno.carrera.get_naturalidad_display }}</div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="info-label">Fecha de Registro</div>
-                        <div class="info-value small">{{ alumno.fecha_registro|date:"d/m/Y H:i" }}</div>
-                    </div>
-                </div>
-                <div class="col-12">
-                    <hr class="text-muted opacity-25">
-                    <h6 class="mb-3 text-primary">Contacto de Emergencia</h6>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="info-label">Nombre</div>
-                            <div class="info-value">{{ alumno.contacto_emergencia_nombre }}</div>
+        <!-- ══ HERO GLASS ══ -->
+        <div class="da-hero">
+            <div class="da-hero-orb"></div>
+            <div class="da-hero-inner">
+
+                <div class="da-hero-top">
+                    <div class="da-hero-id">
+                        <div class="da-av-wrap">
+                            <div class="da-av"><i class="bi bi-person-fill"></i></div>
+                            <div class="da-av-dot {% if alumno.activo %}on{% else %}off{% endif %}"></div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="info-label">Teléfono</div>
-                            <div class="info-value">{{ alumno.contacto_emergencia_telefono }}</div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="info-label">Relación</div>
-                            <div class="info-value">{{ alumno.contacto_emergencia_relacion }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Estado Financiero -->
-    <div class="col-md-4">
-        <div class="section-card">
-            <h5 class="mb-4 d-flex align-items-center">
-                <i class="bi bi-wallet2 text-primary me-2"></i>
-                Estado Financiero
-            </h5>
-            
-            <div class="mb-4">
-                <div class="info-label">Situación de Pagos</div>
-                {% if alumno.estado_pagos == 'AL_DIA' %}
-                    <div class="alert alert-success d-flex align-items-center border-0 shadow-sm py-2">
-                        <i class="bi bi-check-circle-fill me-2"></i> Al día
-                    </div>
-                {% elif alumno.estado_pagos == 'CERCANO_VENCIMIENTO' %}
-                    <div class="alert alert-warning d-flex align-items-center border-0 shadow-sm py-2">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Próximo a vencer
-                    </div>
-                {% elif alumno.estado_pagos == 'ATRASADO' %}
-                    <div class="alert alert-danger d-flex align-items-center border-0 shadow-sm py-2">
-                        <i class="bi bi-x-circle-fill me-2"></i> Atrasado
-                    </div>
-                {% else %}
-                    <div class="alert alert-secondary d-flex align-items-center border-0 shadow-sm py-2">
-                        <i class="bi bi-info-circle-fill me-2"></i> Sin pagos
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="mb-3">
-                <div class="info-label">Total Pagado</div>
-                <div class="h4 fw-bold text-success mb-0">Gs. {{ total_pagado|formato_guaranies }}</div>
-            </div>
-
-            {% if alumno.carrera.naturalidad == 'TS' %}
-                <div class="mt-4 p-3 rounded-3 border" style="background-color: var(--gray-100);">
-                    <div class="info-label mb-2">Habilitación de Examen</div>
-                    {% if alumno.puede_rendir_examen %}
-                        <div class="text-success fw-bold">Habilitado</div>
-                    {% else %}
-                        <div class="text-danger fw-bold">No Habilitado</div>
-                        <small>Debe estar al día con sus cuotas</small>
-                    {% endif %}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
-
-<!-- Tabs de Movimientos -->
-<div class="section-card mb-4">
-    <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="pills-pagos-tab" data-bs-toggle="pill" data-bs-target="#pills-pagos" type="button" role="tab">
-                <i class="bi bi-cash me-1"></i> <span class="d-none d-sm-inline">Historial de Pagos</span><span class="d-inline d-sm-none">Historial</span>
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-canjes-tab" data-bs-toggle="pill" data-bs-target="#pills-canjes" type="button" role="tab">
-                <i class="bi bi-gift me-1"></i> <span class="d-none d-sm-inline">Canjes Realizados</span><span class="d-inline d-sm-none">Canjes</span>
-            </button>
-        </li>
-    </ul>
-    
-    <div class="tab-content" id="pills-tabContent">
-        <!-- Panel de Pagos -->
-        <div class="tab-pane fade show active" id="pills-pagos" role="tabpanel">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle table-responsive-stack">
-                    <thead>
-                        <tr>
-                            <th>Recibo</th>
-                            <th>Fecha</th>
-                            <th>Cuota</th>
-                            <th>Concepto</th>
-                            <th class="text-end">Importe</th>
-                            <th class="text-center">Puntos</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for pago in pagos %}
-                        <tr onclick="window.location='{% url 'detalle_pago' pago.uuid %}'">
-                            <td data-label="Recibo"><span class="badge border" style="background-color: var(--gray-100); color: var(--text-main);">{% if pago.numero_recibo %}{{ pago.numero_recibo }}{% else %}Sin recibo{% endif %}</span></td>
-                            <td data-label="Fecha">{{ pago.fecha|date:"d/m/Y" }}</td>
-                            <td data-label="Cuota">{{ pago.numero_cuota }}</td>
-                            <td data-label="Concepto">{{ pago.concepto|truncatechars:40 }}</td>
-                            <td data-label="Importe" class="text-end fw-bold">Gs. {{ pago.importe_total|formato_guaranies }}</td>
-                            <td data-label="Puntos" class="text-center">
-                                {% if pago.estrellas > 0 %}
-                                    <div class="puntos-estrellas">
-                                        {% for i in "x"|ljust:pago.estrellas %}⭐{% endfor %}
-                                    </div>
+                        <div class="da-hero-meta">
+                            <h2 class="da-nom">{{ alumno.nombre_completo }}</h2>
+                            <div class="da-sub">
+                                <i class="bi bi-mortarboard-fill"></i>
+                                {{ alumno.carrera.nombre }}
+                                <span class="da-sub-dot">·</span>
+                                {{ alumno.carrera.get_naturalidad_display }}
+                                <span class="da-sub-dot">·</span>
+                                {% if alumno.activo %}
+                                    <span class="da-status on"><i class="bi bi-circle-fill" style="font-size:.3rem"></i> Activo</span>
                                 {% else %}
-                                    <span class="text-muted">—</span>
+                                    <span class="da-status off"><i class="bi bi-circle-fill" style="font-size:.3rem"></i> Inactivo</span>
                                 {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                No hay pagos registrados
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            </div>
+                            <div class="da-hero-info">
+                                {% if alumno.cedula %}<span class="da-hero-pill"><i class="bi bi-card-text"></i>{{ alumno.cedula }}</span>{% endif %}
+                                {% if alumno.sede %}<span class="da-hero-pill"><i class="bi bi-geo-alt"></i>{{ alumno.sede.nombre }}</span>{% endif %}
+                                {% if alumno.telefono %}<span class="da-hero-pill"><i class="bi bi-phone"></i>{{ alumno.telefono }}</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="da-pts">
+                        <span class="da-pts-n">{{ total_estrellas }}</span>
+                        <span class="da-pts-l">★ Puntos</span>
+                    </div>
+                </div>
+
+                <div class="da-tabs">
+                    <button class="da-tab act" onclick="cambiarTab('info')" id="tab-info">
+                        <i class="bi bi-person-lines-fill"></i> Información
+                    </button>
+                    <button class="da-tab" onclick="cambiarTab('pagos')" id="tab-pagos">
+                        <i class="bi bi-cash-coin"></i> Pagos
+                    </button>
+                    <button class="da-tab" onclick="cambiarTab('canjes')" id="tab-canjes">
+                        <i class="bi bi-gift"></i> Canjes
+                    </button>
+                </div>
+
             </div>
         </div>
 
-        <!-- Panel de Canjes -->
-        <div class="tab-pane fade" id="pills-canjes" role="tabpanel">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle table-responsive-stack">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Concepto</th>
-                            <th class="text-center">Cantidad</th>
-                            <th>Registrado por</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for canje in canjes %}
-                        <tr>
-                            <td data-label="Fecha">{{ canje.fecha|date:"d/m/Y H:i" }}</td>
-                            <td data-label="Concepto">{{ canje.concepto }}</td>
-                            <td data-label="Cantidad" class="text-center fw-bold text-danger">-{{ canje.cantidad }} ⭐</td>
-                            <td data-label="Registrado por">{{ canje.usuario_registro.get_full_name|default:canje.usuario_registro.username }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center py-5 text-muted">
-                                <i class="bi bi-gift fs-1 d-block mb-2"></i>
-                                No hay canjes registrados
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <!-- ══ PANELS ══ -->
+        <div class="da-panels">
+
+            <!-- INFO -->
+            <div id="panel-info" class="act">
+                <div class="row g-3">
+
+                    <div class="col-lg-8">
+                        <div class="da-card">
+                            <div class="da-card-hd">
+                                <div class="da-card-ic ic-b"><i class="bi bi-person-lines-fill"></i></div>
+                                <span class="da-card-tit">Datos Personales</span>
+                            </div>
+                            <div class="da-card-bd">
+                                <div class="da-fields">
+                                    <div><span class="da-lbl">Nombre completo</span><span class="da-val">{{ alumno.nombre_completo }}</span></div>
+                                    <div><span class="da-lbl">Cédula de identidad</span><span class="da-val mono">{{ alumno.cedula|default:"—" }}</span></div>
+                                    <div><span class="da-lbl">Fecha de nacimiento</span><span class="da-val">{{ alumno.fecha_nacimiento|date:"d \d\e F \d\e Y"|default:"—" }}</span></div>
+                                    <div><span class="da-lbl">Teléfono</span><span class="da-val mono">{{ alumno.telefono|default:"—" }}</span></div>
+                                    <div><span class="da-lbl">Fecha de inicio</span><span class="da-val">{{ alumno.fecha_inicio|date:"d \d\e F \d\e Y"|default:"—" }}</span></div>
+                                    <div><span class="da-lbl">Curso actual</span><span class="da-val">{% if alumno.curso_actual %}{{ alumno.curso_actual }}° Año{% else %}<span class="dim">—</span>{% endif %}</span></div>
+                                    <div><span class="da-lbl">Sede</span><span class="da-val">{{ alumno.sede.nombre }}</span></div>
+                                    <div><span class="da-lbl">Modalidad</span><span class="da-val">{{ alumno.carrera.get_naturalidad_display }}</span></div>
+                                </div>
+                                <hr class="da-hr">
+                                <div class="da-sec-lbl"><i class="bi bi-telephone-fill"></i> Contacto de Emergencia</div>
+                                <div class="da-fields">
+                                    <div><span class="da-lbl">Nombre</span><span class="da-val">{{ alumno.contacto_emergencia_nombre|default:"—" }}</span></div>
+                                    <div><span class="da-lbl">Teléfono</span><span class="da-val mono">{{ alumno.contacto_emergencia_telefono|default:"—" }}</span></div>
+                                    <div><span class="da-lbl">Relación</span><span class="da-val">{{ alumno.contacto_emergencia_relacion|default:"—" }}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="da-card" style="height:100%">
+                            <div class="da-card-hd">
+                                <div class="da-card-ic ic-g"><i class="bi bi-wallet2"></i></div>
+                                <span class="da-card-tit">Estado Financiero</span>
+                            </div>
+                            <div class="da-card-bd">
+                                {% if estado_cobertura == 'AL_DIA' %}
+                                    <div class="da-estado est-ok"><i class="bi bi-check-circle-fill"></i><div class="da-est-body"><span class="da-est-main">Al día</span>{% if valido_hasta %}<span class="da-est-sub">Cubierto hasta el {{ valido_hasta|date:"d/m/Y" }}</span>{% endif %}</div></div>
+                                {% elif estado_cobertura == 'POR_VENCER' %}
+                                    <div class="da-estado est-warn"><i class="bi bi-exclamation-triangle-fill"></i><div class="da-est-body"><span class="da-est-main">Por vencer pronto</span>{% if valido_hasta %}<span class="da-est-sub">Vence el {{ valido_hasta|date:"d/m/Y" }}</span>{% endif %}</div></div>
+                                {% elif estado_cobertura == 'VENCIDO' %}
+                                    <div class="da-estado est-bad"><i class="bi bi-x-circle-fill"></i><div class="da-est-body"><span class="da-est-main">Cobertura vencida</span>{% if valido_hasta %}<span class="da-est-sub">Venció el {{ valido_hasta|date:"d/m/Y" }}</span>{% endif %}</div></div>
+                                {% else %}
+                                    <div class="da-estado est-none"><i class="bi bi-info-circle-fill"></i><div class="da-est-body"><span class="da-est-main">Sin pagos registrados</span><span class="da-est-sub">No se encontraron pagos con cobertura</span></div></div>
+                                {% endif %}
+
+                                <div class="da-total">
+                                    <span class="da-total-l">Total pagado</span>
+                                    <span class="da-total-v">Gs. {{ total_pagado|formato_guaranies }}</span>
+                                </div>
+
+                                {% if alumno.carrera.naturalidad == 'TS' %}
+                                    <div class="da-hab {% if alumno.puede_rendir_examen %}ok{% else %}no{% endif %}">
+                                        <div class="da-hab-ic"><i class="bi bi-{% if alumno.puede_rendir_examen %}patch-check-fill{% else %}patch-exclamation-fill{% endif %}"></i></div>
+                                        <div>
+                                            <span class="da-hab-l">Habilitación de Examen</span>
+                                            {% if alumno.puede_rendir_examen %}<span class="da-hab-v">Habilitado para rendir</span>{% else %}<span class="da-hab-v">No habilitado</span>{% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- PAGOS -->
+            <div id="panel-pagos">
+                <div class="da-card">
+                    <div style="overflow-x:auto">
+                        <table class="da-tbl">
+                            <thead><tr>
+                                <th>Recibo</th><th>Fecha</th><th>Cuota</th>
+                                <th>Concepto</th><th>Importe</th>
+                                <th>Válido hasta</th><th style="text-align:center">Puntos</th>
+                            </tr></thead>
+                            <tbody>
+                            {% for pago in pagos %}
+                                <tr onclick="window.location='{% url 'detalle_pago' pago.uuid %}'">
+                                    <td data-label="Recibo"><span class="da-rec"><i class="bi bi-receipt" style="font-size:.6rem"></i> {{ pago.numero_recibo|default:"—" }}</span></td>
+                                    <td data-label="Fecha" style="color:var(--text-muted);font-size:.85rem">{{ pago.fecha|date:"d/m/Y" }}</td>
+                                    <td data-label="Cuota"><span class="da-cuota">{{ pago.numero_cuota|default:"—" }}</span></td>
+                                    <td data-label="Concepto" style="color:var(--text-muted);font-size:.85rem">{{ pago.concepto|truncatechars:36 }}</td>
+                                    <td data-label="Importe"><span class="da-importe">Gs. {{ pago.importe_total|formato_guaranies }}</span></td>
+                                    <td data-label="Válido hasta">
+                                        {% if pago.valido_hasta %}<span style="font-size:.85rem;font-weight:600">{{ pago.valido_hasta|date:"d/m/Y" }}</span>{% else %}<span style="color:var(--text-muted)">—</span>{% endif %}
+                                        {% if pago.tiene_multa %}<span class="da-multa ms-1"><i class="bi bi-exclamation-triangle-fill"></i> Multa</span>{% endif %}
+                                    </td>
+                                    <td data-label="Puntos" style="text-align:center">
+                                        {% if pago.es_matricula %}<span style="color:var(--text-muted);font-size:.75rem;font-family:'Sora',sans-serif">Matrícula</span>
+                                        {% elif pago.puntos == 3 %}<span class="da-pts-badge pts-3">★★★ 3</span>
+                                        {% elif pago.puntos == 2 %}<span class="da-pts-badge pts-2">★★ 2</span>
+                                        {% elif pago.puntos == 1 %}<span class="da-pts-badge pts-1">★ 1</span>
+                                        {% else %}<span class="da-pts-badge pts-0">★ 0</span>{% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr class="no-click"><td colspan="7">
+                                    <div class="da-empty"><div class="da-empty-ico"><i class="bi bi-inbox"></i></div><p>No hay pagos registrados aún</p></div>
+                                </td></tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANJES -->
+            <div id="panel-canjes">
+                <div class="da-card">
+                    <div style="overflow-x:auto">
+                        <table class="da-tbl">
+                            <thead><tr>
+                                <th>Fecha</th><th>Concepto / Premio</th>
+                                <th style="text-align:center">Puntos</th><th>Registrado por</th>
+                            </tr></thead>
+                            <tbody>
+                            {% for canje in canjes %}
+                                <tr class="no-click">
+                                    <td data-label="Fecha" style="color:var(--text-muted);font-size:.85rem">{{ canje.fecha|date:"d/m/Y H:i" }}</td>
+                                    <td data-label="Concepto" style="font-weight:600">{{ canje.concepto }}</td>
+                                    <td data-label="Puntos" style="text-align:center">
+                                        <span style="font-family:'Sora',sans-serif;font-weight:800;color:var(--danger)">−{{ canje.cantidad }} ★</span>
+                                    </td>
+                                    <td data-label="Por" style="font-size:.85rem;color:var(--text-muted)">
+                                        {{ canje.usuario_registro.get_full_name|default:canje.usuario_registro.username }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr class="no-click"><td colspan="4">
+                                    <div class="da-empty"><div class="da-empty-ico"><i class="bi bi-gift"></i></div><p>No se han realizado canjes aún</p></div>
+                                </td></tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /da-panels -->
+    </div><!-- /da -->
+
+
+    <!-- ══ MODAL CANJE ══ -->
+    <div class="modal fade modal-da" id="modalCanje" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-gift-fill me-2"></i>Registrar Canje de Puntos</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{% url 'canjear_estrellas' alumno.uuid %}" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="pts-disp">
+                            <span class="n">{{ total_estrellas }}</span>
+                            <span class="l">★ Puntos disponibles</span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="m-lbl">Cantidad a Canjear</label>
+                            <input type="number" name="cantidad" class="m-input"
+                                   min="1" max="{{ total_estrellas }}" required placeholder="0">
+                        </div>
+                        <div>
+                            <label class="m-lbl">Concepto / Premio</label>
+                            <input type="text" name="concepto" class="m-input"
+                                   required placeholder="Ej: Vale de fotocopias, Kit de dibujo…">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="m-btn m-btn-cancel" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="m-btn m-btn-ok"><i class="bi bi-check-lg"></i> Confirmar canje</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
 
-<div class="mt-4 mb-5">
-    <a href="{% url 'lista_alumnos' %}" class="btn btn-outline-secondary rounded-pill">
-        <i class="bi bi-arrow-left me-1"></i> Volver a la lista
-    </a>
-</div>
-
-<!-- Modal de Canje -->
-<div class="modal fade" id="modalCanje" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-warning text-dark border-0">
-                <h5 class="modal-title fw-bold"><i class="bi bi-gift-fill me-2"></i> Registrar canje</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{% url 'canjear_estrellas' alumno.uuid %}" method="POST">
-                {% csrf_token %}
-                <div class="modal-body p-4">
-                    <div class="text-center mb-4">
-                        <div class="display-6 fw-bold text-warning">⭐ {{ total_estrellas }}</div>
-                        <div class="text-muted">Puntos disponibles</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Cantidad a Canjear</label>
-                        <input type="number" name="cantidad" class="form-control form-control-lg" min="1" max="{{ total_estrellas }}" required placeholder="0">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Concepto / Premio</label>
-                        <input type="text" name="concepto" class="form-control" required placeholder="Ej: Vale de fotocopias, Kit de dibujo...">
-                    </div>
-                </div>
-                <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">Confirmar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    <script>
+        const TAB_KEY = 'da_tab_{{ alumno.uuid }}';
+        function cambiarTab(name) {
+            document.querySelectorAll('.da-tab').forEach(t => t.classList.remove('act'));
+            document.getElementById('tab-' + name).classList.add('act');
+            document.querySelectorAll('.da-panels > div').forEach(p => p.classList.remove('act'));
+            document.getElementById('panel-' + name).classList.add('act');
+            try { sessionStorage.setItem(TAB_KEY, name); } catch(e) {}
+        }
+        (function() {
+            try {
+                const s = sessionStorage.getItem(TAB_KEY);
+                if (s && document.getElementById('panel-' + s)) cambiarTab(s);
+            } catch(e) {}
+        })();
+    </script>
 {% endblock %}
