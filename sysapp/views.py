@@ -555,7 +555,6 @@ def registrar_pago(request):
 
 
 @login_required
-@admin_required
 def editar_pago(request, pago_uuid):
     pago = get_object_or_404(Pago, uuid=pago_uuid)
 
@@ -1472,7 +1471,6 @@ def ficha_alumno(request, alumno_uuid):
         'tiene_inicio':   bool(alumno.fecha_inicio),
     })
 
-
 @login_required
 def editar_datos_ficha(request, alumno_uuid):
     """
@@ -1530,3 +1528,41 @@ def editar_datos_ficha(request, alumno_uuid):
 
     # Siempre redirigir a la ficha (GET o POST)
     return redirect('ficha_alumno', alumno_uuid=alumno.uuid)
+
+
+@property
+def ultimo_pago_valido(self):
+    """
+    Retorna el último pago relevante, tomando en cuenta pagos sin valido_hasta
+    y ordenando primero por valido_hasta y luego por fecha.
+    """
+    return self.pagos.filter(es_matricula=False).order_by(
+        '-valido_hasta', '-fecha'
+    ).first()
+
+
+@property
+def dias_hasta_vencimiento(self):
+    pago = self.ultimo_pago_valido
+    if not pago or not pago.valido_hasta:
+        return None
+    return (pago.valido_hasta - timezone.now().date()).days
+
+@property
+def estado_pagos(self):
+    pago = self.ultimo_pago_valido
+    if not pago:
+        return 'SIN_PAGOS'
+
+    dias = self.dias_hasta_vencimiento
+
+    if dias is None:
+        # Si no hay fecha de vencimiento, consideramos que el pago está activo
+        return 'AL_DIA'
+
+    if dias > 10:
+        return 'AL_DIA'
+    elif dias >= 0:
+        return 'CERCANO_VENCIMIENTO'
+    else:
+        return 'ATRASADO'
