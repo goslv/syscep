@@ -4,7 +4,11 @@ from django.contrib.auth.models import User
 from django.utils.html import format_html
 from .models import Sede, Carrera, Materia, Funcionario, AsistenciaFuncionario, Alumno, Pago, CanjeEstrellas, Egreso, \
     CuentaBancaria, PerfilUsuario
+from django.contrib.admin import AdminSite
 
+AdminSite.has_permission = lambda self, request: (
+    request.user.is_active and request.user.is_superuser
+)
 
 @admin.register(CanjeEstrellas)
 class CanjeEstrellasAdmin(admin.ModelAdmin):
