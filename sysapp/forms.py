@@ -9,41 +9,48 @@ from .models import (
 
 class UsuarioForm(forms.ModelForm):
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        widget=forms.PasswordInput(attrs={'class': 'fu-input'}),
         required=False, label='Contraseña',
     )
     password_confirm = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        widget=forms.PasswordInput(attrs={'class': 'fu-input'}),
         required=False, label='Confirmar Contraseña',
     )
     sede = forms.ModelChoiceField(
         queryset=None, required=False, label='Sede asignada',
         empty_label='Sin restricción (acceso global)',
-        widget=forms.Select(attrs={'class': 'form-select'}),
+        widget=forms.Select(attrs={'class': 'fu-input'}),
+    )
+    roles = forms.ModelMultipleChoiceField(
+        queryset=None, required=False, label='Roles asignados',
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
     )
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active']
+        fields = ['username', 'email', 'first_name', 'last_name', 'is_active']
         widgets = {
-            'username':   forms.TextInput(attrs={'class': 'form-control'}),
-            'email':      forms.EmailInput(attrs={'class': 'form-control'}),
-            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'last_name':  forms.TextInput(attrs={'class': 'form-control'}),
-            'is_staff':   forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'username':   forms.TextInput(attrs={'class': 'fu-input'}),
+            'email':      forms.EmailInput(attrs={'class': 'fu-input'}),
+            'first_name': forms.TextInput(attrs={'class': 'fu-input'}),
+            'last_name':  forms.TextInput(attrs={'class': 'fu-input'}),
             'is_active':  forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         from .models import Sede
+        from django.contrib.auth.models import Group
         self.fields['sede'].queryset = Sede.objects.filter(activa=True).order_by('nombre')
+        self.fields['roles'].queryset = Group.objects.all().order_by('name')
+
         if not self.instance.pk:
             self.fields['password'].required = True
             self.fields['password_confirm'].required = True
         else:
             try:
                 self.initial['sede'] = self.instance.perfil.sede
+                self.initial['roles'] = self.instance.groups.all()
             except Exception:
                 pass
 
@@ -64,11 +71,40 @@ class UsuarioForm(forms.ModelForm):
             user.set_password(password)
         if commit:
             user.save()
+            # Guardar roles
+            if roles := self.cleaned_data.get('roles'):
+                user.groups.set(roles)
+            else:
+                user.groups.clear()
+
             from .models import PerfilUsuario
             perfil, _ = PerfilUsuario.objects.get_or_create(user=user)
             perfil.sede = self.cleaned_data.get('sede')
             perfil.save()
         return user
+
+
+class RoleForm(forms.ModelForm):
+    from django.contrib.auth.models import Group, Permission
+    permissions = forms.ModelMultipleChoiceField(
+        queryset=Permission.objects.all().order_by('content_type__app_label', 'codename'),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Permisos"
+    )
+
+    class Meta:
+        from django.contrib.auth.models import Group
+        model = Group
+        fields = ['name', 'permissions']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'fu-input', 'placeholder': 'Ej: Director, Secretaria…'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.initial['permissions'] = self.instance.permissions.all()
 
 
 class PerfilForm(forms.ModelForm):
@@ -81,10 +117,7 @@ class PerfilForm(forms.ModelForm):
             'email':      forms.EmailInput(attrs={'class': 'form-control'}),
         }
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  PAGO FORM
-# ══════════════════════════════════════════════════════════════════════════
 class PagoForm(forms.ModelForm):
     es_matricula = forms.BooleanField(
         required=False, label='Es Matrícula',
@@ -122,6 +155,14 @@ class PagoForm(forms.ModelForm):
         required=False, label='Cantidad de Cuotas',
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'value': '1'})
     )
+    monto_efectivo = forms.DecimalField(
+        required=False, max_digits=10, decimal_places=0, label='Monto Efectivo (Gs.)',
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '1'})
+    )
+    monto_deposito = forms.DecimalField(
+        required=False, max_digits=10, decimal_places=0, label='Monto Depósito (Gs.)',
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '1'})
+    )
 
     class Meta:
         model = Pago
@@ -129,6 +170,7 @@ class PagoForm(forms.ModelForm):
             'numero_recibo', 'fecha', 'alumno', 'sede', 'carrera',
             'numero_cuota', 'concepto', 'importe_total', 'puntos',
             'foto_comprobante', 'observaciones', 'es_matricula', 'metodo_pago',
+            'monto_efectivo', 'monto_deposito',
         ]
         widgets = {
             'numero_recibo':    forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opcional'}),
@@ -149,7 +191,7 @@ class PagoForm(forms.ModelForm):
         self.fields['alumno'].queryset  = Alumno.objects.all().order_by('apellido', 'nombre')
         self.fields['sede'].queryset    = Sede.objects.all().order_by('nombre')
         self.fields['carrera'].queryset = Carrera.objects.filter(activa=True).order_by('nombre')
-        for f in ['numero_recibo', 'alumno', 'carrera', 'observaciones', 'foto_comprobante', 'puntos', 'carrera_otro']:
+        for f in ['numero_recibo', 'alumno', 'carrera', 'observaciones', 'foto_comprobante', 'puntos', 'carrera_otro', 'monto_efectivo', 'monto_deposito']:
             self.fields[f].required = False
         if self.instance.pk:
             self.initial['es_matricula'] = self.instance.es_matricula
@@ -206,6 +248,23 @@ class PagoForm(forms.ModelForm):
         if not importe_total and monto_unitario:
             cuotas = cleaned_data.get('cantidad_cuotas', 1) or 1
             cleaned_data['importe_total'] = monto_unitario * cuotas
+            importe_total = cleaned_data['importe_total']
+
+        metodo_pago = cleaned_data.get('metodo_pago')
+        if metodo_pago == 'EFECTIVO':
+            cleaned_data['monto_efectivo'] = importe_total
+            cleaned_data['monto_deposito'] = 0
+        elif metodo_pago == 'DEPOSITO':
+            cleaned_data['monto_efectivo'] = 0
+            cleaned_data['monto_deposito'] = importe_total
+        elif metodo_pago == 'MIXTO':
+            m_efectivo = cleaned_data.get('monto_efectivo') or 0
+            m_deposito = cleaned_data.get('monto_deposito') or 0
+            if (m_efectivo + m_deposito) != importe_total:
+                raise forms.ValidationError(
+                    f'La suma de efectivo ({m_efectivo}) y depósito ({m_deposito}) '
+                    f'debe coincidir con el importe total ({importe_total}).'
+                )
 
         return cleaned_data
 
@@ -231,13 +290,10 @@ class PagoForm(forms.ModelForm):
             numeros.append(parte)
         return ','.join(numeros)
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  EGRESO FORM
-# ══════════════════════════════════════════════════════════════════════════
 class EgresoForm(forms.ModelForm):
 
-    # ── Funcionario (solo visible para categoría SUELDOS) ────────────────
+    # Funcionario (solo visible para categoría SUELDOS)
     funcionario = forms.ModelChoiceField(
         queryset=None,
         required=False,
@@ -300,13 +356,10 @@ class EgresoForm(forms.ModelForm):
             cleaned_data['funcionario'] = None
         return cleaned_data
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  ASISTENCIA FORM
-# ══════════════════════════════════════════════════════════════════════════
 class AsistenciaForm(forms.ModelForm):
 
-    # ── Horas trabajadas (opcional) ──────────────────────────────────────
+    # Horas trabajadas (opcional)
     horas_trabajadas = forms.DecimalField(
         required=False,
         max_digits=5,
@@ -346,10 +399,7 @@ class AsistenciaForm(forms.ModelForm):
             raise forms.ValidationError('Las horas trabajadas no pueden superar 24 en un día.')
         return horas
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  ALUMNO FORM
-# ══════════════════════════════════════════════════════════════════════════
 class AlumnoForm(forms.ModelForm):
     class Meta:
         model = Alumno
@@ -382,10 +432,7 @@ class AlumnoForm(forms.ModelForm):
                   'contacto_emergencia_relacion', 'activo']:
             self.fields[f].required = False
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  FUNCIONARIO FORM
-# ══════════════════════════════════════════════════════════════════════════
 class FuncionarioForm(forms.ModelForm):
     class Meta:
         model = Funcionario
@@ -418,10 +465,7 @@ class SedeForm(forms.ModelForm):
             'activa':    forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  CARRERA FORM
-# ══════════════════════════════════════════════════════════════════════════
 class CarreraForm(forms.ModelForm):
     class Meta:
         model = Carrera
