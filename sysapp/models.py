@@ -2,6 +2,7 @@ import os
 import uuid
 from typing import Any
 
+from django.contrib import auth
 from django.contrib.auth.context_processors import auth
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
@@ -309,8 +310,25 @@ class Pago(models.Model):
     importe_total = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="Importe Total")
     recibido_por = models.CharField(max_length=200, verbose_name="Recibido por", blank=True, null=True)
     es_matricula = models.BooleanField(default=False, verbose_name="Es Matrícula")
-    METODO_PAGO_CHOICES = [('EFECTIVO', 'Efectivo'), ('TRANSFERENCIA', 'Transferencia')]
-    metodo_pago = models.CharField(max_length=20, choices=METODO_PAGO_CHOICES, default='EFECTIVO', verbose_name="Método de Pago")
+    METODO_PAGO_CHOICES = [
+        ('EFECTIVO', 'Efectivo'),
+        ('DEPOSITO', 'Depósito / Transferencia'),
+        ('MIXTO', 'Mixto'),
+    ]
+    metodo_pago = models.CharField(
+        max_length=20, choices=METODO_PAGO_CHOICES,
+        default='EFECTIVO', verbose_name="Método de Pago"
+    )
+    monto_efectivo = models.DecimalField(
+        max_digits=10, decimal_places=0,
+        null=True, blank=True, default=0,
+        verbose_name="Monto Efectivo",
+    )
+    monto_deposito = models.DecimalField(
+        max_digits=10, decimal_places=0,
+        null=True, blank=True, default=0,
+        verbose_name="Monto Depósito / Transferencia",
+    )
     puntos = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name="Puntos")
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
     foto_comprobante = models.ImageField(upload_to=path_comprobante_pago, blank=True, null=True)
@@ -425,7 +443,7 @@ class Egreso(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     CATEGORIA_CHOICES = [
         ('SERVICIOS', 'Servicios (Luz, Agua, Internet)'),
-        ('SUELDOS', 'Sueldos y Salarios'),
+        ('SUELDOS', 'Honorarios y Viáticos'),
         ('MATERIALES', 'Materiales y Suministros'),
         ('MANTENIMIENTO', 'Mantenimiento'),
         ('ALQUILER', 'Alquiler'),
@@ -443,8 +461,6 @@ class Egreso(models.Model):
     usuario_registro = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Registrado por")
     observaciones = models.TextField(blank=True, null=True, verbose_name="Observaciones")
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Registro")
-
-    # ── NUEVO: funcionario asociado (para sueldos) ──────────────────────
     funcionario = models.ForeignKey(
         Funcionario,
         on_delete=models.SET_NULL,
@@ -527,6 +543,23 @@ class CuentaBancaria(models.Model):
 
     def __str__(self):
         return f"{self.entidad} — {self.titular}"
+
+
+class CierreCaja(models.Model):
+    sede = models.ForeignKey('Sede', on_delete=models.CASCADE, related_name='cierres')
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cierres')
+    fecha_cierre = models.DateTimeField(default=timezone.now)
+    total_ingresos = models.DecimalField(max_digits=15, decimal_places=0)
+    total_egresos = models.DecimalField(max_digits=15, decimal_places=0)
+    balance = models.DecimalField(max_digits=15, decimal_places=0)
+
+    class Meta:
+        verbose_name = "Cierre de Caja"
+        verbose_name_plural = "Cierres de Caja"
+        ordering = ['-fecha_cierre']
+
+    def __str__(self):
+        return f"Cierre {self.sede.nombre} - {self.fecha_cierre.strftime('%d/%m/%Y %H:%M')}"
 
 
 class PerfilUsuario(models.Model):
