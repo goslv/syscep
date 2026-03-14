@@ -1,812 +1,363 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
+{% load static %}
 
 {% block title %}Detalle del Pago - ITS CEP{% endblock %}
 {% block page_title %}Detalle del Pago{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/caja/detallePago.css' %}">
+{% endblock %}
 
 {% block content %}
 
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    <div class="dp-root">
+        <div class="dp-grid">
 
-    /* ── Tokens ──────────────────────────────────────────────────── */
-    :root {
-        --dp-bg:       #f4f1ec;
-        --dp-surface:  #ffffff;
-        --dp-ink:      #0d0d0d;
-        --dp-muted:    #6b7280;
-        --dp-border:   rgba(0,0,0,0.07);
-        --dp-accent: #1688f9;
-        --dp-accent2:  #0f766e;
-        --dp-danger:   #dc2626;
-        --dp-mono:     'JetBrains Mono', monospace;
-        --dp-sans:     'Sora', sans-serif;
-        --dp-radius:   16px;
-        --dp-shadow:   0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
-        --dp-shadow-lg:0 20px 40px rgba(0,0,0,0.1);
-    }
+            <!--Columna principal-->
+            <div>
+                <div class="dp-card">
 
-    [data-theme="dark"] {
-        --dp-bg:      #0d1117;
-        --dp-surface: #161b22;
-        --dp-ink:     #e6edf3;
-        --dp-muted:   #8b949e;
-        --dp-border:  rgba(255,255,255,0.07);
-        --dp-shadow:  0 2px 12px rgba(0,0,0,0.4);
-        --dp-shadow-lg:0 20px 40px rgba(0,0,0,0.5);
-    }
-
-    /* ── Reset scope ─────────────────────────────────────────────── */
-    .dp-root * { box-sizing: border-box; }
-    .dp-root { font-family: var(--dp-sans); color: var(--dp-ink); }
-
-    .dp-back {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.45rem;
-        font-size: 0.82rem;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: var(--dp-muted);
-        text-decoration: none;
-        padding: 0.5rem 0;
-        margin-bottom: 1.75rem;
-        transition: color 0.2s, gap 0.2s;
-    }
-    .dp-back:hover { color: var(--dp-accent); gap: 0.7rem; }
-    .dp-back i { font-size: 1rem; }
-
-    .dp-grid {
-        display: grid;
-        grid-template-columns: 1fr 340px;
-        gap: 1.5rem;
-        align-items: start;
-    }
-
-    @media (max-width: 900px) {
-        .dp-grid { grid-template-columns: 1fr; }
-        .dp-sidebar { order: -1; }
-    }
-
-    /* ── Card base ───────────────────────────────────────────────── */
-    .dp-card {
-        background: var(--dp-surface);
-        border-radius: var(--dp-radius);
-        border: 1px solid var(--dp-border);
-        box-shadow: var(--dp-shadow);
-        overflow: hidden;
-    }
-
-    /* ── Hero header ─────────────────────────────────────────────── */
-    .dp-hero {
-        position: relative;
-        padding: 1.75rem 2rem 1.5rem;
-        background: var(--dp-surface);
-        border-bottom: 1px solid var(--dp-border);
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .dp-hero-left { display: flex; flex-direction: column; gap: 0.5rem; }
-
-    /* Tipo de pago: matrícula o cuota */
-    .dp-type-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 999px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        width: fit-content;
-    }
-    .dp-type-pill.cuota      { background: rgba(15,118,110,0.12); color: var(--dp-accent2); }
-    .dp-type-pill.matricula  { background: rgba(249,115,22,0.12); color: var(--dp-accent); }
-
-    .dp-recibo-num {
-        font-family: var(--dp-mono);
-        font-size: 1.55rem;
-        font-weight: 600;
-        color: var(--dp-ink);
-        letter-spacing: -0.02em;
-        line-height: 1.1;
-    }
-    .dp-recibo-num span { color: var(--dp-muted); font-weight: 400; font-size: 1rem; }
-
-    .dp-hero-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 0.25rem;
-    }
-
-    .dp-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.3rem 0.7rem;
-        border-radius: 8px;
-        font-size: 0.78rem;
-        font-weight: 500;
-        background: var(--dp-bg);
-        color: var(--dp-muted);
-        border: 1px solid var(--dp-border);
-    }
-    .dp-chip i { font-size: 0.8rem; }
-    .dp-chip.efectivo    { background: rgba(34,197,94,0.1);  color: #15803d; border-color: rgba(34,197,94,0.2); }
-    .dp-chip.transferencia { background: rgba(59,130,246,0.1); color: #1d4ed8; border-color: rgba(59,130,246,0.2); }
-
-    /* Action buttons */
-    .dp-actions { display: flex; gap: 0.5rem; align-items: flex-start; }
-
-    .dp-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.4rem;
-        padding: 0.5rem 1rem;
-        border-radius: 10px;
-        border: 1px solid var(--dp-border);
-        font-size: 0.82rem;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        transition: all 0.18s ease;
-        white-space: nowrap;
-        background: var(--dp-surface);
-        color: var(--dp-ink);
-    }
-    .dp-btn:hover { transform: translateY(-1px); box-shadow: var(--dp-shadow-lg); }
-    .dp-btn.edit  { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
-    .dp-btn.edit:hover  { background: #2563eb; color: white; }
-    .dp-btn.del   { background: #fef2f2; color: var(--dp-danger); border-color: #fecaca; }
-    .dp-btn.del:hover   { background: var(--dp-danger); color: white; }
-
-
-    [data-theme="dark"] .dp-btn       { background: #21262d; border-color: #30363d; color: var(--dp-ink); }
-    [data-theme="dark"] .dp-btn.edit  { background: rgba(37,99,235,0.15); color: #60a5fa; border-color: rgba(37,99,235,0.3); }
-    [data-theme="dark"] .dp-btn.edit:hover { background: #2563eb; color: white; }
-    [data-theme="dark"] .dp-btn.del   { background: rgba(220,38,38,0.12); color: #f87171; border-color: rgba(220,38,38,0.2); }
-    [data-theme="dark"] .dp-btn.del:hover  { background: #dc2626; color: white; }
-    [data-theme="dark"] .dp-hero  { background: rgba(1, 1, 30, 0.34); color: rgba(2, 13, 58, 0.25); }
-
-    /* ── Importe destacado ───────────────────────────────────────── */
-    .dp-amount-band {
-        padding: 1.25rem 2rem;
-        background: linear-gradient(135deg, var(--dp-accent) 0%, #0c31ea 100%);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-    }
-
-    .dp-amount-label {
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: rgba(255,255,255,0.75);
-    }
-
-    .dp-amount-value {
-        font-family: var(--dp-mono);
-        font-size: 2rem;
-        font-weight: 700;
-        color: #ffffff;
-        letter-spacing: -0.03em;
-        line-height: 1;
-    }
-
-    .dp-puntos-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        background: rgba(255,255,255,0.2);
-        color: white;
-        padding: 0.35rem 0.8rem;
-        border-radius: 999px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        backdrop-filter: blur(4px);
-    }
-
-    /* ── Field grid ──────────────────────────────────────────────── */
-    .dp-body { padding: 1.75rem 2rem; }
-
-    .dp-fields {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.25rem 2rem;
-    }
-
-    .dp-field { display: flex; flex-direction: column; gap: 0.3rem; }
-    .dp-field.full { grid-column: 1 / -1; }
-
-    .dp-field-label {
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--dp-muted);
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-    .dp-field-label i { font-size: 0.75rem; }
-
-    .dp-field-value {
-        font-size: 0.95rem;
-        font-weight: 500;
-        color: var(--dp-ink);
-        line-height: 1.4;
-    }
-
-    .dp-field-value a {
-        color: var(--dp-accent2);
-        text-decoration: none;
-        font-weight: 600;
-        transition: color 0.15s;
-    }
-    .dp-field-value a:hover { color: var(--dp-accent); }
-
-    .dp-field-value.mono {
-        font-family: var(--dp-mono);
-        font-size: 0.9rem;
-        color: var(--dp-ink);
-    }
-
-    .dp-badge-ext {
-        display: inline-block;
-        padding: 0.15rem 0.55rem;
-        border-radius: 6px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        background: rgba(14,165,233,0.12);
-        color: #0369a1;
-        margin-left: 0.5rem;
-        vertical-align: middle;
-    }
-
-    /* Divider */
-    .dp-divider {
-        grid-column: 1 / -1;
-        height: 1px;
-        background: var(--dp-border);
-        margin: 0.25rem 0;
-    }
-
-    /* ── Footer meta ─────────────────────────────────────────────── */
-    .dp-footer {
-        padding: 1rem 2rem;
-        border-top: 1px solid var(--dp-border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        background: var(--dp-bg);
-    }
-
-    .dp-footer-meta {
-        font-size: 0.75rem;
-        color: var(--dp-muted);
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-    .dp-footer-meta strong { color: var(--dp-ink); }
-
-    /* ── Sidebar: comprobante ────────────────────────────────────── */
-    .dp-sidebar { display: flex; flex-direction: column; gap: 1rem; }
-
-    .dp-comprobante-card {
-        background: var(--dp-surface);
-        border-radius: var(--dp-radius);
-        border: 1px solid var(--dp-border);
-        box-shadow: var(--dp-shadow);
-        overflow: hidden;
-    }
-
-    .dp-comprobante-header {
-        padding: 1rem 1.25rem 0.75rem;
-        border-bottom: 1px solid var(--dp-border);
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--dp-muted);
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-
-    .dp-comprobante-img {
-        display: block;
-        width: 100%;
-        aspect-ratio: 4/3;
-        object-fit: cover;
-        cursor: zoom-in;
-        transition: transform 0.4s ease, filter 0.3s ease;
-        filter: brightness(0.97);
-    }
-    .dp-comprobante-img:hover { transform: scale(1.03); filter: brightness(1); }
-
-    .dp-comprobante-footer {
-        padding: 0.75rem 1.25rem;
-        font-size: 0.75rem;
-        color: var(--dp-muted);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.4rem;
-    }
-
-    /* ── Observaciones box ───────────────────────────────────────── */
-    .dp-obs {
-        background: var(--dp-bg);
-        border-radius: 10px;
-        padding: 1rem 1.25rem;
-        border-left: 3px solid var(--dp-accent);
-        font-size: 0.88rem;
-        color: var(--dp-muted);
-        font-style: italic;
-        line-height: 1.6;
-    }
-
-    /* ── Modal imagen ────────────────────────────────────────────── */
-    .dp-modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.92);
-        backdrop-filter: blur(12px);
-        z-index: 9999;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-        flex-direction: column;
-        gap: 1rem;
-    }
-    .dp-modal-overlay.open { display: flex; }
-
-    .dp-modal-img {
-        max-width: 90vw;
-        max-height: 80vh;
-        object-fit: contain;
-        border-radius: 12px;
-        box-shadow: 0 40px 80px rgba(0,0,0,0.6);
-        transition: transform 0.3s ease;
-        cursor: zoom-in;
-    }
-    .dp-modal-img.zoomed { transform: scale(1.6); cursor: zoom-out; }
-
-    .dp-modal-actions {
-        display: flex;
-        gap: 0.75rem;
-        align-items: center;
-    }
-
-    .dp-modal-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.6rem 1.25rem;
-        border-radius: 999px;
-        font-size: 0.82rem;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        border: none;
-        transition: all 0.2s;
-    }
-    .dp-modal-btn.close    { background: rgba(255,255,255,0.1); color: white; }
-    .dp-modal-btn.close:hover { background: rgba(255,255,255,0.2); }
-    .dp-modal-btn.download { background: var(--dp-accent); color: white; }
-    .dp-modal-btn.download:hover { background: #ea580c; }
-
-    /* ── Modal eliminar ──────────────────────────────────────────── */
-    /* Reutiliza el modal de Bootstrap, solo customizamos */
-    #modalEliminar .modal-content {
-        border-radius: 16px;
-        border: none;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-        font-family: var(--dp-sans);
-        background: var(--dp-surface);
-        color: var(--dp-ink);
-    }
-    #modalEliminar .modal-header { border-radius: 16px 16px 0 0; }
-    #modalEliminar .form-control {
-        background: var(--dp-bg);
-        border-color: var(--dp-border);
-        color: var(--dp-ink);
-        border-radius: 10px;
-        font-family: var(--dp-sans);
-    }
-
-    /* ── Animaciones de entrada ──────────────────────────────────── */
-    @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(16px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .dp-card, .dp-comprobante-card {
-        animation: fadeUp 0.4s ease both;
-    }
-    .dp-card { animation-delay: 0.05s; }
-    .dp-comprobante-card { animation-delay: 0.15s; }
-</style>
-
-<div class="dp-root mt-5">
-
-    <!-- Back link -->
-    {% if user.is_staff %}
-    <a href="{% url 'lista_pagos' %}" class="dp-back">
-        <i class="bi bi-arrow-left"></i> Historial de pagos
-    </a>
-    {% else %}
-    <a href="{% url 'lista_caja' %}" class="dp-back">
-        <i class="bi bi-arrow-left"></i> Volver a caja
-    </a>
-    {% endif %}
-
-    <div class="dp-grid">
-
-        <!-- ── Columna principal ─────────────────────────────────── -->
-        <div>
-            <div class="dp-card">
-
-                <!-- Hero header -->
-                <div class="dp-hero">
-                    <div class="dp-hero-left">
-                        <!-- Tipo de pago -->
-                        {% if pago.es_matricula %}
-                        <div class="dp-type-pill matricula">
-                            <i class="bi bi-mortarboard-fill"></i> Matrícula
-                        </div>
-                        {% else %}
-                        <div class="dp-type-pill cuota">
-                            <i class="bi bi-calendar-month"></i> Cuota
-                        </div>
-                        {% endif %}
-
-                        <!-- Número de recibo -->
-                        <div class="dp-recibo-num">
-                            {% if pago.numero_recibo %}
-                                <span>Recibo</span> #{{ pago.numero_recibo }}
+                    <!-- Hero header -->
+                    <div class="dp-hero">
+                        <div class="dp-hero-left">
+                            <!-- Tipo de pago -->
+                            {% if pago.es_matricula %}
+                                <div class="dp-type-pill matricula">
+                                    <i class="bi bi-mortarboard-fill"></i> Matrícula
+                                </div>
                             {% else %}
-                                <span style="font-family:var(--dp-sans); font-size:1.1rem; color:var(--dp-muted);">Sin número de recibo</span>
+                                <div class="dp-type-pill cuota">
+                                    <i class="bi bi-calendar-month"></i> Cuota
+                                </div>
                             {% endif %}
-                        </div>
 
-                        <!-- Chips meta -->
-                        <div class="dp-hero-meta">
-                            <div class="dp-chip">
-                                <i class="bi bi-calendar3"></i>
-                                {{ pago.fecha|date:"d \d\e F, Y" }}
-                            </div>
-                            <div class="dp-chip">
-                                <i class="bi bi-building"></i>
-                                {{ pago.sede.nombre }}
-                            </div>
-                            {% if pago.metodo_pago == 'EFECTIVO' %}
-                            <div class="dp-chip efectivo">
-                                Efectivo
-                            </div>
-                            {% else %}
-                            <div class="dp-chip transferencia">
-                                Transferencia
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Acciones -->
-                    <div class="dp-actions">
-                        <a href="{% url 'editar_pago' pago.uuid %}" class="dp-btn edit">
-                            <i class="bi bi-pencil-square"></i> Editar
-                        </a>
-                        <button type="button" class="dp-btn del" onclick="abrirModalEliminar()">
-                            <i class="bi bi-trash3"></i>
-                            {% if user.is_staff %}Eliminar{% else %}Solicitar eliminación{% endif %}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Banda de importe -->
-                <div class="dp-amount-band">
-                    <div>
-                        <div class="dp-amount-label">Importe Total</div>
-                        <div class="dp-amount-value">Gs. {{ pago.importe_total|formato_guaranies }}</div>
-                    </div>
-                    {% if pago.puntos and pago.puntos > 0 %}
-                    <div class="dp-puntos-badge">
-                        <i class="bi bi-star-fill"></i> {{ pago.puntos }} punto{{ pago.puntos|pluralize }}
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- Cuerpo: campos -->
-                <div class="dp-body">
-                    <div class="dp-fields">
-
-                        <!-- Pagador -->
-                        <div class="dp-field full">
-                            <div class="dp-field-label">
-                                <i class="bi bi-person-fill"></i>
-                                {% if pago.es_cliente_diferenciado %}Cliente{% else %}Alumno{% endif %}
-                            </div>
-                            <div class="dp-field-value">
-                                {% if pago.es_cliente_diferenciado %}
-                                    {{ pago.nombre_cliente }}
-                                    <span class="dp-badge-ext">Cliente externo</span>
+                            <!-- Número de recibo -->
+                            <div class="dp-recibo-num">
+                                {% if pago.numero_recibo %}
+                                    <span>Recibo</span> #{{ pago.numero_recibo }}
                                 {% else %}
-                                    <a href="{% url 'detalle_alumno' pago.alumno.uuid %}">
-                                        {{ pago.alumno.nombre_completo }}
-                                    </a>
+                                    <span style="font-family:var(--dp-sans),serif; font-size:1.1rem; color:var(--dp-muted);">Sin número de recibo</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Chips meta -->
+                            <div class="dp-hero-meta">
+                                {% if pago.metodo_pago == 'EFECTIVO' %}
+                                    <div class="dp-chip efectivo">
+                                        <i class="bi bi-cash"></i> Efectivo
+                                    </div>
+                                {% elif pago.metodo_pago == 'MIXTO' %}
+                                    <div class="dp-chip mixto">
+                                        <i class="bi bi-shuffle"></i> Pago Mixto
+                                    </div>
+                                {% else %}
+                                    <div class="dp-chip transferencia">
+                                        <i class="bi bi-bank2"></i> Transferencia / Depósito
+                                    </div>
+                                {% endif %}
+
+                                {# Desglose si es mixto #}
+                                {% if pago.metodo_pago == 'MIXTO' %}
+                                    <div class="dp-split">
+                                        {% if pago.monto_efectivo and pago.monto_efectivo > 0 %}
+                                            <span class="dp-split-item dp-split-ef">
+                <i class="bi bi-cash"></i> Gs. {{ pago.monto_efectivo|formato_guaranies }}
+            </span>
+                                        {% endif %}
+                                        {% if pago.monto_deposito and pago.monto_deposito > 0 %}
+                                            <span class="dp-split-item dp-split-dep">
+                <i class="bi bi-bank2"></i> Gs. {{ pago.monto_deposito|formato_guaranies }}
+            </span>
+                                        {% endif %}
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>
 
-                        {% if pago.carrera %}
-                        <div class="dp-field full">
-                            <div class="dp-field-label"><i class="bi bi-journal-bookmark-fill"></i> Carrera</div>
-                            <div class="dp-field-value">{{ pago.carrera.nombre }}</div>
+                        <!-- Acciones -->
+                        <div class="dp-actions">
+                            <a href="{% url 'editar_pago' pago.uuid %}" class="dp-btn edit">
+                                <i class="bi bi-pencil-square"></i> Editar
+                            </a>
+                            <button type="button" class="dp-btn del" onclick="abrirModalEliminar()">
+                                <i class="bi bi-trash3"></i>
+                                {% if user.is_staff %}Eliminar{% else %}Solicitar eliminación{% endif %}
+                            </button>
                         </div>
-                        {% endif %}
-
-                        {% if pago.curso %}
-                        <div class="dp-field full">
-                            <div class="dp-field-label"><i class="bi bi-mortarboard"></i> Curso</div>
-                            <div class="dp-field-value">{{ pago.curso }}</div>
-                        </div>
-                        {% endif %}
-
-                        <div class="dp-divider"></div>
-
-                        <!-- Concepto -->
-                        <div class="dp-field full">
-                            <div class="dp-field-label"><i class="bi bi-card-text"></i> Concepto</div>
-                            <div class="dp-field-value">{{ pago.concepto }}</div>
-                        </div>
-
-                        <!-- Cuotas (solo si no es matrícula) -->
-                        {% if not pago.es_matricula %}
-                            {% if pago.numero_cuota %}
-                            <div class="dp-field">
-                                <div class="dp-field-label"><i class="bi bi-hash"></i> Cuota N°</div>
-                                <div class="dp-field-value mono">{{ pago.numero_cuota }}</div>
-                            </div>
-                            {% endif %}
-
-                            {% if pago.cantidad_cuotas %}
-                            <div class="dp-field">
-                                <div class="dp-field-label"><i class="bi bi-stack"></i> Cantidad</div>
-                                <div class="dp-field-value">{{ pago.cantidad_cuotas }} cuota{{ pago.cantidad_cuotas|pluralize }}</div>
-                            </div>
-                            {% endif %}
-
-                            {% if pago.monto_unitario %}
-                            <div class="dp-field">
-                                <div class="dp-field-label"><i class="bi bi-tag"></i> Monto por cuota</div>
-                                <div class="dp-field-value mono">Gs. {{ pago.monto_unitario|formato_guaranies }}</div>
-                            </div>
-                            {% endif %}
-
-                            {% if pago.fecha_vencimiento %}
-                            <div class="dp-field">
-                                <div class="dp-field-label"><i class="bi bi-alarm"></i> Vencimiento</div>
-                                <div class="dp-field-value">{{ pago.fecha_vencimiento|date:"d/m/Y" }}</div>
-                            </div>
-                            {% endif %}
-                        {% endif %}
-
-                        {% if pago.observaciones %}
-                        <div class="dp-field full" style="margin-top: 0.25rem;">
-                            <div class="dp-field-label"><i class="bi bi-chat-quote"></i> Observaciones</div>
-                            <div class="dp-obs">{{ pago.observaciones }}</div>
-                        </div>
-                        {% endif %}
-
                     </div>
-                </div>
 
-                <!-- Footer meta -->
-                {% if pago.usuario_registro %}
-                <div class="dp-footer">
-                    <div class="dp-footer-meta">
-                        <i class="bi bi-person-check"></i>
-                        Registrado por <strong>{{ pago.usuario_registro.get_full_name|default:pago.usuario_registro.username }}</strong>
+                    <!-- Banda de importe -->
+                    <div class="dp-amount-band">
+                        <div>
+                            <div class="dp-amount-label">Importe Total</div>
+                            <div class="dp-amount-value">Gs. {{ pago.importe_total|formato_guaranies }}</div>
+                            {% if pago.metodo_pago == 'MIXTO' %}
+                                <div class="dp-amount-split">
+                                    {% if pago.monto_efectivo and pago.monto_efectivo > 0 %}
+                                        <span class="dp-amount-split-item">
+                        <i class="bi bi-cash"></i> Efectivo: Gs. {{ pago.monto_efectivo|formato_guaranies }}
+                    </span>
+                                    {% endif %}
+                                    {% if pago.monto_deposito and pago.monto_deposito > 0 %}
+                                        <span class="dp-amount-split-item">
+                        <i class="bi bi-bank2"></i> Depósito: Gs. {{ pago.monto_deposito|formato_guaranies }}
+                    </span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if pago.puntos and pago.puntos > 0 %}
+                            <div class="dp-puntos-badge">
+                                <i class="bi bi-star-fill"></i> {{ pago.puntos }} punto{{ pago.puntos|pluralize }}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="dp-footer-meta">
-                        <i class="bi bi-clock"></i>
-                        {{ pago.fecha_creacion|date:"d/m/Y H:i" }}
+
+                    <!-- Cuerpo: campos -->
+                    <div class="dp-body">
+                        <div class="dp-fields">
+
+                            <!-- Pagador -->
+                            <div class="dp-field full">
+                                <div class="dp-field-label">
+                                    <i class="bi bi-person-fill"></i>
+                                    {% if pago.es_cliente_diferenciado %}Cliente{% else %}Alumno{% endif %}
+                                </div>
+                                <div class="dp-field-value">
+                                    {% if pago.es_cliente_diferenciado %}
+                                        {{ pago.nombre_cliente }}
+                                        <span class="dp-badge-ext">Cliente externo</span>
+                                    {% else %}
+                                        <a href="{% url 'detalle_alumno' pago.alumno.uuid %}">
+                                            {{ pago.alumno.nombre_completo }}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if pago.carrera %}
+                                <div class="dp-field full">
+                                    <div class="dp-field-label"><i class="bi bi-journal-bookmark-fill"></i> Carrera</div>
+                                    <div class="dp-field-value">{{ pago.carrera.nombre }}</div>
+                                </div>
+                            {% endif %}
+
+                            {% if pago.curso %}
+                                <div class="dp-field full">
+                                    <div class="dp-field-label"><i class="bi bi-mortarboard"></i> Curso</div>
+                                    <div class="dp-field-value">{{ pago.curso }}</div>
+                                </div>
+                            {% endif %}
+
+                            <div class="dp-divider"></div>
+
+                            <!-- Concepto -->
+                            <div class="dp-field full">
+                                <div class="dp-field-label"><i class="bi bi-card-text"></i> Concepto</div>
+                                <div class="dp-field-value">{{ pago.concepto }}</div>
+                            </div>
+
+                            <!-- Cuotas (solo si no es matrícula) -->
+                            {% if not pago.es_matricula %}
+                                {% if pago.numero_cuota %}
+                                    <div class="dp-field">
+                                        <div class="dp-field-label"><i class="bi bi-hash"></i> Cuota N°</div>
+                                        <div class="dp-field-value mono">{{ pago.numero_cuota }}</div>
+                                    </div>
+                                {% endif %}
+
+                                {% if pago.cantidad_cuotas %}
+                                    <div class="dp-field">
+                                        <div class="dp-field-label"><i class="bi bi-stack"></i> Cantidad</div>
+                                        <div class="dp-field-value">{{ pago.cantidad_cuotas }} cuota{{ pago.cantidad_cuotas|pluralize }}</div>
+                                    </div>
+                                {% endif %}
+
+                                {% if pago.monto_unitario %}
+                                    <div class="dp-field">
+                                        <div class="dp-field-label"><i class="bi bi-tag"></i> Monto por cuota</div>
+                                        <div class="dp-field-value mono">Gs. {{ pago.monto_unitario|formato_guaranies }}</div>
+                                    </div>
+                                {% endif %}
+
+                                {% if pago.fecha_vencimiento %}
+                                    <div class="dp-field">
+                                        <div class="dp-field-label"><i class="bi bi-alarm"></i> Vencimiento</div>
+                                        <div class="dp-field-value">{{ pago.fecha_vencimiento|date:"d/m/Y" }}</div>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if pago.observaciones %}
+                                <div class="dp-field full" style="margin-top: 0.25rem;">
+                                    <div class="dp-field-label"><i class="bi bi-chat-quote"></i> Observaciones</div>
+                                    <div class="dp-obs">{{ pago.observaciones }}</div>
+                                </div>
+                            {% endif %}
+
+                        </div>
                     </div>
-                </div>
-                {% endif %}
 
-            </div><!-- /.dp-card -->
-        </div><!-- /col principal -->
+                    <!-- Footer meta -->
+                    {% if pago.usuario_registro %}
+                        <div class="dp-footer">
+                            <div class="dp-footer-meta">
+                                <i class="bi bi-person-check"></i>
+                                Registrado por <strong>{{ pago.usuario_registro.get_full_name|default:pago.usuario_registro.username }}</strong>
+                            </div>
+                            <div class="dp-footer-meta">
+                                <i class="bi bi-clock"></i>
+                                {{ pago.fecha_creacion|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                    {% endif %}
 
-        <!-- ── Sidebar ────────────────────────────────────────────── -->
-        <div class="dp-sidebar">
-
-            {% if pago.foto_comprobante %}
-            <div class="dp-comprobante-card">
-                <div class="dp-comprobante-header">
-                    <i class="bi bi-image"></i> Comprobante adjunto
-                </div>
-                <img src="{{ pago.foto_comprobante.url }}"
-                     alt="Comprobante de pago"
-                     class="dp-comprobante-img"
-                     onclick="abrirModalImagen('{{ pago.foto_comprobante.url }}')">
-                <div class="dp-comprobante-footer">
-                    <i class="bi bi-zoom-in"></i> Clic para ampliar
                 </div>
             </div>
-            {% endif %}
 
-            <!-- Card de resumen rápido -->
-            <div class="dp-card" style="padding: 1.25rem 1.5rem;">
-                <div style="font-size:0.7rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--dp-muted); margin-bottom:1rem;">
-                    Resumen
-                </div>
-                <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <!--Sidebar-->
+            <div class="dp-sidebar">
 
-                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
-                        <span style="color:var(--dp-muted);">Tipo</span>
-                        <span style="font-weight:600;">
+                {% if pago.foto_comprobante %}
+                    <div class="dp-comprobante-card">
+                        <div class="dp-comprobante-header">
+                            <i class="bi bi-image"></i> Comprobante adjunto
+                        </div>
+                        <img src="{{ pago.foto_comprobante.url }}"
+                             alt="Comprobante de pago"
+                             class="dp-comprobante-img"
+                             onclick="abrirModalImagen('{{ pago.foto_comprobante.url }}')">
+                        <div class="dp-comprobante-footer">
+                            <i class="bi bi-zoom-in"></i> Clic para ampliar
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="dp-card" style="padding: 1.25rem 1.5rem;">
+                    <div style="font-size:0.7rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--dp-muted); margin-bottom:1rem;">
+                        Resumen
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.75rem;">
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
+                            <span style="color:var(--dp-muted);">Tipo</span>
+                            <span style="font-weight:600;">
                             {% if pago.es_matricula %}
                                 <span style="color:var(--dp-accent);">Matrícula</span>
                             {% else %}
                                 <span style="color:var(--dp-accent2);">Cuota</span>
                             {% endif %}
                         </span>
-                    </div>
+                        </div>
 
-                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
-                        <span style="color:var(--dp-muted);">Método</span>
-                        <span style="font-weight:600;">
-                            {% if pago.metodo_pago == 'EFECTIVO' %}Efectivo{% else %}Transferencia{% endif %}
-                        </span>
-                    </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
+                            <span style="color:var(--dp-muted);">Método</span>
+                            <span style="font-weight:600;">
+                                {% if pago.metodo_pago == 'EFECTIVO' %}
+                                    Efectivo
+                                {% elif pago.metodo_pago == 'MIXTO' %}
+                                    <span style="color:#6d28d9;">Mixto</span>
+                                {% else %}
+                                    Transferencia
+                                {% endif %}
+                            </span>
+                        </div>
 
-                    {% if not pago.es_matricula and pago.fecha_vencimiento %}
-                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
-                        <span style="color:var(--dp-muted);">Vence</span>
-                        <span style="font-weight:600; font-family:var(--dp-mono); font-size:0.8rem;">
+                        {% if not pago.es_matricula and pago.fecha_vencimiento %}
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
+                                <span style="color:var(--dp-muted);">Vence</span>
+                                <span style="font-weight:600; font-family:var(--dp-mono),serif; font-size:0.8rem;">
                             {{ pago.fecha_vencimiento|date:"d/m/Y" }}
                         </span>
-                    </div>
-                    {% endif %}
+                            </div>
+                        {% endif %}
 
-                    <div style="height:1px; background:var(--dp-border);"></div>
+                        <div style="height:1px; background:var(--dp-border);"></div>
 
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:0.78rem; color:var(--dp-muted);">Total</span>
-                        <span style="font-family:var(--dp-mono); font-size:1.05rem; font-weight:700; color:var(--dp-accent);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.78rem; color:var(--dp-muted);">Total</span>
+                            <span style="font-family:var(--dp-mono); font-size:1.05rem; font-weight:700; color:var(--dp-accent);">
                             Gs. {{ pago.importe_total|formato_guaranies }}
                         </span>
-                    </div>
+                        </div>
 
-                    {% if pago.puntos and pago.puntos > 0 %}
-                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
-                        <span style="color:var(--dp-muted);">Puntos</span>
-                        <span style="font-weight:700; color:#d97706;">
+                        {% if pago.puntos and pago.puntos > 0 %}
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
+                                <span style="color:var(--dp-muted);">Puntos</span>
+                                <span style="font-weight:700; color:#d97706;">
                             ★ {{ pago.puntos }}
                         </span>
+                            </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
-            </div>
-
-        </div><!-- /sidebar -->
-
-    </div><!-- /dp-grid -->
-</div><!-- /dp-root -->
-
-
-<!-- ── Modal: ver imagen ─────────────────────────────────────────── -->
-<div class="dp-modal-overlay" id="dpModalImg" onclick="cerrarModalImagen(event)">
-    <img src="" id="dpImgGrande" alt="Comprobante" class="dp-modal-img" onclick="event.stopPropagation(); toggleZoom()">
-    <div class="dp-modal-actions">
-        <a href="" id="dpDownloadBtn" download class="dp-modal-btn download">
-            <i class="bi bi-cloud-arrow-down"></i> Descargar
-        </a>
-        <button class="dp-modal-btn close" onclick="cerrarModalImagen()">
-            <i class="bi bi-x-lg"></i> Cerrar
-        </button>
-    </div>
-</div>
-
-
-<!-- ── Modal: confirmar eliminar ────────────────────────────────── -->
-<div class="modal fade" id="modalEliminar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header {% if user.is_staff %}bg-danger{% else %}bg-warning{% endif %} text-white">
-                <h5 class="modal-title" style="font-family:var(--dp-sans); font-weight:600; font-size:0.95rem;">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    {% if user.is_staff %}Confirmar eliminación{% else %}Solicitar eliminación{% endif %}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" style="font-family:var(--dp-sans); font-size:0.88rem;">
-                {% if user.is_staff %}
-                    <p>¿Seguro que deseas eliminar el pago
-                    <strong>{% if pago.numero_recibo %}#{{ pago.numero_recibo }}{% else %}sin recibo{% endif %}</strong>?
-                    </p>
-                    <p class="text-danger" style="font-size:0.8rem;">
-                        <i class="bi bi-info-circle"></i> Esta acción no se puede deshacer.
-                    </p>
-                {% else %}
-                    <p>Para eliminar este registro, debes enviar una solicitud al administrador indicando el motivo.</p>
-                {% endif %}
-
-                <form action="{% url 'eliminar_pago' pago.uuid %}" method="post" class="mt-3">
-                    {% csrf_token %}
-                    {% if not user.is_staff %}
-                    <div class="mb-3">
-                        <label class="form-label" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">
-                            Motivo
-                        </label>
-                        <textarea name="motivo" class="form-control" rows="3"
-                                  placeholder="Explica por qué debe eliminarse este registro..." required></textarea>
-                    </div>
-                    {% endif %}
-                    <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn {% if user.is_staff %}btn-danger{% else %}btn-warning{% endif %} btn-sm">
-                            <i class="bi bi-trash3"></i>
-                            {% if user.is_staff %}Eliminar definitivamente{% else %}Enviar solicitud{% endif %}
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- ── Modal: ver imagen ─────────────────────────────────────────── -->
+    <div class="dp-modal-overlay" id="dpModalImg" onclick="cerrarModalImagen(event)">
+        <img src="" id="dpImgGrande" alt="Comprobante" class="dp-modal-img" onclick="event.stopPropagation(); toggleZoom()">
+        <div class="dp-modal-actions">
+            <a href="" id="dpDownloadBtn" download class="dp-modal-btn download">
+                <i class="bi bi-cloud-arrow-down"></i> Descargar
+            </a>
+            <button class="dp-modal-btn close" onclick="cerrarModalImagen()">
+                <i class="bi bi-x-lg"></i> Cerrar
+            </button>
+        </div>
+    </div>
 
 
-<script>
-    /* ── Modal imagen ───────────────────────────────── */
-    function abrirModalImagen(url) {
-        const overlay  = document.getElementById('dpModalImg');
-        const img      = document.getElementById('dpImgGrande');
-        const download = document.getElementById('dpDownloadBtn');
-        img.src        = url;
-        img.classList.remove('zoomed');
-        download.href  = url;
-        overlay.classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
+    <!-- ── Modal: confirmar eliminar ────────────────────────────────── -->
+    <div class="modal fade" id="modalEliminar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header {% if user.is_staff %}bg-danger{% else %}bg-warning{% endif %} text-white">
+                    <h5 class="modal-title" style="font-family:var(--dp-sans); font-weight:600; font-size:0.95rem;">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        {% if user.is_staff %}Confirmar eliminación{% else %}Solicitar eliminación{% endif %}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="font-family:var(--dp-sans); font-size:0.88rem;">
+                    {% if user.is_staff %}
+                        <p>¿Seguro que deseas eliminar el pago
+                            <strong>{% if pago.numero_recibo %}#{{ pago.numero_recibo }}{% else %}sin recibo{% endif %}</strong>?
+                        </p>
+                        <p class="text-danger" style="font-size:0.8rem;">
+                            <i class="bi bi-info-circle"></i> Esta acción no se puede deshacer.
+                        </p>
+                    {% else %}
+                        <p>Para eliminar este registro, debes enviar una solicitud al administrador indicando el motivo.</p>
+                    {% endif %}
 
-    function cerrarModalImagen(e) {
-        if (e && e.target !== document.getElementById('dpModalImg') && e.type !== 'click') return;
-        if (e && e.target.closest('.dp-modal-actions')) return;
-        document.getElementById('dpModalImg').classList.remove('open');
-        document.body.style.overflow = '';
-    }
+                    <form action="{% url 'eliminar_pago' pago.uuid %}" method="post" class="mt-3">
+                        {% csrf_token %}
+                        {% if not user.is_staff %}
+                            <div class="mb-3">
+                                <label class="form-label" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">
+                                    Motivo
+                                </label>
+                                <textarea name="motivo" class="form-control" rows="3"
+                                          placeholder="Explica por qué debe eliminarse este registro..." required></textarea>
+                            </div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn {% if user.is_staff %}btn-danger{% else %}btn-warning{% endif %} btn-sm">
+                                <i class="bi bi-trash3"></i>
+                                {% if user.is_staff %}Eliminar definitivamente{% else %}Enviar solicitud{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    function toggleZoom() {
-        document.getElementById('dpImgGrande').classList.toggle('zoomed');
-    }
 
-    // Cerrar con Escape
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') cerrarModalImagen();
-    });
-
-    /* ── Modal eliminar ────────────────────────────── */
-    function abrirModalEliminar() {
-        new bootstrap.Modal(document.getElementById('modalEliminar')).show();
-    }
-</script>
-
+{% endblock %}
+{% block extra_js %}
+    <script src="{% static 'js/caja/detallePago.js' %}"></script>
 {% endblock %}
