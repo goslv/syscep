@@ -139,16 +139,23 @@
         return m;
     }
 
-    function syncMetodoPago() {
+    function syncMetodoPago(resetBanco = false) {
         const m     = getMetodo();
         const banco = $('pfBancoPanel');
         const split = $('pfSplitPanel');
+
         banco.classList.toggle('open', m === 'DEPOSITO');
         split.classList.toggle('open', m === 'MIXTO');
-        if (m !== 'DEPOSITO' && m !== 'MIXTO') {
+
+        /* Solo resetear cuando el usuario cambia manualmente el método */
+        if (resetBanco) {
+            cerrarOtro();
             $('cuentaBancariaId').value = '';
             document.querySelectorAll('input[name="banco_seleccion"]').forEach(r => r.checked = false);
-            cerrarOtro();
+        }
+
+        if (m !== 'DEPOSITO' && m !== 'MIXTO') {
+            $('cuentaBancariaId').value = '';
         }
         if (m !== 'MIXTO') {
             if ($('pfMontoEfectivo')) $('pfMontoEfectivo').value = '';
@@ -189,7 +196,7 @@
         }
     }
 
-    /* Banco */
+    /* ── Banco ───────────────────────────────────────────── */
     const ICONOS = {
         continental: 'bi-bank', itau: 'bi-building-fill', vision: 'bi-eye-fill',
         familiar: 'bi-house-heart-fill', bnf: 'bi-flag-fill', interfisa: 'bi-diagram-3-fill',
@@ -258,7 +265,7 @@
         }
     }
 
-    /* Alumno dropdown */
+    /* ── Alumno dropdown ─────────────────────────────────── */
     let alumnoDropdownOpen = false;
     let alumnoFocusedIdx   = -1;
     let alumnoResults      = [];
@@ -383,13 +390,13 @@
         }
     }
 
-    /* Modal imagen */
+    /* ── Modal imagen ────────────────────────────────────── */
     window.abrirModalImg = function (url) {
         $('imgModalGrande').src = url;
         new bootstrap.Modal($('modalImg')).show();
     };
 
-    /* Validación submit */
+    /* ── Validación submit ───────────────────────────────── */
     function validarYEnviar(e) {
         const v = parseFloat($('id_importe_total')?.value);
         if (!v || v <= 0) {
@@ -412,12 +419,13 @@
         }
     }
 
-    /* Init */
+    /* ── Init ────────────────────────────────────────────── */
     document.addEventListener('DOMContentLoaded', () => {
         /* Fecha por defecto hoy */
         $('btnHoy')?.addEventListener('click', () => {
             $('id_fecha').value = new Date().toISOString().split('T')[0];
         });
+        if (!$('id_fecha')?.value) $('id_fecha').value = new Date().toISOString().split('T')[0];
 
         /* Portal dropdown alumno */
         initAlumnoDropdownPortal();
@@ -460,7 +468,7 @@
         $('id_es_matricula')?.addEventListener('change', syncMatricula);
         $('id_es_cliente_diferenciado')?.addEventListener('change', syncCliente);
         $('id_carrera')?.addEventListener('change', () => { applyCarrera($('id_carrera').value); syncCarrera(); });
-        document.querySelectorAll('input[name="metodo_pago"]').forEach(r => r.addEventListener('change', syncMetodoPago));
+        document.querySelectorAll('input[name="metodo_pago"]').forEach(r => r.addEventListener('change', () => syncMetodoPago(true)));
         $('pfBtnSave')?.addEventListener('click', guardarBanco);
         $('id_monto_unitario')?.addEventListener('input', calcImporte);
         $('id_cantidad_cuotas')?.addEventListener('input', calcImporte);

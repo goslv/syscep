@@ -1,8 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* ════════════════════════════════════════════════════════
-   VARIABLES
-════════════════════════════════════════════════════════ */
+/* VARIABLES */
 :root {
     --primary:        #2563eb;
     --primary-dark:   #1d4ed8;
@@ -43,9 +41,7 @@
 }
 
 
-/* ════════════════════════════════════════════════════════
-   BASE
-════════════════════════════════════════════════════════ */
+/* BASE */
 .pf {
     font-family: var(--font);
     color: var(--gray-800);
@@ -62,9 +58,7 @@
 }
 
 
-/* ════════════════════════════════════════════════════════
-   HEADER
-════════════════════════════════════════════════════════ */
+/* HEADER */
 .pf-header {
     background: white;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
@@ -87,9 +81,7 @@
 }
 
 
-/* ════════════════════════════════════════════════════════
-   BODY
-════════════════════════════════════════════════════════ */
+/* BODY */
 .pf-body {
     background: white;
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
@@ -106,9 +98,7 @@
 }
 
 
-/* ════════════════════════════════════════════════════════
-   SECTIONS
-════════════════════════════════════════════════════════ */
+/* SECTIONS */
 @keyframes sectionSlide {
     from {
         opacity: 0;
@@ -171,9 +161,7 @@
 }
 
 
-/* ════════════════════════════════════════════════════════
-   GRID
-════════════════════════════════════════════════════════ */
+/* GRID */
 .pf-grid {
     display: grid;
     gap: 1rem;
@@ -189,9 +177,7 @@
 }
 
 
-/* ════════════════════════════════════════════════════════
-   FIELDS
-════════════════════════════════════════════════════════ */
+/* FIELDS */
 .pf-field {
     display: flex;
     flex-direction: column;
@@ -261,9 +247,7 @@
 }
 
 
-/* ════════════════════════════════════════════════════════
-   TOGGLE
-════════════════════════════════════════════════════════ */
+/* TOGGLE */
 .pf-toggle {
     display: flex;
     align-items: center;
@@ -339,9 +323,7 @@
 }
 
 
-/* ════════════════════════════════════════════════════════
-   ALUMNO — DROPDOWN CUSTOM
-════════════════════════════════════════════════════════ */
+/* ALUMNO — DROPDOWN CUSTOM */
 .pf-alumno-select {
     position: relative;
 }
@@ -544,9 +526,7 @@
 }
 
 
-/* ════════════════════════════════════════════════════════
-   MÉTODOS DE PAGO
-════════════════════════════════════════════════════════ */
+/* MÉTODOS DE PAGO */
 .pf-payment-methods {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
@@ -610,9 +590,7 @@
 }
 
 
-/* ════════════════════════════════════════════════════════
-   PANEL SPLIT (cobro mixto)
-════════════════════════════════════════════════════════ */
+/* PANEL SPLIT (cobro mixto)*/
 #pfSplitPanel {
     overflow: hidden;
     max-height: 0;
@@ -688,7 +666,7 @@
 
 .pf-amount-icon.ef {
     background: var(--success-light);
-    color: var(--success-dark);
+    color: var(--success);
     border-color: #6ee7b7;
 }
 
@@ -735,7 +713,6 @@
 
 .pf-split-check.ok {
     background: var(--success-light);
-    color: var(--success-dark);
 }
 
 .pf-split-check.warn {
@@ -1232,9 +1209,7 @@
 }
 
 
-/* ════════════════════════════════════════════════════════
-   RESPONSIVE
-════════════════════════════════════════════════════════ */
+/* RESPONSIVE */
 
 /* ── 480px — input total más grande ── */
 @media (min-width: 480px) {

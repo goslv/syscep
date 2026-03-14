@@ -258,29 +258,6 @@
                                     </label>
                                 </div>
                             </div>
-                            <div id="pfOtroBancoInputs">
-                                <div class="pf-otro-box">
-                                    <div class="pf-banco-label" style="margin-bottom:.65rem;">
-                                        <i class="bi bi-pencil-square"></i> Datos de la cuenta
-                                    </div>
-                                    <div class="pf-otro-grid">
-                                        <div class="pf-field">
-                                            <label class="pf-label pf-label-required">Entidad bancaria</label>
-                                            <input type="text" id="pfEntidad" class="pf-input" placeholder="Ej: Banco Continental…">
-                                        </div>
-                                        <div class="pf-field">
-                                            <label class="pf-label pf-label-required">Titular</label>
-                                            <input type="text" id="pfTitular" class="pf-input" placeholder="Nombre del titular">
-                                        </div>
-                                    </div>
-                                    <button type="button" class="pf-btn-save-banco" id="pfBtnSave">
-                                        <i class="bi bi-floppy"></i> Guardar para futuros pagos
-                                    </button>
-                                    <div class="pf-hint" style="margin-top:.4rem;font-size:.7rem;">
-                                        <i class="bi bi-info-circle"></i> Si no guardás, se asocia solo a este pago.
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Panel split montos (solo Mixto) -->
@@ -328,6 +305,31 @@
                                             <span class="pf-banco-card-titular">Ingresar manualmente</span>
                                         </label>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inputs banco manual — compartido por DEPOSITO y MIXTO -->
+                        <div id="pfOtroBancoInputs">
+                            <div class="pf-otro-box">
+                                <div class="pf-banco-label" style="margin-bottom:.65rem;">
+                                    <i class="bi bi-pencil-square"></i> Datos de la cuenta
+                                </div>
+                                <div class="pf-otro-grid">
+                                    <div class="pf-field">
+                                        <label class="pf-label pf-label-required">Entidad bancaria</label>
+                                        <input type="text" id="pfEntidad" class="pf-input" placeholder="Ej: Banco Continental…">
+                                    </div>
+                                    <div class="pf-field">
+                                        <label class="pf-label pf-label-required">Titular</label>
+                                        <input type="text" id="pfTitular" class="pf-input" placeholder="Nombre del titular">
+                                    </div>
+                                </div>
+                                <button type="button" class="pf-btn-save-banco" id="pfBtnSave">
+                                    <i class="bi bi-floppy"></i> Guardar para futuros pagos
+                                </button>
+                                <div class="pf-hint" style="margin-top:.4rem;font-size:.7rem;">
+                                    <i class="bi bi-info-circle"></i> Si no guardás, se asocia solo a este pago.
                                 </div>
                             </div>
                         </div>
