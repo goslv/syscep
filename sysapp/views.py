@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group, Permission
 from django.db import models
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -19,10 +19,11 @@ from .models import (
     Sede, Alumno, Funcionario, Pago, Carrera,
     AsistenciaFuncionario, Materia, Egreso,
     CanjeEstrellas, SolicitudEliminacion, CuentaBancaria,
+    CierreCaja,
 )
 from .forms import (
     PagoForm, AlumnoForm, FuncionarioForm, AsistenciaForm,
-    SedeForm, CarreraForm, UsuarioForm, MateriaForm, EgresoForm, PerfilForm,
+    SedeForm, CarreraForm, UsuarioForm, MateriaForm, EgresoForm, PerfilForm, RoleForm,
 )
 from .decorators import admin_required
 
@@ -449,38 +450,64 @@ def _guardar_cuenta_bancaria_si_nueva(request, pago):
     else:
         pago.cuenta_bancaria = None
 
-
 @login_required
 def lista_pagos(request):
-    pagos = Pago.objects.all().select_related('alumno', 'sede', 'carrera').order_by('-fecha', '-id')
+    # Base de la consulta
+    pagos = Pago.objects.all().select_related('alumno', 'sede', 'carrera')
 
-    # Filtros
-    sede_id = request.GET.get('sede')
+    # 1. Filtros de Búsqueda de Texto (Buscador Global)
+    q = request.GET.get('q')
+    if q:
+        pagos = pagos.filter(
+            Q(alumno__nombre__icontains=q) |
+            Q(alumno__apellido__icontains=q) |
+            Q(numero_recibo__icontains=q) |
+            Q(nombre_cliente__icontains=q) |
+            Q(concepto__icontains=q)
+        )
+
+    # 2. Filtros de Sede (Seguridad y Selección)
+    if not request.user.is_staff:
+        # Si no es admin, forzar su sede (ajusta 'perfil.sede' según tu modelo de User)
+        pagos = pagos.filter(sede=request.user.perfil.sede)
+    else:
+        sede_id = request.GET.get('sede')
+        if sede_id:
+            pagos = pagos.filter(sede_id=sede_id)
+
+    # 3. Filtros de Fecha
     fecha_desde = request.GET.get('fecha_desde')
     fecha_hasta = request.GET.get('fecha_hasta')
 
-    if sede_id:
-        pagos = pagos.filter(sede_id=sede_id)
-
     if fecha_desde:
         pagos = pagos.filter(fecha__gte=fecha_desde)
-
     if fecha_hasta:
         pagos = pagos.filter(fecha__lte=fecha_hasta)
 
-    # Calcular el total de pagos (antes de limitar a 100)
+    # 4. Lógica de Ordenamiento (Mejora de UX)
+    order_by = request.GET.get('order')
+    if order_by == 'recibo':
+        pagos = pagos.order_by('numero_recibo', '-fecha')
+    elif order_by == 'fecha':
+        pagos = pagos.order_by('fecha', 'id') # Orden ascendente
+    else:
+        # Orden por defecto (lo más reciente arriba)
+        pagos = pagos.order_by('-fecha', '-id')
+
+    # 5. Cálculos (Sobre el queryset filtrado pero antes del slice)
     total_pagos = pagos.aggregate(total=Sum('importe_total'))['total'] or 0
 
-    # Limitar a 100 registros
+    # 6. Limitar registros (Importante: después de calcular el total)
     pagos = pagos[:100]
 
-    # Obtener todas las sedes para el filtro
+    # Datos adicionales para el contexto
     sedes = Sede.objects.all().order_by('nombre')
 
     context = {
         'pagos': pagos,
         'sedes': sedes,
-        'total_pagos': total_pagos,  # ← Esta línea es la que faltaba
+        'total_pagos': total_pagos,
+        'es_admin': request.user.is_staff,
     }
 
     return render(request, 'pagos/listaPagos.html', context)
@@ -530,6 +557,10 @@ def registrar_pago(request):
                 pago.puntos = 0
             else:
                 pago.fecha_vencimiento = form.cleaned_data.get('fecha_vencimiento')
+
+            # Asegurar que se guarden los montos parciales
+            pago.monto_efectivo = form.cleaned_data.get('monto_efectivo')
+            pago.monto_deposito = form.cleaned_data.get('monto_deposito')
 
             pago.save()
 
@@ -583,6 +614,10 @@ def editar_pago(request, pago_uuid):
                 pago.puntos            = 0
             else:
                 pago.fecha_vencimiento = form.cleaned_data.get('fecha_vencimiento')
+
+            # Asegurar que se guarden los montos parciales
+            pago.monto_efectivo = form.cleaned_data.get('monto_efectivo')
+            pago.monto_deposito = form.cleaned_data.get('monto_deposito')
 
             pago.save()
 
@@ -1042,6 +1077,87 @@ def cambiar_estado_usuario(request, usuario_id):
     return redirect('lista_usuarios')
 
 
+# ROLES CRUD
+
+@login_required
+@admin_required
+def lista_roles(request):
+    roles = Group.objects.annotate(total_usuarios=Count('user'))
+    return render(request, 'usuarios/listaRoles.html', {'roles': roles})
+
+
+@login_required
+@admin_required
+def crear_rol(request):
+    if request.method == 'POST':
+        form = RoleForm(request.POST)
+        if form.is_valid():
+            rol = form.save()
+            messages.success(request, f'Rol "{rol.name}" creado exitosamente.')
+            return redirect('lista_roles')
+    else:
+        form = RoleForm()
+
+    # Agrupar permisos por modelo para una mejor UI
+    permisos = Permission.objects.select_related('content_type').order_by('content_type__model', 'codename')
+    permisos_agrupados = {}
+    for p in permisos:
+        model_name = p.content_type.model.capitalize()
+        if model_name not in permisos_agrupados:
+            permisos_agrupados[model_name] = []
+        permisos_agrupados[model_name].append(p)
+
+    return render(request, 'usuarios/formRoles.html', {
+        'form': form,
+        'titulo': 'Crear Nuevo Rol',
+        'boton': 'Crear Rol',
+        'permisos_agrupados': permisos_agrupados
+    })
+
+
+@login_required
+@admin_required
+def editar_rol(request, rol_id):
+    rol = get_object_or_404(Group, pk=rol_id)
+    if request.method == 'POST':
+        form = RoleForm(request.POST, instance=rol)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Rol "{rol.name}" actualizado exitosamente.')
+            return redirect('lista_roles')
+    else:
+        form = RoleForm(instance=rol)
+
+    permisos = Permission.objects.select_related('content_type').order_by('content_type__model', 'codename')
+    permisos_agrupados = {}
+    rol_permissions_ids = rol.permissions.values_list('id', flat=True)
+
+    for p in permisos:
+        model_name = p.content_type.model.capitalize()
+        if model_name not in permisos_agrupados:
+            permisos_agrupados[model_name] = []
+        p.checked = p.id in rol_permissions_ids
+        permisos_agrupados[model_name].append(p)
+
+    return render(request, 'usuarios/formRoles.html', {
+        'form': form,
+        'rol': rol,
+        'titulo': f'Editar Rol: {rol.name}',
+        'boton': 'Guardar Cambios',
+        'permisos_agrupados': permisos_agrupados
+    })
+
+
+@login_required
+@admin_required
+def eliminar_rol(request, rol_id):
+    rol = get_object_or_404(Group, pk=rol_id)
+    nombre = rol.name
+    rol.delete()
+    messages.success(request, f'Rol "{nombre}" eliminado exitosamente.')
+    return redirect('lista_roles')
+
+
 @login_required
 def mi_perfil(request):
     if request.method == 'POST':
@@ -1269,74 +1385,93 @@ def informe_caja(request):
             return redirect('lista_caja')
 
     hoy = timezone.now().date()
+    # Para el cierre de caja necesitamos aware datetime
+    ahora = timezone.now()
 
     if es_admin:
-        # ADMIN: puede usar rango de fechas
         fecha_desde_str = request.GET.get('fecha_desde')
         fecha_hasta_str = request.GET.get('fecha_hasta')
-
         if fecha_desde_str and fecha_hasta_str:
             try:
                 fecha_desde = datetime.strptime(fecha_desde_str, '%Y-%m-%d').date()
                 fecha_hasta = datetime.strptime(fecha_hasta_str, '%Y-%m-%d').date()
             except (ValueError, TypeError):
-                # Si hay error en las fechas, usar mes actual
                 fecha_desde = hoy.replace(day=1)
-                if hoy.month == 12:
-                    fecha_hasta = hoy.replace(day=31)
-                else:
-                    fecha_hasta = (hoy.replace(month=hoy.month + 1, day=1) - timedelta(days=1))
+                fecha_hasta = (hoy.replace(month=hoy.month + 1, day=1) - timedelta(days=1)) if hoy.month != 12 else hoy.replace(day=31)
         else:
-            # Si no hay fechas, usar mes actual
             fecha_desde = hoy.replace(day=1)
-            if hoy.month == 12:
-                fecha_hasta = hoy.replace(day=31)
-            else:
-                fecha_hasta = (hoy.replace(month=hoy.month + 1, day=1) - timedelta(days=1))
+            fecha_hasta = (hoy.replace(month=hoy.month + 1, day=1) - timedelta(days=1)) if hoy.month != 12 else hoy.replace(day=31)
 
-        # Filtrar por sede para admin
-        sede_id = request.GET.get('sede')
+        sede_id  = request.GET.get('sede')
         sede_obj = get_object_or_404(Sede, id=sede_id) if sede_id else None
 
-    else:
-        # USUARIO COMÚN: puede seleccionar UNA fecha específica
-        fecha_seleccionada_str = request.GET.get('fecha')
+        # Para admin, mostramos todo por defecto, o filtramos por fecha
+        ingresos = Pago.objects.filter(fecha__gte=fecha_desde, fecha__lte=fecha_hasta)
+        egresos  = Egreso.objects.filter(fecha__gte=fecha_desde, fecha__lte=fecha_hasta)
+        if sede_obj:
+            ingresos = ingresos.filter(sede=sede_obj)
+            egresos  = egresos.filter(sede=sede_obj)
 
+    else:
+        # Lógica de cierre de caja para funcionarios (solo un día)
+        sede_obj = sede_usuario
+
+        fecha_seleccionada_str = request.GET.get('fecha')
         if fecha_seleccionada_str:
             try:
                 fecha_seleccionada = datetime.strptime(fecha_seleccionada_str, '%Y-%m-%d').date()
             except (ValueError, TypeError):
-                # Si hay error, usar hoy
                 fecha_seleccionada = hoy
         else:
-            # Si no hay fecha seleccionada, usar hoy
             fecha_seleccionada = hoy
 
-        # Para usuarios comunes, la fecha desde y hasta son la misma
         fecha_desde = fecha_seleccionada
         fecha_hasta = fecha_seleccionada
-        sede_obj = sede_usuario  # Sede forzada
 
-    # Filtrar ingresos y egresos por fechas
-    ingresos = Pago.objects.filter(
-        fecha__gte=fecha_desde, fecha__lte=fecha_hasta
-    )
-    egresos = Egreso.objects.filter(
-        fecha__gte=fecha_desde, fecha__lte=fecha_hasta
-    )
+        # Para funcionarios, filtramos por la fecha seleccionada
+        ingresos = Pago.objects.filter(sede=sede_obj, fecha=fecha_seleccionada)
+        egresos  = Egreso.objects.filter(sede=sede_obj, fecha=fecha_seleccionada)
 
-    # Filtrar por sede si corresponde
-    if sede_obj:
-        ingresos = ingresos.filter(sede=sede_obj)
-        egresos = egresos.filter(sede=sede_obj)
+        # ACCIÓN: Cerrar Caja (Se mantiene como hito de control, aunque el informe sea diario)
+        if request.method == 'POST' and 'cerrar_caja' in request.POST:
+            total_ing = ingresos.aggregate(Sum('importe_total'))['importe_total__sum'] or 0
+            total_egr = egresos.aggregate(Sum('monto'))['monto__sum'] or 0
+            balance_cierre = total_ing - total_egr
 
-    # Ordenar y seleccionar relaciones
-    ingresos = ingresos.select_related('alumno', 'sede', 'carrera').order_by('fecha')
-    egresos = egresos.select_related('sede').order_by('fecha')
+            CierreCaja.objects.create(
+                sede=sede_obj,
+                usuario=request.user,
+                fecha_cierre=ahora,
+                total_ingresos=total_ing,
+                total_egresos=total_egr,
+                balance=balance_cierre
+            )
+            messages.success(request, f'Caja de la sede {sede_obj.nombre} cerrada exitosamente.')
+            return redirect('informe_caja')
 
-    # Calcular totales
+    # ── Ordenamiento por número de recibo respetando fechas descendentes ────────
+    sort_recibo = request.GET.get('sort_recibo', '')
+    if sort_recibo == 'asc':
+        # Fecha desc, luego recibo asc
+        ingresos = ingresos.select_related('alumno', 'sede', 'carrera', 'cuenta_bancaria').order_by('-fecha', 'numero_recibo')
+    elif sort_recibo == 'desc':
+        # Fecha desc, luego recibo desc
+        ingresos = ingresos.select_related('alumno', 'sede', 'carrera', 'cuenta_bancaria').order_by('-fecha', '-numero_recibo')
+    else:
+        # Por defecto: Fecha desc
+        ingresos = ingresos.select_related('alumno', 'sede', 'carrera', 'cuenta_bancaria').order_by('-fecha', '-id')
+
+    egresos = egresos.select_related('sede', 'usuario_registro').order_by('-fecha')
+
+    # ── Totales generales ──────────────────────────────────────────────────────
     total_ingresos = ingresos.aggregate(Sum('importe_total'))['importe_total__sum'] or 0
-    total_egresos = egresos.aggregate(Sum('monto'))['monto__sum'] or 0
+    total_egresos  = egresos.aggregate(Sum('monto'))['monto__sum'] or 0
+
+    # ── Totales por forma de cobro ─────────────────────────────────────────────
+    total_efectivo = ingresos.aggregate(t=Sum('monto_efectivo'))['t'] or 0
+    total_deposito = ingresos.aggregate(t=Sum('monto_deposito'))['t'] or 0
+
+    balance = total_ingresos - total_egresos
 
     # Agrupar egresos por categoría
     egresos_por_categoria = {}
@@ -1344,26 +1479,29 @@ def informe_caja(request):
         cat = e.get_categoria_display()
         egresos_por_categoria[cat] = egresos_por_categoria.get(cat, 0) + e.monto
 
-    # Preparar contexto
     context = {
-        'sede': sede_obj,
-        'fecha_desde': fecha_desde,
-        'fecha_hasta': fecha_hasta,
-        'ingresos': ingresos,
-        'egresos': egresos,
-        'total_ingresos': total_ingresos,
-        'total_egresos': total_egresos,
-        'balance': total_ingresos - total_egresos,
+        'ingresos':              ingresos,
+        'egresos':               egresos,
+        'fecha_desde':           fecha_desde,
+        'fecha_hasta':           fecha_hasta,
+        'total_ingresos':        total_ingresos,
+        'total_egresos':         total_egresos,
+        'total_efectivo':        total_efectivo,
+        'total_deposito':        total_deposito,
+        'balance':               balance,
+        'sede':                  sede_obj,
         'egresos_por_categoria': egresos_por_categoria,
-        'sedes': Sede.objects.all().order_by('nombre'),
-        'es_admin': es_admin,
-        'sede_forzada': None if es_admin else sede_usuario,
-        'fecha_emision': timezone.now(),
-        # Para usuarios comunes, pasar la fecha seleccionada
-        'fecha_seleccionada': fecha_desde if not es_admin else None,
+        'sedes':                 Sede.objects.all().order_by('nombre'),
+        'es_admin':              es_admin,
+        'sede_forzada':          None if es_admin else sede_obj,
+        'fecha_emision':         ahora,
+        'fecha_seleccionada':    fecha_desde if not es_admin else None,
+        'sort_recibo':           sort_recibo,
+        'usuario_informe':       request.user,
     }
 
     return render(request, 'caja/informeCaja.html', context)
+
 
 #SOLICITUDES DE ELIMINACIÓN
 
@@ -1566,3 +1704,62 @@ def estado_pagos(self):
         return 'CERCANO_VENCIMIENTO'
     else:
         return 'ATRASADO'
+
+@login_required
+def buscar_alumno(request):
+    q        = request.GET.get('q', '').strip()
+    recientes = request.GET.get('recientes', '0') == '1'
+
+    if recientes or not q:
+        alumnos = (
+            Alumno.objects
+            .select_related('sede', 'carrera')
+            .order_by('-id')
+            [:30]
+        )
+    else:
+        alumnos = (
+            Alumno.objects
+            .select_related('sede', 'carrera')
+            .filter(
+                models.Q(nombre__icontains=q) |
+                models.Q(apellido__icontains=q) |
+                models.Q(cedula__icontains=q)
+            )
+            .order_by('-id')[:30]
+        )
+
+    resultados = [
+        {
+            'id':            a.id,
+            'nombre_completo': a.nombre_completo,  # property o campo
+            'cedula':        a.cedula or '',
+            'sede':          str(a.sede) if a.sede else '',
+            'sede_id':       a.sede_id,
+            'carrera':       str(a.carrera) if a.carrera else '',
+            'carrera_id':    a.carrera_id,
+        }
+        for a in alumnos
+    ]
+    return JsonResponse({'resultados': resultados})
+
+def buscar_funcionario(request):
+    q = request.GET.get('q', '').strip()
+    qs = Funcionario.objects.all()
+    if q:
+        qs = qs.filter(
+            Q(nombre__icontains=q) |
+            Q(apellido__icontains=q) |
+            Q(cedula__icontains=q)
+        )
+    resultados = [
+        {
+            'id':             f.id,
+            'nombre_completo': f.nombre_completo,  # o f.get_full_name()
+            'cargo':          f.cargo or '',
+            'sede':           f.sede.nombre if f.sede else '',
+            'cedula':         f.cedula or '',
+        }
+        for f in qs[:20]
+    ]
+    return JsonResponse({'resultados': resultados})
