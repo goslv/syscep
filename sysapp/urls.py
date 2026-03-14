@@ -48,6 +48,7 @@ urlpatterns = [
     path('funcionarios/asistencias/', views.lista_asistencias, name='lista_asistencias'),
     path('funcionarios/<int:funcionario_id>/', views.detalle_funcionario, name='detalle_funcionario'),
     path('funcionarios/<int:funcionario_id>/editar/', views.editar_funcionario, name='editar_funcionario'),
+    path('buscar-funcionario/', views.buscar_funcionario, name='buscar_funcionario'),
 
     # Sedes
     path('sedes/', views.lista_sedes, name='lista_sedes'),
@@ -72,6 +73,12 @@ urlpatterns = [
     path('usuarios/configuracion/', views.configuracion, name='configuracion'),
     path('usuarios/<int:usuario_id>/editar/', views.editar_usuario, name='editar_usuario'),
     path('usuarios/<int:usuario_id>/cambiar-estado/', views.cambiar_estado_usuario, name='cambiar_estado_usuario'),
+
+    # Roles
+    path('roles/', views.lista_roles, name='lista_roles'),
+    path('roles/crear/', views.crear_rol, name='crear_rol'),
+    path('roles/<int:rol_id>/editar/', views.editar_rol, name='editar_rol'),
+    path('roles/<int:rol_id>/eliminar/', views.eliminar_rol, name='eliminar_rol'),
 
 
 ]
