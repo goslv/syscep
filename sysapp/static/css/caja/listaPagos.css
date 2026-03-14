@@ -1,0 +1,462 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --lp-bg:       #f8faf9;
+    --lp-surface:  #ffffff;
+    --lp-ink:      #0f1419;
+    --lp-muted:    #64748b;
+    --lp-border:   #e2e8f0;
+    --lp-green:    #059669;
+    --lp-green-lt: #d1fae5;
+    --lp-blue:     #2563eb;
+    --lp-blue-lt:  #dbeafe;
+    --lp-r:        14px;
+    --lp-sh:       0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.06);
+    --lp-display:  'Space Grotesk', sans-serif;
+    --lp-body:     'Inter', sans-serif;
+}
+[data-theme="dark"] {
+    --lp-bg:       #0a0e12;
+    --lp-surface:  #13171d;
+    --lp-ink:      #e8eef3;
+    --lp-muted:    #8b9daf;
+    --lp-border:   #1f2937;
+    --lp-green-lt: #064e3b;
+    --lp-blue-lt:  #1e3a8a;
+    --lp-sh:       0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.5);
+}
+
+.lp { font-family: var(--lp-body); color: var(--lp-ink); }
+.lp * { box-sizing: border-box; }
+
+/* Header */
+.lp-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.lp-head-title {
+    font-family: var(--lp-display);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--lp-ink);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+}
+.lp-head-title i { color: var(--lp-green); font-size: 1.6rem; }
+.lp-head-actions {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    flex-wrap: wrap;
+}
+
+/* Botones */
+.lp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .6rem 1.2rem;
+    border-radius: 999px;
+    font-size: .85rem;
+    font-weight: 600;
+    font-family: var(--lp-body);
+    border: none;
+    cursor: pointer;
+    transition: all .2s;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.lp-btn-primary { background: var(--lp-blue); color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.25); }
+.lp-btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); color: #fff; }
+.lp-btn-success { background: var(--lp-green); color: #fff; box-shadow: 0 4px 12px rgba(5,150,105,.25); }
+.lp-btn-success:hover { background: #047857; transform: translateY(-1px); color: #fff; }
+.lp-btn-outline {
+    background: var(--lp-surface);
+    color: var(--lp-ink);
+    border: 1.5px solid var(--lp-border);
+}
+.lp-btn-outline:hover { background: var(--lp-bg); border-color: var(--lp-ink); color: var(--lp-ink); }
+.lp-btn i { font-size: 1rem; }
+
+/* Stats card */
+.lp-stat-card {
+    background: linear-gradient(135deg, var(--lp-green) 0%, #047857 100%);
+    border-radius: var(--lp-r);
+    padding: 1.75rem 2rem;
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(5,150,105,.3);
+    margin-bottom: 1.5rem;
+    animation: lp-fade .3s ease both;
+}
+@keyframes lp-fade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.lp-stat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.lp-stat-label { font-size: .8rem; font-weight: 600; opacity: .85; letter-spacing: .05em; text-transform: uppercase; }
+.lp-stat-icon { font-size: 2.5rem; opacity: .3; }
+.lp-stat-value {
+    font-family: var(--lp-display);
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.lp-stat-value small { font-size: 1.2rem; font-weight: 500; opacity: .8; margin-right: .3rem; }
+.lp-stat-sub { font-size: .82rem; opacity: .8; margin-top: .5rem; }
+
+/* Sede notice */
+.lp-sede-notice {
+    background: var(--lp-blue-lt);
+    border: 1px solid var(--lp-blue);
+    border-radius: var(--lp-r);
+    padding: .8rem 1.2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    font-size: .86rem;
+    color: #1e3a8a;
+}
+[data-theme="dark"] .lp-sede-notice { background: #1e3a8a; color: #dbeafe; }
+.lp-sede-notice i { font-size: 1.3rem; }
+.lp-sede-notice strong { font-weight: 700; }
+
+/* Filtros */
+.lp-filters {
+    background: var(--lp-surface);
+    border: 1px solid var(--lp-border);
+    border-radius: var(--lp-r);
+    padding: 1.5rem;
+    box-shadow: var(--lp-sh);
+    margin-bottom: 1.5rem;
+}
+.lp-filters-title {
+    font-family: var(--lp-display);
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--lp-ink);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.lp-filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+.lp-filter-field { display: flex; flex-direction: column; gap: .4rem; }
+.lp-filter-label {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--lp-muted);
+}
+.lp .form-control, .lp .form-select {
+    padding: .65rem .9rem !important;
+    border: 1.5px solid var(--lp-border) !important;
+    border-radius: 10px !important;
+    font-size: .88rem !important;
+    color: var(--lp-ink) !important;
+    background: var(--lp-bg) !important;
+    font-family: var(--lp-body) !important;
+    transition: all .15s;
+}
+[data-theme="dark"] .lp .form-control,
+[data-theme="dark"] .lp .form-select { background: #0a0e12 !important; }
+.lp .form-control:focus, .lp .form-select:focus {
+    outline: none !important;
+    border-color: var(--lp-green) !important;
+    box-shadow: 0 0 0 3px rgba(5,150,105,.13) !important;
+}
+
+/* Card tabla */
+.lp-card {
+    background: var(--lp-surface);
+    border: 1px solid var(--lp-border);
+    border-radius: var(--lp-r);
+    box-shadow: var(--lp-sh);
+    overflow: hidden;
+}
+
+/* Tabla */
+.lp-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.lp-table thead th {
+    padding: 1rem 1.2rem;
+    text-align: left;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--lp-muted);
+    background: var(--lp-bg);
+    border-bottom: 2px solid var(--lp-border);
+}
+.lp-table tbody tr {
+    border-bottom: 1px solid var(--lp-border);
+    transition: background .15s;
+    cursor: pointer;
+}
+.lp-table tbody tr:hover { background: var(--lp-bg); }
+.lp-table tbody td {
+    padding: 1rem 1.2rem;
+    font-size: .88rem;
+    color: var(--lp-ink);
+}
+
+/* Columnas */
+.lp-table .col-date { color: var(--lp-muted); font-size: .84rem; }
+.lp-table .col-badge {
+    display: inline-block;
+    padding: .3rem .7rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 600;
+    border: 1px solid;
+    background: var(--lp-surface);
+}
+.lp-table .badge-recibo { border-color: var(--lp-blue); color: var(--lp-blue); }
+.lp-table .badge-none { border-color: var(--lp-border); color: var(--lp-muted); opacity: .6; }
+.lp-table .col-nombre { font-weight: 600; }
+.lp-table .col-sub { font-size: .82rem; color: var(--lp-muted); margin-top: .15rem; }
+.lp-table .col-monto {
+    text-align: right;
+    font-family: var(--lp-display);
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--lp-green);
+}
+
+.lp-table .col-actions {
+    text-align: center;
+    opacity: 0;
+    transition: opacity .2s;
+}
+.lp-table tbody tr:hover .col-actions { opacity: 1; }
+.lp-table .btn-group { display: inline-flex; gap: .35rem; }
+.lp-table .btn-action {
+    padding: .4rem .8rem;
+    font-size: .78rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid var(--lp-border);
+    background: var(--lp-surface);
+    color: var(--lp-ink);
+    text-decoration: none;
+    transition: all .15s;
+}
+.lp-table .btn-action:hover { background: var(--lp-bg); border-color: var(--lp-ink); color: var(--lp-ink); }
+
+/* Empty state */
+.lp-empty {
+    padding: 4rem 2rem;
+    text-align: center;
+    color: var(--lp-muted);
+}
+.lp-empty i { font-size: 3.5rem; opacity: .2; margin-bottom: 1rem; display: block; }
+.lp-empty p { margin: 0; font-size: .92rem; }
+
+/* Footer */
+.lp-footer {
+    padding: 1rem 1.2rem;
+    background: var(--lp-bg);
+    border-top: 2px solid var(--lp-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: .85rem;
+    color: var(--lp-muted);
+}
+.lp-footer-total {
+    font-family: var(--lp-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--lp-green);
+}
+
+/* FAB */
+.lp-fab {
+    position: fixed;
+    right: 2rem;
+    bottom: 2rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: var(--lp-green);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 10px 25px rgba(5,150,105,.4);
+    transition: all .3s cubic-bezier(.4,0,.2,1);
+    text-decoration: none;
+    z-index: 1000;
+}
+.lp-fab:hover {
+    background: #047857;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 15px 35px rgba(5,150,105,.5);
+    color: #fff;
+}
+
+/* --- Añadir esto a tu archivo CSS existente --- */
+
+/* Buscador con icono */
+.lp-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.lp-search-wrapper i {
+    position: absolute;
+    left: 12px;
+    color: var(--lp-muted);
+}
+.lp-search-wrapper .form-control {
+    padding-left: 2.5rem !important;
+}
+
+/* Columna ancha para búsqueda */
+.lp-col-wide {
+    grid-column: span 2;
+}
+
+/* Contenedor de acciones de filtro */
+.lp-filter-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.lp-filter-actions .lp-btn {
+    height: 42px; /* Alineado con los inputs */
+}
+
+/* Estilo de los links de ordenamiento en el header */
+.lp-table thead th a {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s;
+}
+
+.lp-table thead th a:hover {
+    color: var(--lp-green);
+}
+
+/* Mejoras de responsividad para la tabla */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Evitar que el click en la fila interfiera con los botones de acción */
+.col-actions .btn-group {
+    position: relative;
+    z-index: 2;
+}
+
+/* --- NUEVAS CLASES PARA LA DISPOSICIÓN COMPACTA --- */
+
+.lp-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    flex-wrap: wrap;
+}
+
+.lp-search-section {
+    display: flex;
+    gap: .5rem;
+    flex-grow: 1;
+    justify-content: flex-end;
+    position: relative;
+}
+
+.lp-search-box {
+    position: relative;
+    max-width: 350px;
+    width: 100%;
+}
+
+.lp-search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--lp-muted);
+}
+
+.lp-search-box .form-control {
+    padding-left: 2.4rem !important;
+}
+
+.lp-action-buttons {
+    display: flex;
+    gap: .5rem;
+}
+
+/* Panel Desplegable */
+.lp-filters-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 1050;
+    background: var(--lp-surface);
+    border: 1px solid var(--lp-border);
+    border-radius: var(--lp-r);
+    padding: 1.2rem;
+    box-shadow: var(--lp-sh);
+    width: 100%;
+    max-width: 500px;
+}
+
+.lp-filters-grid-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+/* Ajustes a la tabla para que los links no se vean azules */
+.lp-table thead th a {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Responsive */
+
+@media(max-width: 992px) {
+    .lp-col-wide { grid-column: span 1; }
+    .lp-filters-grid { grid-template-columns: 1fr 1fr; }
+}
+@media(max-width:768px) {
+    .lp-top-bar { flex-direction: column; align-items: stretch; }
+    .lp-search-box { max-width: 100%; }
+    .lp-filters-dropdown { position: fixed; top: auto; bottom: 80px; left: 10px; right: 10px; width: auto; max-width: none; }
+    .lp-head { flex-direction: column; align-items: stretch; }
+    .lp-head-actions { justify-content: center; }
+    .lp-filters-grid { grid-template-columns: 1fr; }
+    .lp-table thead th { padding: .8rem .8rem; font-size: .68rem; }
+    .lp-table tbody td { padding: .8rem .8rem; font-size: .82rem; }
+    .lp-table .col-concepto,
+    .lp-table .col-actions,
+    .lp-table th:nth-child(4),
+    .lp-table th:last-child { display: none; }
+    .lp-fab { right: 1.5rem; bottom: 1.5rem; width: 52px; height: 52px; font-size: 1.3rem; }
+}
