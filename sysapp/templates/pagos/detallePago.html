@@ -157,6 +157,15 @@
                                 <div class="dp-field-value">{{ pago.concepto }}</div>
                             </div>
 
+                            {% if pago.cuenta_bancaria %}
+                                <div class="dp-field full">
+                                    <div class="dp-field-label"><i class="bi bi-bank"></i> Cuenta bancaria destino</div>
+                                    <div class="dp-field-value">
+                                        {{ pago.cuenta_bancaria.entidad }} — {{ pago.cuenta_bancaria.titular }}
+                                    </div>
+                                </div>
+                            {% endif %}
+
                             <!-- Cuotas (solo si no es matrícula) -->
                             {% if not pago.es_matricula %}
                                 {% if pago.numero_cuota %}
@@ -184,6 +193,18 @@
                                     <div class="dp-field">
                                         <div class="dp-field-label"><i class="bi bi-alarm"></i> Vencimiento</div>
                                         <div class="dp-field-value">{{ pago.fecha_vencimiento|date:"d/m/Y" }}</div>
+                                    </div>
+                                {% endif %}
+                                {% if pago.monto_efectivo %}
+                                    <div class="dp-field">
+                                        <div class="dp-field-label"><i class="bi bi-cash"></i> Efectivo</div>
+                                        <div class="dp-field-value mono">Gs. {{ pago.monto_efectivo|formato_guaranies }}</div>
+                                    </div>
+                                {% endif %}
+                                {% if pago.monto_deposito %}
+                                    <div class="dp-field">
+                                        <div class="dp-field-label"><i class="bi bi-bank2"></i> Depósito</div>
+                                        <div class="dp-field-value mono">Gs. {{ pago.monto_deposito|formato_guaranies }}</div>
                                     </div>
                                 {% endif %}
                             {% endif %}
