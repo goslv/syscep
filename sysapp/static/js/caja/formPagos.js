@@ -150,12 +150,12 @@
         /* Solo resetear cuando el usuario cambia manualmente el método */
         if (resetBanco) {
             cerrarOtro();
-            $('cuentaBancariaId').value = '';
+            if ($('cuentaBancariaId')) $('cuentaBancariaId').value = '';
             document.querySelectorAll('input[name="banco_seleccion"]').forEach(r => r.checked = false);
         }
 
         if (m !== 'DEPOSITO' && m !== 'MIXTO') {
-            $('cuentaBancariaId').value = '';
+            if ($('cuentaBancariaId')) $('cuentaBancariaId').value = '';
         }
         if (m !== 'MIXTO') {
             if ($('pfMontoEfectivo')) $('pfMontoEfectivo').value = '';
@@ -220,13 +220,14 @@
                     <span class="pf-banco-card-titular">${c.titular}</span>
                 </label>`;
             card.querySelector('input').addEventListener('change', () => {
-                $('cuentaBancariaId').value = c.id; cerrarOtro();
+                if ($('cuentaBancariaId')) $('cuentaBancariaId').value = c.id; 
+                cerrarOtro();
             });
             grid.insertBefore(card, cardOtro);
-            if (actualId == c.id) $('cuentaBancariaId').value = c.id;
+            if (actualId == c.id) { if ($('cuentaBancariaId')) $('cuentaBancariaId').value = c.id; }
         });
         $(radioOtroId)?.addEventListener('change', () => {
-            $('cuentaBancariaId').value = '';
+            if ($('cuentaBancariaId')) $('cuentaBancariaId').value = '';
             $('pfOtroBancoInputs')?.classList.add('open');
         });
     }
@@ -250,11 +251,11 @@
                 body: JSON.stringify({ entidad: ent, titular: tit })
             });
             const d = await res.json(); if (!d.id) throw new Error(d.error || 'Error');
-            $('cuentaBancariaId').value = d.id;
+            if ($('cuentaBancariaId')) $('cuentaBancariaId').value = d.id;
             if (!cuentasBancarias.find(c => c.id === d.id)) cuentasBancarias.push(d);
             renderBancos(cuentasBancarias);
             const r = document.querySelector(`input[name="banco_seleccion"][value="${d.id}"]`);
-            if (r) { r.checked = true; $('cuentaBancariaId').value = d.id; }
+            if (r) { r.checked = true; if ($('cuentaBancariaId')) $('cuentaBancariaId').value = d.id; }
             cerrarOtro();
             btn.className = 'pf-btn-save-banco ok';
             btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Guardado';
