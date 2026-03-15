@@ -18,7 +18,7 @@
         <div class="pf-shell">
             <form method="post" enctype="multipart/form-data" id="pagoForm">
                 {% csrf_token %}
-                <input type="hidden" id="cuentaBancariaId" name="cuenta_bancaria_id" value="{{ cuenta_bancaria_actual|default:'' }}">
+                <div style="display:none">{{ form.cuenta_bancaria }}</div>
 
                 <!-- ── Cabecera ── -->
                 <div class="pf-header">
