@@ -170,7 +170,7 @@ class PagoForm(forms.ModelForm):
             'numero_recibo', 'fecha', 'alumno', 'sede', 'carrera',
             'numero_cuota', 'concepto', 'importe_total', 'puntos',
             'foto_comprobante', 'observaciones', 'es_matricula', 'metodo_pago',
-            'monto_efectivo', 'monto_deposito',
+            'monto_efectivo', 'monto_deposito', 'cuenta_bancaria',
         ]
         widgets = {
             'numero_recibo':    forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opcional'}),
@@ -184,6 +184,7 @@ class PagoForm(forms.ModelForm):
             'importe_total':    forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '1'}),
             'foto_comprobante': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'observaciones':    forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'cuenta_bancaria':  forms.HiddenInput(attrs={'id': 'cuentaBancariaId'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -191,7 +192,7 @@ class PagoForm(forms.ModelForm):
         self.fields['alumno'].queryset  = Alumno.objects.all().order_by('apellido', 'nombre')
         self.fields['sede'].queryset    = Sede.objects.all().order_by('nombre')
         self.fields['carrera'].queryset = Carrera.objects.filter(activa=True).order_by('nombre')
-        for f in ['numero_recibo', 'alumno', 'carrera', 'observaciones', 'foto_comprobante', 'puntos', 'carrera_otro', 'monto_efectivo', 'monto_deposito']:
+        for f in ['numero_recibo', 'alumno', 'carrera', 'observaciones', 'foto_comprobante', 'puntos', 'carrera_otro', 'monto_efectivo', 'monto_deposito', 'cuenta_bancaria']:
             self.fields[f].required = False
         if self.instance.pk:
             self.initial['es_matricula'] = self.instance.es_matricula
