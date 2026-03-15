@@ -427,11 +427,13 @@ def _guardar_cuenta_bancaria_si_nueva(request, pago):
     crea la cuenta (o recupera la existente) y la asocia al pago.
     Si seleccionó una cuenta existente, la asocia directamente.
     """
-    if pago.metodo_pago != 'TRANSFERENCIA':
+    if pago.metodo_pago not in ['DEPOSITO', 'MIXTO']:
         pago.cuenta_bancaria = None
         return
 
-    cuenta_id = request.POST.get('cuenta_bancaria_id', '').strip()
+    cuenta_id = request.POST.get('cuenta_bancaria', '').strip()
+    if not cuenta_id:
+        cuenta_id = request.POST.get('cuenta_bancaria_id', '').strip()
     otro_entidad = request.POST.get('otro_banco_entidad', '').strip()
     otro_titular = request.POST.get('otro_banco_titular', '').strip()
 
