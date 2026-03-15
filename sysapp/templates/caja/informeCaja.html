@@ -12,12 +12,9 @@
         <div class="print-header">
             <div>
                 <p class="ph-org">Instituto Técnico Superior CEP</p>
-                <p class="ph-sub">Informe de Caja{% if not es_admin %} — Mis registros{% endif %}</p>
+                <p class="ph-sub">Informe de Caja</p>
             </div>
             <div class="ph-right">
-                {% if not es_admin %}
-                    <div><strong>Solo mis registros</strong></div>
-                {% endif %}
                 <div><strong>Sede:</strong> {% if sede %}{{ sede.nombre }}{% else %}Todas las Sedes{% endif %}</div>
                 <div><strong>Período:</strong> {{ fecha_desde|date:"d/m/Y" }} – {{ fecha_hasta|date:"d/m/Y" }}</div>
                 <div><strong>Emitido:</strong> {{ fecha_emision|date:"d/m/Y H:i" }}</div>
@@ -32,21 +29,21 @@
         <div class="print-kpi-strip">
             {% if total_deposito %}
                 <div class="pk-item">
-                    <span class="pk-label">Depósito / Transferencia</span>
-                    <span class="pk-value violet">Gs. {{ total_deposito|formato_guaranies }}</span>
+                    <span class="pk-label" id="pkDepositoLabel">Depósito / Transferencia</span>
+                    <span class="pk-value violet">Gs. <span id="pkDepositoVal">{{ total_deposito|formato_guaranies }}</span></span>
                 </div>
             {% endif %}
             <div class="pk-item">
-                <span class="pk-label">Total Ingresos</span>
-                <span class="pk-value green">Gs. {{ total_ingresos|formato_guaranies }}</span>
+                <span class="pk-label" id="pkIngresosLabel">Total Ingresos</span>
+                <span class="pk-value green">Gs. <span id="pkIngresosVal">{{ total_ingresos|formato_guaranies }}</span></span>
             </div>
             <div class="pk-item">
-                <span class="pk-label">Total Egresos</span>
-                <span class="pk-value red">Gs. {{ total_egresos|formato_guaranies }}</span>
+                <span class="pk-label" id="pkEgresosLabel">Total Egresos</span>
+                <span class="pk-value red">Gs. <span id="pkEgresosVal">{{ total_egresos|formato_guaranies }}</span></span>
             </div>
             <div class="pk-item">
-                <span class="pk-label">Balance Neto</span>
-                <span class="pk-value {% if balance >= 0 %}blue{% else %}red{% endif %}">Gs. {{ balance|formato_guaranies }}</span>
+                <span class="pk-label" id="pkBalanceLabel">Balance Neto</span>
+                <span class="pk-value {% if balance >= 0 %}blue{% else %}red{% endif %}">Gs. <span id="pkBalanceVal">{{ balance|formato_guaranies }}</span></span>
             </div>
         </div>
 
@@ -154,25 +151,25 @@
 
         {# WEB: KPIs #}
         <div class="lc-stats no-print">
-            <div class="lc-stat-card green">
-                <div class="lc-stat-label"><i class="bi bi-arrow-up-circle-fill"></i> Total Ingresos</div>
-                <div class="lc-stat-value"><small>Gs.</small>{{ total_ingresos|formato_guaranies }}</div>
-                <div class="lc-stat-sub"><i class="bi bi-receipt"></i> {{ ingresos|length }} registro{{ ingresos|length|pluralize }}</div>
+            <div class="lc-stat-card green" id="statCardIngresos">
+                <div class="lc-stat-label"><i class="bi bi-arrow-up-circle-fill"></i> <span id="statIngresosLabel">Total Ingresos</span></div>
+                <div class="lc-stat-value"><small>Gs.</small><span id="statIngresosVal">{{ total_ingresos|formato_guaranies }}</span></div>
+                <div class="lc-stat-sub" id="statIngresosSub"><i class="bi bi-receipt"></i> {{ ingresos|length }} registro{{ ingresos|length|pluralize }}</div>
             </div>
-            <div class="lc-stat-card red">
-                <div class="lc-stat-label"><i class="bi bi-arrow-down-circle-fill"></i> Total Egresos</div>
-                <div class="lc-stat-value"><small>Gs.</small>{{ total_egresos|formato_guaranies }}</div>
-                <div class="lc-stat-sub"><i class="bi bi-file-text"></i> {{ egresos|length }} registro{{ egresos|length|pluralize }}</div>
+            <div class="lc-stat-card red" id="statCardEgresos">
+                <div class="lc-stat-label"><i class="bi bi-arrow-down-circle-fill"></i> <span id="statEgresosLabel">Total Egresos</span></div>
+                <div class="lc-stat-value"><small>Gs.</small><span id="statEgresosVal">{{ total_egresos|formato_guaranies }}</span></div>
+                <div class="lc-stat-sub" id="statEgresosSub"><i class="bi bi-file-text"></i> {{ egresos|length }} registro{{ egresos|length|pluralize }}</div>
             </div>
-            <div class="lc-stat-card {% if balance >= 0 %}blue{% else %}red{% endif %}">
-                <div class="lc-stat-label"><i class="bi bi-calculator-fill"></i> Balance Neto</div>
-                <div class="lc-stat-value"><small>Gs.</small>{{ balance|formato_guaranies }}</div>
-                <div class="lc-stat-sub"><i class="bi bi-arrow-left-right"></i> Ingresos − Egresos</div>
+            <div class="lc-stat-card {% if balance >= 0 %}blue{% else %}red{% endif %}" id="statCardBalance">
+                <div class="lc-stat-label"><i class="bi bi-calculator-fill"></i> <span id="statBalanceLabel">Balance Neto</span></div>
+                <div class="lc-stat-value"><small>Gs.</small><span id="statBalanceVal">{{ balance|formato_guaranies }}</span></div>
+                <div class="lc-stat-sub" id="statBalanceSub"><i class="bi bi-arrow-left-right"></i> Ingresos − Egresos</div>
             </div>
             {% if total_deposito %}
-                <div class="lc-stat-card violet">
-                    <div class="lc-stat-label"><i class="bi bi-bank2"></i> Depósitos</div>
-                    <div class="lc-stat-value"><small>Gs.</small>{{ total_deposito|formato_guaranies }}</div>
+                <div class="lc-stat-card violet" id="statCardDeposito">
+                    <div class="lc-stat-label"><i class="bi bi-bank2"></i> <span id="statDepositoLabel">Depósitos</span></div>
+                    <div class="lc-stat-value"><small>Gs.</small><span id="statDepositoVal">{{ total_deposito|formato_guaranies }}</span></div>
                     <div class="lc-stat-sub"><i class="bi bi-zoom-in"></i> Ver detalle por cuenta</div>
                 </div>
             {% endif %}
@@ -275,7 +272,9 @@
                         <tr class="ingreso-row"
                             data-metodo="{{ ingreso.metodo_pago }}"
                             data-cuenta="{{ ingreso.cuenta_bancaria.entidad|default:'Sin especificar' }}"
-                            data-dep="{% if ingreso.metodo_pago == 'MIXTO' %}{{ ingreso.monto_deposito|default:0 }}{% else %}{{ ingreso.importe_total }}{% endif %}"
+                            data-titular="{{ ingreso.cuenta_bancaria.titular|default:'' }}"
+                            data-dep="{% if ingreso.metodo_pago == 'MIXTO' %}{{ ingreso.monto_deposito|default:0 }}{% elif ingreso.metodo_pago == 'DEPOSITO' or ingreso.metodo_pago == 'TRANSFERENCIA' %}{{ ingreso.importe_total }}{% else %}0{% endif %}"
+                            data-importe="{{ ingreso.importe_total }}"
                             data-fecha="{{ ingreso.fecha|date:'d/m/Y' }}"
                             data-alumno="{% if ingreso.alumno %}{{ ingreso.alumno.nombre_completo }}{% else %}{{ ingreso.nombre_cliente }}{% endif %}"
                             data-recibo="{{ ingreso.numero_recibo|default:'' }}"
@@ -345,8 +344,8 @@
                         <tr>
                             <td class="no-print"></td>
                             <td colspan="4"></td>
-                            <td style="text-align:right;font-size:.76rem;color:var(--lc-muted);">SUBTOTAL</td>
-                            <td class="lc-monto monto-ingreso">Gs. {{ total_ingresos|formato_guaranies }}</td>
+                            <td style="text-align:right;font-size:.76rem;color:var(--lc-muted);" id="tfootIngresosLabel">SUBTOTAL</td>
+                            <td class="lc-monto monto-ingreso" id="tfootIngresosVal">Gs. {{ total_ingresos|formato_guaranies }}</td>
                         </tr>
                         </tfoot>
                     {% endif %}
@@ -385,7 +384,7 @@
                     </thead>
                     <tbody>
                     {% for egreso in egresos %}
-                        <tr class="egreso-row">
+                        <tr class="egreso-row" data-monto="{{ egreso.monto }}">
                             <td class="no-print" style="text-align:center;">
                                 <input type="checkbox" class="egreso-check" style="width:16px;height:16px;">
                             </td>
@@ -415,8 +414,8 @@
                         <tfoot>
                         <tr>
                             <td class="no-print"></td>
-                            <td colspan="5" style="text-align:right;">SUBTOTAL EGRESOS</td>
-                            <td class="lc-monto monto-egreso">Gs. {{ total_egresos|formato_guaranies }}</td>
+                            <td colspan="5" style="text-align:right;" id="tfootEgresosLabel">SUBTOTAL EGRESOS</td>
+                            <td class="lc-monto monto-egreso" id="tfootEgresosVal">Gs. {{ total_egresos|formato_guaranies }}</td>
                         </tr>
                         </tfoot>
                     {% endif %}
@@ -445,7 +444,6 @@
                 <div class="firma-role">Firma y Aclaración</div>
             </div>
         </div>
-
     </div>
 {% endblock %}
 {% block extra_js %}

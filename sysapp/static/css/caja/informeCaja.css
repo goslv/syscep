@@ -289,9 +289,7 @@ thead input[type="checkbox"]:checked::after {
     .firma-role    { font-size: 6.5pt; color: #666; }
 }
 
-/* ─────────────────────────────────────────────────────────
-   MODAL DEPÓSITOS  (agregar al final de informeCaja.css)
-───────────────────────────────────────────────────────── */
+/* MODAL DEPÓSITOS  (agregar al final de informeCaja.css)*/
 
 /* Stat card violet clickeable — hint visual */
 .lc-stat-card.violet {
