@@ -2,11 +2,11 @@
 
 /* ─── Tokens consistentes ─────────────────────────────── */
 :root {
-    --lu-bg:        #f8fafc;
-    --lu-surface:   #ffffff;
-    --lu-ink:       #0f1825;
-    --lu-muted:     #5e6f88;
-    --lu-border:    #e1e9f0;
+    --lu-bg:        var(--body-bg);
+    --lu-surface:   var(--card-bg);
+    --lu-ink:       var(--text-main);
+    --lu-muted:     var(--text-muted);
+    --lu-border:    var(--border-color);
     --lu-primary:   #6366f1;
     --lu-primary-dk: #4f52e0;
     --lu-primary-lt: #e9eafe;
@@ -27,11 +27,6 @@
 }
 
 [data-theme="dark"] {
-    --lu-bg:        #0e121b;
-    --lu-surface:   #161c26;
-    --lu-ink:       #edf2f9;
-    --lu-muted:     #8f9fb2;
-    --lu-border:    #232b36;
     --lu-primary-lt: #1e1f3a;
     --lu-success-lt: #12352d;
     --lu-warning-lt: #302010;
@@ -43,8 +38,10 @@
 .lu {
     font-family: 'Plus Jakarta Sans', sans-serif;
     color: var(--lu-ink);
-    min-height: 100vh;
+    background: var(--lu-bg);
+    min-height: calc(100vh - var(--topbar-height));
     padding: 1.5rem;
+    transition: background-color 0.3s ease;
 }
 
 .lu * { box-sizing: border-box; }
