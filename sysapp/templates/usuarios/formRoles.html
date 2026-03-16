@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }} — ITS CEP{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% load static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/usuarios/formRoles.css' %}">
+{% endblock %}
+{% block content %}
+
+    <div class="fr">
+
+        <div class="fr-head">
+            <div class="fr-head-left">
+                <div class="fr-head-title">
+                    <div class="fr-head-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                    {{ titulo }}
+                </div>
+                <div class="fr-breadcrumb">
+                    <a href="{% url 'dashboard' %}">Inicio</a>
+                    <i class="bi bi-chevron-right" style="font-size:.6rem;opacity:.6"></i>
+                    <a href="{% url 'lista_roles' %}">Roles</a>
+                    <i class="bi bi-chevron-right" style="font-size:.6rem;opacity:.6"></i>
+                    <span>{{ titulo }}</span>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" class="fr-card" novalidate>
+            {% csrf_token %}
+            <div class="fr-banner">
+                <div class="fr-banner-info">
+                    <h2><i class="bi bi-shield-check"></i> Configuración del rol</h2>
+                    <p>Definí el nombre y los permisos que tendrá este rol.</p>
+                </div>
+                <span class="fr-banner-pill"><i class="bi bi-pencil-square me-1"></i>Modo edición</span>
+            </div>
+
+            <div class="fr-body">
+
+                <div class="fr-field">
+                    <label class="fr-label" for="{{ form.name.id_for_label }}">
+                        <i class="bi bi-tag-fill"></i> Nombre del rol
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="fr-error"><i class="bi bi-exclamation-circle"></i> {{ form.name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <!-- Admin warning — el JS lo muestra/oculta automáticamente -->
+                    <div class="fr-admin-notice" id="fr-admin-notice">
+                        <div class="fr-admin-notice-icon">
+                            <i class="bi bi-shield-exclamation"></i>
+                        </div>
+                        <div class="fr-admin-notice-body">
+                            <div class="fr-admin-notice-title">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                Permisos de alto riesgo habilitados
+                            </div>
+                            <div class="fr-admin-notice-text">
+                                Este rol tiene permisos que pueden otorgar acceso al panel de administración de Django
+                                o modificar usuarios y grupos del sistema. Asigná este rol únicamente a personal de confianza.
+                            </div>
+                            <div class="fr-admin-perms-list" id="fr-admin-perms-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="fr-perms-head">
+        <span class="fr-perms-title">
+            <i class="bi bi-toggles"></i> Permisos del sistema
+        </span>
+                    </div>
+
+                    <p class="fr-perms-sub">
+                        Los módulos marcados en <strong style="color:var(--lc-red)">rojo</strong>
+                        contienen permisos sensibles que pueden comprometer la seguridad si se asignan incorrectamente.
+                    </p>
+
+                    <!-- Toolbar: búsqueda + expandir/colapsar -->
+                    <div class="fr-perms-toolbar">
+                        <div class="fr-perms-toolbar-left">
+                            <div class="fr-search-wrap">
+                                <i class="bi bi-search"></i>
+                                <input type="text" id="fr-search"
+                                       placeholder="Buscar permiso..."
+                                       autocomplete="off"
+                                       aria-label="Buscar permisos">
+                            </div>
+                        </div>
+                        <div class="fr-perms-toolbar-right">
+                            <button type="button" class="fr-expand-btn" id="fr-expand-all">
+                                <i class="bi bi-arrows-collapse"></i> Colapsar todo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fr-perms-empty" id="fr-perms-empty">
+                        <i class="bi bi-search"></i>
+                        No se encontraron permisos con ese término.
+                    </div>
+
+                    {% for nombre_modelo, permisos in permisos_agrupados.items %}
+                        <div class="fr-module abierto" data-modulo="{{ nombre_modelo }}">
+                            <div class="fr-module-head"
+                                 role="button" tabindex="0"
+                                 aria-expanded="true"
+                                 aria-controls="mod-body-{{ forloop.counter }}">
+                                <div class="fr-module-left">
+                                    <!-- El JS reemplaza el icono y añade descripción automáticamente -->
+                                    <div class="fr-module-icon">
+                                        <i class="bi bi-folder-fill"></i>
+                                    </div>
+                                    <span class="fr-module-name">{{ nombre_modelo }}</span>
+                                </div>
+                                <div class="fr-module-right">
+                    <span class="fr-module-badge" id="badge-{{ forloop.counter }}">
+                        0 / {{ permisos|length }}
+                    </span>
+                                    <button type="button" class="fr-sel-all"
+                                            data-destino="mod-body-{{ forloop.counter }}"
+                                            aria-label="Seleccionar todos los permisos de {{ nombre_modelo }}">
+                                        <i class="bi bi-check2-all"></i> Todos
+                                    </button>
+                                    <i class="bi bi-chevron-down fr-chevron" aria-hidden="true"></i>
+                                </div>
+                            </div>
+                            <div class="fr-module-body" id="mod-body-{{ forloop.counter }}">
+                                {% for p in permisos %}
+                                    <div class="fr-perm" data-etiqueta="{{ p.name|lower }}">
+                                        <input type="checkbox"
+                                               name="permissions"
+                                               value="{{ p.id }}"
+                                               id="perm-{{ p.id }}"
+                                               {% if p.checked or p in form.permissions.value %}checked{% endif %}>
+                                        <label for="perm-{{ p.id }}">{{ p.name }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <div class="fr-foot">
+                <p class="fr-foot-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Los cambios se aplicarán a todos los usuarios con este rol.
+                </p>
+                <div class="fr-foot-actions">
+                    <a href="{% url 'lista_roles' %}" class="fr-btn fr-btn-ghost">
+                        <i class="bi bi-x-lg"></i> Cancelar
+                    </a>
+                    <button type="submit" class="fr-btn fr-btn-primary">
+                        <i class="bi bi-check-lg"></i> {{ boton }}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+{% block extra_js %}
+    <script src="{% static 'js/usuarios/formRoles.js' %}"></script>
+{% endblock %}
