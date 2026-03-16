@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --lr-bg:        #f8fafc;
+    --lr-surface:   #ffffff;
+    --lr-ink:       #0f1825;
+    --lr-muted:     #5e6f88;
+    --lr-border:    #e1e9f0;
+    --lr-primary:   #6366f1;
+    --lr-primary-dk: #4f52e0;
+    --lr-primary-lt: #e9eafe;
+    --lr-purple:    #8b5cf6;
+    --lr-purple-lt: #ede9fe;
+    --lr-gray-lt:   #f1f5f9;
+    --lr-r:         16px;
+    --lr-sh-md:     0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.03);
+    --lr-sh-lg:     0 12px 32px rgba(0,0,0,.08);
+    --lr-transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+    --lr-bg:        #0e121b;
+    --lr-surface:   #161c26;
+    --lr-ink:       #edf2f9;
+    --lr-muted:     #8f9fb2;
+    --lr-border:    #232b36;
+    --lr-primary-lt: #1e1f3a;
+    --lr-purple-lt: #281c42;
+    --lr-gray-lt:   #1e2630;
+}
+
+.lr {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--lr-ink);
+    padding: 1.5rem;
+}
+
+.lr-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.lr-head-title {
+    font-size: 2rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.lr-head-title i {
+    color: var(--lr-primary);
+    background: var(--lr-primary-lt);
+    padding: .5rem;
+    border-radius: 14px;
+}
+
+.lr-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .7rem 1.4rem;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--lr-transition);
+    border: none;
+    cursor: pointer;
+}
+
+.lr-btn-primary {
+    background: linear-gradient(135deg, var(--lr-primary) 0%, var(--lr-primary-dk) 100%);
+    color: #fff;
+}
+
+.lr-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99,102,241,.3);
+    color: #fff;
+}
+
+.lr-card {
+    background: var(--lr-surface);
+    border: 1px solid var(--lr-border);
+    border-radius: 20px;
+    box-shadow: var(--lr-sh-lg);
+    overflow: hidden;
+}
+
+.lr-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.lr-table th {
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    background: var(--lr-gray-lt);
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--lr-muted);
+}
+
+.lr-table td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--lr-border);
+}
+
+.lr-badge {
+    display: inline-flex;
+    padding: .25rem .75rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 700;
+    background: var(--lr-primary-lt);
+    color: var(--lr-primary);
+}
+
+.lr-actions {
+    display: flex;
+    gap: .5rem;
+}
+
+.lr-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: var(--lr-transition);
+    border: 1.5px solid var(--lr-border);
+    color: var(--lr-muted);
+}
+
+.lr-action-btn:hover {
+    background: var(--lr-primary);
+    color: white;
+    border-color: var(--lr-primary);
+    transform: translateY(-2px);
+}
+
+.lr-action-btn.delete:hover {
+    background: var(--lr-danger);
+    color: white;
+    border-color: var(--lr-danger);
+}
