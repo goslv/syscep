@@ -74,33 +74,43 @@ def register(request):
 @login_required
 def dashboard(request):
     hoy = timezone.now().date()
-    total_alumnos      = Alumno.objects.filter(activo=True).count()
-    total_funcionarios = Funcionario.objects.filter(activo=True).count()
-    total_carreras     = Carrera.objects.filter(activa=True).count()
-    total_sedes        = Sede.objects.filter(activa=True).count()
 
-    pagos_hoy     = Pago.objects.filter(fecha=hoy)
-    ingresos_hoy  = pagos_hoy.aggregate(Sum('importe_total'))['importe_total__sum'] or 0
+    alumnos_activos    = Alumno.objects.filter(activo=True)
+    alumnos_al_dia     = sum(1 for a in alumnos_activos if a.estado_pagos == 'AL_DIA')
+    alumnos_por_vencer = sum(1 for a in alumnos_activos if a.estado_pagos == 'CERCANO_VENCIMIENTO')
+    alumnos_atrasados  = sum(1 for a in alumnos_activos if a.estado_pagos == 'ATRASADO')
+    pagos_recientes    = Pago.objects.select_related('alumno', 'sede').order_by('-fecha_creacion')[:10]
 
-    alumnos_activos      = Alumno.objects.filter(activo=True)
-    alumnos_al_dia       = sum(1 for a in alumnos_activos if a.estado_pagos == 'AL_DIA')
-    alumnos_por_vencer   = sum(1 for a in alumnos_activos if a.estado_pagos == 'CERCANO_VENCIMIENTO')
-    alumnos_atrasados    = sum(1 for a in alumnos_activos if a.estado_pagos == 'ATRASADO')
+    es_director = request.user.groups.filter(name='Director').exists() or request.user.is_staff
 
-    pagos_recientes = Pago.objects.select_related('alumno', 'sede', 'carrera').order_by('-fecha_creacion')[:10]
+    context = {
+        'alumnos_al_dia':    alumnos_al_dia,
+        'alumnos_por_vencer':alumnos_por_vencer,
+        'alumnos_atrasados': alumnos_atrasados,
+        'pagos_recientes':   pagos_recientes,
+        'es_director':       es_director,
+    }
 
-    return render(request, 'inicio.html', {
-        'total_alumnos':       total_alumnos,
-        'total_funcionarios':  total_funcionarios,
-        'total_carreras':      total_carreras,
-        'total_sedes':         total_sedes,
-        'ingresos_hoy':        ingresos_hoy,
-        'cantidad_pagos_hoy':  pagos_hoy.count(),
-        'alumnos_al_dia':      alumnos_al_dia,
-        'alumnos_por_vencer':  alumnos_por_vencer,
-        'alumnos_atrasados':   alumnos_atrasados,
-        'pagos_recientes':     pagos_recientes,
-    })
+    if es_director:
+        ingresos_qs = Pago.objects.filter(fecha=hoy).select_related('alumno', 'sede')
+        egresos_qs  = Egreso.objects.filter(fecha=hoy).select_related('sede')
+        total_ing   = ingresos_qs.aggregate(Sum('importe_total'))['importe_total__sum'] or 0
+        total_egr   = egresos_qs.aggregate(Sum('monto'))['monto__sum'] or 0
+        context.update({
+            'total_ingresos_hoy':  total_ing,
+            'total_egresos_hoy':   total_egr,
+            'balance_hoy':         total_ing - total_egr,
+            'total_deposito_hoy':  ingresos_qs.aggregate(t=Sum('monto_deposito'))['t'] or 0,
+            'cantidad_ingresos':   ingresos_qs.count(),
+            'cantidad_egresos':    egresos_qs.count(),
+            'ultimas_transacciones': list(
+                [{'tipo': 'ing', 'desc': f"{p.alumno.nombre_completo if p.alumno else p.nombre_cliente}", 'monto': p.importe_total, 'sede': p.sede.nombre} for p in ingresos_qs.order_by('-id')[:5]]
+                + [{'tipo': 'eg', 'desc': p.concepto, 'monto': p.monto, 'sede': p.sede.nombre} for p in egresos_qs.order_by('-id')[:5]]
+            ),
+            'fecha_hoy': hoy,
+        })
+
+    return render(request, 'inicio.html', context)
 
 #  ALUMNOS
 
@@ -1756,12 +1766,73 @@ def buscar_funcionario(request):
         )
     resultados = [
         {
-            'id':             f.id,
-            'nombre_completo': f.nombre_completo,  # o f.get_full_name()
-            'cargo':          f.cargo or '',
-            'sede':           f.sede.nombre if f.sede else '',
-            'cedula':         f.cedula or '',
+            'id': f.id,
+            'nombre_completo': f.nombre_completo,
+            'cargo': f.cargo or '',
+            'sede': f.sede.nombre if f.sede else '',
+            'cedula': f.cedula or '',
         }
         for f in qs[:20]
     ]
+    return JsonResponse({'resultados': resultados})
+
+@login_required
+def buscar_global(request):
+    from django.db.models import Q
+    from django.urls import reverse
+    
+    q = request.GET.get('q', '').strip()
+    if not q:
+        return JsonResponse({'resultados': []})
+
+    resultados = []
+
+    # 1. Alumnos
+    alumnos = Alumno.objects.filter(
+        Q(nombre__icontains=q) |
+        Q(apellido__icontains=q) |
+        Q(cedula__icontains=q)
+    ).select_related('carrera', 'sede')[:5]
+
+    for a in alumnos:
+        resultados.append({
+            'tipo': 'Alumno',
+            'titulo': a.nombre_completo,
+            'subtitulo': f"CI: {a.cedula or 'S/D'} - {a.carrera.nombre if a.carrera else 'Sin carrera'}",
+            'url': reverse('detalle_alumno', kwargs={'alumno_uuid': a.uuid}),
+            'icon': 'bi-person-badge'
+        })
+
+    # 2. Pagos
+    pagos = Pago.objects.filter(
+        Q(numero_recibo__icontains=q) |
+        Q(nombre_cliente__icontains=q) |
+        Q(alumno__nombre__icontains=q) |
+        Q(alumno__apellido__icontains=q)
+    ).select_related('alumno')[:5]
+
+    for p in pagos:
+        resultados.append({
+            'tipo': 'Pago',
+            'titulo': f"Recibo: {p.numero_recibo or 'S/N'}",
+            'subtitulo': f"{p.nombre_pagador} - Gs. {int(p.importe_total):,}",
+            'url': reverse('detalle_pago', kwargs={'pago_uuid': p.uuid}),
+            'icon': 'bi-cash-stack'
+        })
+
+    # 3. Carreras
+    carreras = Carrera.objects.filter(
+        Q(nombre__icontains=q) |
+        Q(descripcion__icontains=q)
+    )[:5]
+
+    for c in carreras:
+        resultados.append({
+            'tipo': 'Carrera',
+            'titulo': c.nombre,
+            'subtitulo': f"Sede: {c.sede.nombre if hasattr(c, 'sede') and c.sede else 'Múltiples'}",
+            'url': reverse('detalle_carrera', kwargs={'carrera_id': c.id}),
+            'icon': 'bi-mortarboard'
+        })
+
     return JsonResponse({'resultados': resultados})
