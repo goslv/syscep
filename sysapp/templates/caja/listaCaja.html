@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
+{% load static %}
 {% block title %}Caja — ITS CEP{% endblock %}
 {% block page_title %}Caja{% endblock %}
 
@@ -8,9 +9,7 @@
 {% endblock %}
 
 {% block content %}
-
     <div class="lc">
-
         <!-- ── Header ─────────────────────────────────────────── -->
         <div class="lc-head">
             <div class="lc-head-left">
@@ -299,7 +298,6 @@
         </div>
     </div>
 {% endblock %}
-
 {% block extra_js %}
     <script src="{% static 'js/caja/listaCaja.js' %}"></script>
 {% endblock %}
