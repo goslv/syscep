@@ -910,6 +910,7 @@
 }
 
 /* ── 768px — tablet ── */
+
 @media (max-width: 768px) {
     .dashboard-container {
         padding: 1rem 0.75rem;
@@ -1026,6 +1027,104 @@
     .fab-menu {
         bottom: calc(56px + .9rem);
     }
+
+    /* ── Carousel swipe en mobile ── */
+
+    .status-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 0;
+        padding: 0.5rem 0.25rem 1rem;
+        margin: 0 -0.25rem;
+        scrollbar-width: none;
+    }
+
+    .status-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .status-item {
+        flex: 0 0 100%;
+        min-width: 0;
+        scroll-snap-align: center;
+        padding: 1.25rem;
+    }
+
+    /* Dots container */
+    .carousel-dots {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .carousel-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--border-color);
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+    .carousel-dot.active {
+        width: 20px;
+        border-radius: 4px;
+        background: var(--primary-500);
+    }
+
+    /* Ocultar botón de informe en mobile (la card entera es clickeable) */
+    .btn-informe-desktop {
+        display: none;
+    }
+
+    /* Swipe indicator mejorado */
+    .swipe-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 0.5rem;
+        opacity: 1;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+    }
+
+    .swipe-indicator.hidden {
+        opacity: 0;
+    }
+
+    .swipe-hand {
+        font-size: 1.2rem;
+        display: inline-block;
+        animation: swipe-hint 1.8s ease-in-out infinite;
+    }
+
+    .swipe-indicator-text {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    @keyframes swipe-hint {
+        0%   { transform: translateX(4px);  opacity: 0.5; }
+        40%  { transform: translateX(-8px); opacity: 1;   }
+        70%  { transform: translateX(4px);  opacity: 0.7; }
+        100% { transform: translateX(4px);  opacity: 0.5; }
+    }
+}
+
+/* Ocultar dots en desktop */
+@media (min-width: 769px) {
+    .carousel-dots { display: none; }
 }
 
 /* ── 480px — móvil ── */

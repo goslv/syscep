@@ -12,6 +12,108 @@
 
     <div class="dashboard-container">
 
+        {% if es_director %}
+            <!-- Resumen del día (solo directores) -->
+            <div class="payment-status-card animate-fade-in caja-card-clickable"
+                 style="margin-bottom:1.5rem; cursor:pointer;"
+                 onclick="window.location='{% url 'informe_caja' %}'">
+                <div class="section-header" style="margin-bottom:1.25rem;">
+                    <div class="section-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1d4ed8;">
+                        <i class="bi bi-clipboard2-data-fill"></i>
+                    </div>
+                    <div>
+                        <h5 style="margin:0;">Caja del día</h5>
+                        <small style="color:var(--text-muted);">{{ fecha_hoy|date:"l d \d\e F" }}</small>
+                    </div>
+                    <!-- Botón solo visible en desktop -->
+                    <a href="{% url 'informe_caja' %}"
+                       class="btn btn-sm btn-outline ms-auto btn-informe-desktop"
+                       style="border-radius:10px;font-size:.8rem;"
+                       onclick="event.stopPropagation()">
+                        <i class="bi bi-arrow-right-circle"></i> Ver informe completo
+                    </a>
+                </div>
+
+                <!-- KPIs -->
+                <div class="status-grid" style="margin-bottom:1.25rem;">
+                    <div class="status-item" style="cursor:default;">
+                        <div class="status-badge al-dia" style="background:linear-gradient(135deg,#10b981,#059669);min-width:68px;height:68px;font-size:1.1rem;">
+                            <i class="bi bi-arrow-up-circle-fill" style="font-size:1.4rem;"></i>
+                        </div>
+                        <div class="status-info">
+                            <h6 style="font-size:.75rem;color:var(--text-muted);margin-bottom:.2rem;">INGRESOS</h6>
+                            <div style="font-weight:800;font-size:1.05rem;color:#10b981;">Gs. {{ total_ingresos_hoy|formato_guaranies }}</div>
+                            <small style="color:var(--text-muted);">{{ cantidad_ingresos }} cobro{{ cantidad_ingresos|pluralize }}</small>
+                        </div>
+                    </div>
+
+                    <div class="status-item" style="cursor:default;">
+                        <div class="status-badge atrasado" style="min-width:68px;height:68px;font-size:1.1rem;">
+                            <i class="bi bi-arrow-down-circle-fill" style="font-size:1.4rem;"></i>
+                        </div>
+                        <div class="status-info">
+                            <h6 style="font-size:.75rem;color:var(--text-muted);margin-bottom:.2rem;">EGRESOS</h6>
+                            <div style="font-weight:800;font-size:1.05rem;color:#ef4444;">Gs. {{ total_egresos_hoy|formato_guaranies }}</div>
+                            <small style="color:var(--text-muted);">{{ cantidad_egresos }} gasto{{ cantidad_egresos|pluralize }}</small>
+                        </div>
+                    </div>
+
+                    <div class="status-item" style="cursor:default;">
+                        <div class="status-badge {% if balance_hoy >= 0 %}al-dia{% else %}atrasado{% endif %}" style="min-width:68px;height:68px;font-size:1.1rem;background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
+                            <i class="bi bi-calculator-fill" style="font-size:1.4rem;"></i>
+                        </div>
+                        <div class="status-info">
+                            <h6 style="font-size:.75rem;color:var(--text-muted);margin-bottom:.2rem;">BALANCE</h6>
+                            <div style="font-weight:800;font-size:1.05rem;color:{% if balance_hoy >= 0 %}#3b82f6{% else %}#ef4444{% endif %};">
+                                Gs. {{ balance_hoy|formato_guaranies }}
+                            </div>
+                            <small style="color:var(--text-muted);">Ingresos − Egresos</small>
+                        </div>
+                    </div>
+
+                    {% if total_deposito_hoy %}
+                        <div class="status-item" style="cursor:default;">
+                            <div class="status-badge" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);min-width:68px;height:68px;font-size:1.1rem;">
+                                <i class="bi bi-bank2" style="font-size:1.4rem;"></i>
+                            </div>
+                            <div class="status-info">
+                                <h6 style="font-size:.75rem;color:var(--text-muted);margin-bottom:.2rem;">DEPÓSITOS</h6>
+                                <div style="font-weight:800;font-size:1.05rem;color:#8b5cf6;">Gs. {{ total_deposito_hoy|formato_guaranies }}</div>
+                                <small style="color:var(--text-muted);">Por transferencia</small>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Últimas transacciones -->
+                {% if ultimas_transacciones %}
+                    <div style="border-top:1px solid var(--border-color);padding-top:1rem;">
+                        <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.65rem;">
+                            <i class="bi bi-clock-history"></i> Últimas transacciones
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:.4rem;">
+                            {% for t in ultimas_transacciones %}
+                                <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem .75rem;border-radius:10px;background:var(--body-bg);font-size:.84rem;">
+                                    <div style="display:flex;align-items:center;gap:.6rem;">
+                        <span style="width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.75rem;
+                                background:{% if t.tipo == 'ing' %}rgba(16,185,129,.12){% else %}rgba(239,68,68,.12){% endif %};
+                                color:{% if t.tipo == 'ing' %}#10b981{% else %}#ef4444{% endif %};">
+                            <i class="bi bi-{% if t.tipo == 'ing' %}arrow-up{% else %}arrow-down{% endif %}"></i>
+                        </span>
+                                        <span style="font-weight:600;color:var(--text-main);">{{ t.desc|truncatechars:28 }}</span>
+                                        <span style="font-size:.72rem;color:var(--text-muted);">{{ t.sede }}</span>
+                                    </div>
+                                    <span style="font-weight:700;{% if t.tipo == 'ing' %}color:#10b981{% else %}color:#ef4444{% endif %};">
+                        {% if t.tipo == 'eg' %}−{% endif %}Gs. {{ t.monto|formato_guaranies }}
+                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
         <!-- Estado de Pagos -->
         <div class="payment-status-card animate-fade-in">
             <div class="section-header">
