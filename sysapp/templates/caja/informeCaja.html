@@ -65,7 +65,7 @@
             <div class="lc-head-actions">
                 <a href="{% url 'lista_caja' %}" class="lc-btn lc-btn-ghost"><i class="bi bi-arrow-left"></i> Volver</a>
                 <button type="button" class="lc-btn lc-btn-ghost" data-bs-toggle="modal" data-bs-target="#modalImpresion">
-                    <i class="bi bi-printer-fill"></i> Imprimir...
+                    <i class="bi bi-printer-fill"></i> Imprimir
                 </button>
                 {% if not es_admin %}
                     <form method="post" style="display:inline;" onsubmit="return confirm('¿Está seguro de que desea cerrar la caja? Esto iniciará un nuevo período de informe.');">
