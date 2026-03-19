@@ -731,7 +731,7 @@ body {
 
 .search-box input::placeholder { color: var(--gray-400); }
 
-.search-box i {
+.search-box > i {
     position: absolute;
     left: 1rem;
     top: 50%;
