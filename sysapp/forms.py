@@ -451,10 +451,7 @@ class FuncionarioForm(forms.ModelForm):
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  SEDE FORM
-# ══════════════════════════════════════════════════════════════════════════
 class SedeForm(forms.ModelForm):
     class Meta:
         model = Sede
@@ -482,10 +479,7 @@ class CarreraForm(forms.ModelForm):
             'activa':      forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
-
-# ══════════════════════════════════════════════════════════════════════════
 #  MATERIA FORM
-# ══════════════════════════════════════════════════════════════════════════
 class MateriaForm(forms.ModelForm):
     class Meta:
         model = Materia
