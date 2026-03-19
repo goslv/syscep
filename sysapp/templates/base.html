@@ -1,5 +1,6 @@
 {% load static %}
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,7 @@
     <meta name="author" content="ITS CEP">
     <meta name="theme-color" content="#6366f1">
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="ITS CEP - Sistema de Gestión">
     <meta property="og:description" content="Sistema integral de gestión educativa">
@@ -39,6 +40,7 @@
 
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
 
 <!-- Overlay para móvil -->
@@ -107,13 +109,13 @@
         <div class="nav-section">
             <div class="nav-section-title">Académico</div>
             {% if user.is_staff %}
-            <div class="nav-item">
-                <a href="{% url 'lista_sedes' %}"
-                   class="nav-link {% if 'sede' in request.resolver_match.url_name %}active{% endif %}">
-                    <i class="bi bi-building" aria-hidden="true"></i>
-                    <span>Sedes</span>
-                </a>
-            </div>
+                <div class="nav-item">
+                    <a href="{% url 'lista_sedes' %}"
+                       class="nav-link {% if 'sede' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-building" aria-hidden="true"></i>
+                        <span>Sedes</span>
+                    </a>
+                </div>
             {% endif %}
             <div class="nav-item">
                 <a href="{% url 'lista_carreras' %}"
@@ -125,22 +127,22 @@
         </div>
 
         {% if user.is_staff %}
-        <div class="nav-section">
-            <div class="nav-section-title">Sistema</div>
-            <div class="nav-item">
-                <a href="{% url 'lista_usuarios' %}"
-                   class="nav-link {% if 'usuario' in request.resolver_match.url_name %}active{% endif %}">
-                    <i class="bi bi-person-lock" aria-hidden="true"></i>
-                    <span>Usuarios</span>
-                </a>
+            <div class="nav-section">
+                <div class="nav-section-title">Sistema</div>
+                <div class="nav-item">
+                    <a href="{% url 'lista_usuarios' %}"
+                       class="nav-link {% if 'usuario' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-person-lock" aria-hidden="true"></i>
+                        <span>Usuarios</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/admin" class="nav-link" target="_blank">
+                        <i class="bi bi-gear-fill" aria-hidden="true"></i>
+                        <span>Django Admin</span>
+                    </a>
+                </div>
             </div>
-            <div class="nav-item">
-                <a href="/admin" class="nav-link" target="_blank">
-                    <i class="bi bi-gear-fill" aria-hidden="true"></i>
-                    <span>Django Admin</span>
-                </a>
-            </div>
-        </div>
         {% endif %}
     </nav>
 </aside>
@@ -158,6 +160,7 @@
                 <i class="bi bi-search" aria-hidden="true"></i>
                 <input type="text" id="globalSearch" aria-label="Buscar en el sistema" placeholder="Buscar alumnos, pagos, carreras...">
                 <button class="btn-close d-lg-none position-absolute end-0 top-50 translate-middle-y me-5" id="closeSearchMobile" type="button"></button>
+                <div id="searchResults" class="search-results-dropdown" style="display: none;"></div>
             </div>
         </div>
 
@@ -169,7 +172,7 @@
                 <button class="top-bar-btn" id="notificationsToggle" title="Notificaciones" aria-label="Notificaciones" aria-expanded="false" type="button">
                     <i class="bi bi-bell"></i>
                     {% if total_notificaciones > 0 %}
-                    <span class="notification-dot" aria-hidden="true"></span>
+                        <span class="notification-dot" aria-hidden="true"></span>
                     {% endif %}
                 </button>
                 <div class="notification-panel" id="notificationPanel" role="menu">
@@ -182,44 +185,44 @@
                     </div>
                     <div class="notification-list" id="notificationList">
                         {% for nota in examenes_proximos %}
-                        <div class="notification-item unread"
-                             data-id='{{ nota.id|default:"" }}'
-                             data-type="{{ nota.tipo }}"
-                             data-materia="{{ nota.materia }}"
-                             data-carrera="{{ nota.carrera }}"
-                             data-fecha='{{ nota.fecha|date:"d/m/Y" }}'
-                             data-icon="{{ nota.icon }}"
-                             data-color="{{ nota.color }}"
-                             data-url="{% if nota.carrera_id %}{% url 'detalle_carrera' nota.carrera_id %}{% elif nota.url_notif %}{% url nota.url_notif %}{% endif %}"
-                             {% if nota.es_solicitud %}
-                             data-es-solicitud="true"
-                             data-solicitud-id="{{ nota.solicitud_id }}"
-                             data-motivo="{{ nota.motivo }}"
-                             data-url-procesar="{{ nota.url_procesar }}"
-                             data-datos-objeto='{{ nota.datos_objeto|json_script:"temp"|safe }}'
-                             {% endif %}
-                             onclick="if(window.notificationManager) window.notificationManager.handleClick(this);">
-                            <div class="notification-item-icon {{ nota.color }}">
-                                <i class="bi {{ nota.icon }}"></i>
+                            <div class="notification-item unread"
+                                 data-id='{{ nota.id|default:"" }}'
+                                 data-type="{{ nota.tipo }}"
+                                 data-materia="{{ nota.materia }}"
+                                 data-carrera="{{ nota.carrera }}"
+                                 data-fecha='{{ nota.fecha|date:"d/m/Y" }}'
+                                 data-icon="{{ nota.icon }}"
+                                 data-color="{{ nota.color }}"
+                                 data-url="{% if nota.carrera_id %}{% url 'detalle_carrera' nota.carrera_id %}{% elif nota.url_notif %}{% url nota.url_notif %}{% endif %}"
+                                    {% if nota.es_solicitud %}
+                                 data-es-solicitud="true"
+                                 data-solicitud-id="{{ nota.solicitud_id }}"
+                                 data-motivo="{{ nota.motivo }}"
+                                 data-url-procesar="{{ nota.url_procesar }}"
+                                 data-datos-objeto='{{ nota.datos_objeto|json_script:"temp"|safe }}'
+                                    {% endif %}
+                                 onclick="if(window.notificationManager) window.notificationManager.handleClick(this);">
+                                <div class="notification-item-icon {{ nota.color }}">
+                                    <i class="bi {{ nota.icon }}"></i>
+                                </div>
+                                <div class="notification-item-content">
+                                    <div class="notification-item-title d-flex justify-content-between">
+                                        <span>{{ nota.tipo }}</span>
+                                        <span class="badge bg-light text-dark border-0 small" style="font-size: 0.65rem;">Ver detalle</span>
+                                    </div>
+                                    <div class="notification-item-text">
+                                        {{ nota.materia }} - {{ nota.carrera }}
+                                    </div>
+                                    <div class="notification-item-time">
+                                        <i class="bi bi-calendar"></i> {{ nota.fecha|date:'d/m/Y' }}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="notification-item-content">
-                                <div class="notification-item-title d-flex justify-content-between">
-                                    <span>{{ nota.tipo }}</span>
-                                    <span class="badge bg-light text-dark border-0 small" style="font-size: 0.65rem;">Ver detalle</span>
-                                </div>
-                                <div class="notification-item-text">
-                                    {{ nota.materia }} - {{ nota.carrera }}
-                                </div>
-                                <div class="notification-item-time">
-                                    <i class="bi bi-calendar"></i> {{ nota.fecha|date:'d/m/Y' }}
-                                </div>
+                            {% empty %}
+                            <div class="notification-empty" id="notificationEmpty">
+                                <i class="bi bi-bell-slash mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                                <p class="mb-0">No hay notificaciones nuevas</p>
                             </div>
-                        </div>
-                        {% empty %}
-                        <div class="notification-empty" id="notificationEmpty">
-                            <i class="bi bi-bell-slash mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
-                            <p class="mb-0">No hay notificaciones nuevas</p>
-                        </div>
                         {% endfor %}
                     </div>
                     <div class="notification-panel-footer text-center border-top py-2">

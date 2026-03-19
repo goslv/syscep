@@ -1,6 +1,3 @@
-/* ===================================================
-   BASE.JS - SISTEMA DE GESTIÓN ITS CEP
-   =================================================== */
 
 /* ── ThemeManager ─────────────────────────────────── */
 class ThemeManager {
@@ -228,6 +225,7 @@ class SearchManager {
     constructor() {
         this.searchInput      = document.getElementById('globalSearch');
         this.searchContainer  = document.getElementById('globalSearchContainer');
+        this.resultsContainer = document.getElementById('searchResults');
         this.searchToggle     = document.getElementById('searchToggleMobile');
         this.closeBtn         = document.getElementById('closeSearchMobile');
         this.init();
@@ -245,13 +243,35 @@ class SearchManager {
         this.closeBtn?.addEventListener('click', () => {
             this.searchContainer?.classList.remove('show-mobile');
             this.searchInput.value = '';
+            this.hideResults();
         });
 
-        // Enviar búsqueda con Enter
+        // Enviar búsqueda con Enter (si no hay resultados seleccionados)
         this.searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 const query = this.searchInput.value.trim();
-                if (query) window.location.href = `/alumnos/?busqueda=${encodeURIComponent(query)}`;
+                // Si hay resultados visibles, podríamos navegar al primero, 
+                // pero por ahora mantengamos la redirección a alumnos como fallback
+                if (query && !this.resultsContainer.querySelector('.search-result-item')) {
+                    window.location.href = `/alumnos/?busqueda=${encodeURIComponent(query)}`;
+                }
+            }
+        });
+
+        // Búsqueda en tiempo real (debounced)
+        this.searchInput.addEventListener('input', this.debounce((e) => {
+            const query = e.target.value.trim();
+            if (query.length >= 2) {
+                this.performSearch(query);
+            } else {
+                this.hideResults();
+            }
+        }, 300));
+
+        // Cerrar resultados al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!this.searchContainer.contains(e.target)) {
+                this.hideResults();
             }
         });
 
@@ -265,25 +285,91 @@ class SearchManager {
             if (e.key === 'Escape') {
                 this.searchContainer?.classList.remove('show-mobile');
                 this.searchInput.blur();
+                this.hideResults();
             }
         });
 
         // Placeholder dinámico
         this.searchInput.addEventListener('focus', () => {
             this.searchInput.setAttribute('placeholder', 'Presiona Ctrl+K para buscar rápidamente...');
+            if (this.searchInput.value.trim().length >= 2) {
+                this.showResults();
+            }
         });
         this.searchInput.addEventListener('blur', () => {
             this.searchInput.setAttribute('placeholder', 'Buscar alumnos, pagos, carreras...');
         });
+    }
 
-        // Búsqueda en tiempo real (debounced)
-        this.searchInput.addEventListener('input', this.debounce((e) => {
-            const query = e.target.value.trim();
-            if (query.length >= 2) {
-                // Aquí puedes implementar búsqueda AJAX
-                console.log('Buscando:', query);
-            }
-        }, 300));
+    async performSearch(query) {
+        try {
+            const response = await fetch(`/buscar-global/?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            this.renderResults(data.resultados);
+        } catch (error) {
+            console.error('Error en búsqueda global:', error);
+        }
+    }
+
+    renderResults(resultados) {
+        if (!this.resultsContainer) return;
+
+        // Mapa de íconos de fallback por tipo
+        const iconMap = {
+            'ALUMNO':      'bi-person-fill',
+            'PAGO':        'bi-cash-stack',
+            'CARRERA':     'bi-mortarboard-fill',
+            'FUNCIONARIO': 'bi-person-badge-fill',
+            'SEDE':        'bi-building',
+            'USUARIO':     'bi-person-lock',
+        };
+
+        if (resultados.length === 0) {
+            this.resultsContainer.innerHTML = `
+            <div class="search-no-results">
+                <i class="bi bi-search mb-2 d-block" style="font-size: 1.5rem; opacity: 0.3;"></i>
+                No se encontraron coincidencias para tu búsqueda.
+            </div>
+        `;
+        } else {
+            this.resultsContainer.innerHTML = resultados.map(res => {
+                // Fallback: usa el mapa por tipo si no hay ícono
+                const icon = res.icon || iconMap[res.tipo?.toUpperCase()] || 'bi-search';
+                return `
+                <a href="${res.url}" class="search-result-item">
+                    <div class="search-result-icon">
+                        <i class="bi ${icon}"></i>
+                    </div>
+                    <div class="search-result-content">
+                        <span class="search-result-title">${this.highlightMatch(res.titulo)}</span>
+                        <span class="search-result-sub">${res.subtitulo}</span>
+                    </div>
+                    <span class="search-result-type">${res.tipo}</span>
+                </a>
+            `;
+            }).join('');
+        }
+
+        this.showResults();
+    }
+
+    highlightMatch(text) {
+        const query = this.searchInput.value.trim();
+        if (!query) return text;
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<strong>$1</strong>');
+    }
+
+    showResults() {
+        if (this.resultsContainer) {
+            this.resultsContainer.style.display = 'block';
+        }
+    }
+
+    hideResults() {
+        if (this.resultsContainer) {
+            this.resultsContainer.style.display = 'none';
+        }
     }
 
     debounce(func, wait) {
@@ -415,8 +501,8 @@ class NotificationManager {
                     <div class="p-3 bg-light rounded border small">
                         <ul class="list-unstyled mb-0">
                             ${Object.entries(datos).map(([k, v]) =>
-                                `<li><strong>${k.charAt(0).toUpperCase() + k.slice(1)}:</strong> ${v}</li>`
-                            ).join('')}
+                `<li><strong>${k.charAt(0).toUpperCase() + k.slice(1)}:</strong> ${v}</li>`
+            ).join('')}
                         </ul>
                     </div>
                 </div>
@@ -778,9 +864,6 @@ class LoadingManager {
     }
 }
 
-/* ===================================================
-   INICIALIZACIÓN
-   =================================================== */
 document.addEventListener('DOMContentLoaded', () => {
     try {
         const themeManager        = new ThemeManager();
@@ -815,9 +898,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-/* ===================================================
-   UTILIDADES GLOBALES
-   =================================================== */
 window.utils = {
     formatCurrency(amount) {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amount);
@@ -849,7 +929,7 @@ window.utils = {
     },
 };
 
-/* ── Deshabilitar botón de submit al enviar formularios ── */
+/* Deshabilitar botón de submit al enviar formularios */
 document.addEventListener('submit', (e) => {
     if (e.target.tagName !== 'FORM') return;
     const btn = e.target.querySelector('button[type="submit"]');
