@@ -49,6 +49,7 @@ urlpatterns = [
     path('funcionarios/<int:funcionario_id>/', views.detalle_funcionario, name='detalle_funcionario'),
     path('funcionarios/<int:funcionario_id>/editar/', views.editar_funcionario, name='editar_funcionario'),
     path('buscar-funcionario/', views.buscar_funcionario, name='buscar_funcionario'),
+    path('buscar-global/', views.buscar_global, name='buscar_global'),
 
     # Sedes
     path('sedes/', views.lista_sedes, name='lista_sedes'),
